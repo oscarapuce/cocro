@@ -1,9 +1,11 @@
-package com.cocro.kernel.grid.valueobject
+package com.cocro.domain.grid.valueobject
 
 import com.cocro.kernel.grid.rule.GridIdRule
 
 @JvmInline
-value class GridId(val value: String) {
+value class GridId(
+    val value: String,
+) {
     init {
         require(GridIdRule.validate(value)) {
             "Grid ID must be a 6-character alphanumeric string (A-Z, 0-9)"

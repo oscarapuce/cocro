@@ -1,5 +1,6 @@
-package com.cocro.kernel.grid.model
+package com.cocro.domain.grid.model
 
+import com.cocro.kernel.grid.model.CellPos
 import com.cocro.kernel.grid.rule.DoubleClueDirectionRule
 
 sealed interface Cell {
@@ -7,31 +8,29 @@ sealed interface Cell {
 
     data class LetterCell(
         override val pos: CellPos,
-        val letter: Letter
+        val letter: Letter,
     ) : Cell
 
     sealed interface ClueCell : Cell {
         data class SingleClueCell(
             override val pos: CellPos,
-            val clue: Clue
+            val clue: Clue,
         ) : Cell
 
         data class DoubleClueCell(
             override val pos: CellPos,
             val first: Clue,
-            val second: Clue
+            val second: Clue,
         ) : Cell {
             init {
-                require(DoubleClueDirectionRule.validate(this)) {
+                require(DoubleClueDirectionRule.validate(first.direction, second.direction)) {
                     "Clue directions must be different"
                 }
             }
         }
-
     }
 
     data class BlackCell(
-        override val pos: CellPos
+        override val pos: CellPos,
     ) : Cell
-
 }

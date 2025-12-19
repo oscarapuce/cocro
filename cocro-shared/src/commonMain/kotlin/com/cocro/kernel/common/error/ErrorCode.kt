@@ -20,4 +20,5 @@ enum class ErrorCode(
     GRID_INVALID_LETTER("Invalid letter in grid cell", 400),
     GRID_INVALID_CLUE_COUNT("Too many clues in a cell", 400),
     GRID_DUPLICATE_CLUE_DIRECTION("Duplicate clue direction in a cell", 400),
+    GRID_INVALID_SAFE_STRING("Invalid safe string", 400),
 }

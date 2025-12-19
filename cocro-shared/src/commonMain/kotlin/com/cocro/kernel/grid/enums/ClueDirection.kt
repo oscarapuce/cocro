@@ -1,4 +1,4 @@
-package com.cocro.kernel.grid.model.enums
+package com.cocro.kernel.grid.enums
 
 enum class ClueDirection {
     RIGHT,
