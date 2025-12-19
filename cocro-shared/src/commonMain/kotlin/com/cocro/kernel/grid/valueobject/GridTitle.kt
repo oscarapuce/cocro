@@ -1,0 +1,12 @@
+package com.cocro.kernel.grid.valueobject
+
+import com.cocro.kernel.grid.rule.GridTitleRule
+
+@JvmInline
+value class GridTitle(val value: String) {
+    init {
+        require(GridTitleRule.validate(value)) {
+            "Grid title must not blank and max ${GridTitleRule.MAX_LENGTH} characters"
+        }
+    }
+}
