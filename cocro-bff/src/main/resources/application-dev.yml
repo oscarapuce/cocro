@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: cocro-bff
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/cocro?authSource=admin
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD}
+
