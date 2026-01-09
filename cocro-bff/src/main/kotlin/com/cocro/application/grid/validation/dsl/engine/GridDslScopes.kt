@@ -2,22 +2,25 @@ package com.cocro.application.grid.validation.dsl.engine
 
 import com.cocro.kernel.grid.enums.CellType
 
-class TitleDsl(private val engine: GridValidationEngine) {
+class TitleDsl(
+    private val engine: GridValidationEngine,
+) {
     fun required() = engine.validateTitleRequired()
 }
 
-class SizeDsl(private val engine: GridValidationEngine) {
-    fun width(block: RuleDsl.() -> Unit) =
-        RuleDsl { engine.validateWidth() }.block()
+class SizeDsl(
+    private val engine: GridValidationEngine,
+) {
+    fun width(block: RuleDsl.() -> Unit) = RuleDsl { engine.validateWidth() }.block()
 
-    fun height(block: RuleDsl.() -> Unit) =
-        RuleDsl { engine.validateHeight() }.block()
+    fun height(block: RuleDsl.() -> Unit) = RuleDsl { engine.validateHeight() }.block()
 
-    fun cellCountMatches() =
-        engine.validateCellCountMatches()
+    fun cellCountMatches() = engine.validateCellCountMatches()
 }
 
-class CellsDsl(private val engine: GridValidationEngine) {
+class CellsDsl(
+    private val engine: GridValidationEngine,
+) {
     fun each(block: CellDsl.() -> Unit) {
         engine.forEachCell {
             CellDsl(engine).block()
@@ -25,7 +28,9 @@ class CellsDsl(private val engine: GridValidationEngine) {
     }
 }
 
-class CellDsl(private val engine: GridValidationEngine) {
+class CellDsl(
+    private val engine: GridValidationEngine,
+) {
     fun whenType(
         type: CellType,
         block: CellTypeDsl.() -> Unit,
@@ -36,25 +41,26 @@ class CellDsl(private val engine: GridValidationEngine) {
     }
 }
 
-class CellTypeDsl(private val engine: GridValidationEngine) {
-    fun letter(block: LetterDsl.() -> Unit) =
-        LetterDsl(engine).block()
+class CellTypeDsl(
+    private val engine: GridValidationEngine,
+) {
+    fun letter(block: LetterDsl.() -> Unit) = LetterDsl(engine).block()
 
-    fun clues(block: CluesDsl.() -> Unit) =
-        CluesDsl(engine).block()
+    fun clues(block: CluesDsl.() -> Unit) = CluesDsl(engine).block()
 }
 
-class LetterDsl(private val engine: GridValidationEngine) {
-    fun singleUppercase() =
-        engine.validateSingleUppercaseLetter()
+class LetterDsl(
+    private val engine: GridValidationEngine,
+) {
+    fun singleUppercase() = engine.validateSingleUppercaseLetter()
 }
 
-class CluesDsl(private val engine: GridValidationEngine) {
-    fun exactly(count: Int) =
-        engine.validateClueCount(count)
+class CluesDsl(
+    private val engine: GridValidationEngine,
+) {
+    fun exactly(count: Int) = engine.validateClueCount(count)
 
-    fun directionsMustDiffer() =
-        engine.validateClueDirectionsDiffer()
+    fun directionsMustDiffer() = engine.validateClueDirectionsDiffer()
 }
 
 class RuleDsl(

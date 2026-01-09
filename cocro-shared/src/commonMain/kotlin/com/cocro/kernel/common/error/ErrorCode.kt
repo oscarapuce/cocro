@@ -21,4 +21,12 @@ enum class ErrorCode(
     GRID_INVALID_CLUE_COUNT("Too many clues in a cell", 400),
     GRID_DUPLICATE_CLUE_DIRECTION("Duplicate clue direction in a cell", 400),
     GRID_INVALID_SAFE_STRING("Invalid safe string", 400),
+
+    // --- auth domain ---
+    AUTH_USERNAME_ALREADY_EXISTS("Username already exists", 409),
+    AUTH_INVALID_CREDENTIALS("Invalid username or password", 401),
+    AUTH_USERNAME_INVALID("Invalid username", 400),
+    AUTH_EMAIL_INVALID("Invalid email", 400),
+    AUTH_PASSWORD_INVALID("Invalid password", 400),
+    AUTH_PASSWORD_TOO_WEAK("Password is too weak", 400),
 }

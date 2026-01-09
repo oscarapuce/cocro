@@ -10,7 +10,7 @@ object GridTitleRule : CocroRule<String> {
 
     override fun isValid(values: List<String>): Boolean {
         val title = values.first()
-        return title.isNotBlank()
-                && title.length in TITLE_MIN_LENGTH..TITLE_MAX_LENGTH
+        return title.isNotBlank() &&
+            title.length in TITLE_MIN_LENGTH..TITLE_MAX_LENGTH
     }
 }

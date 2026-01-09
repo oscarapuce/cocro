@@ -22,7 +22,6 @@ import com.cocro.kernel.grid.rule.LetterRule
 class GridValidationEngine(
     private val dto: SubmitGridDto,
 ) {
-
     /** Collected validation errors */
     val errors: MutableList<GridError> = mutableListOf()
 
@@ -64,7 +63,9 @@ class GridValidationEngine(
     // ---------------------------------------------------------------------------
 
     fun author(): String? = dto.author
+
     fun reference(): String? = dto.reference
+
     fun description(): String? = dto.description
 
     fun validateOptionalSafeString(value: String?) {
@@ -139,6 +140,5 @@ class GridValidationEngine(
     // INTERNAL HELPERS
     // ---------------------------------------------------------------------------
 
-    private fun cellPos(cell: CellDto): CellPos =
-        CellPos(cell.x, cell.y)
+    private fun cellPos(cell: CellDto): CellPos = CellPos(cell.x, cell.y)
 }

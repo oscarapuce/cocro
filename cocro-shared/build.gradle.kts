@@ -8,8 +8,6 @@ kotlin {
     sourceSets {
         val commonMain by getting
         val commonTest by getting
-
-        val jvmMain by getting
     }
 }
 

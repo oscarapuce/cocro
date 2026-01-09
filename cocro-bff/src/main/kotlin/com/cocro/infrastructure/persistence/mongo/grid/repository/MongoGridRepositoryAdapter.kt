@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository
 class MongoGridRepositoryAdapter(
     private val springDataRepo: SpringDataGridRepository,
 ) : GridRepository {
-
     override fun findByHashLetters(hash: Long): Grid? =
         springDataRepo
             .findByHashLetters(hash)
@@ -21,6 +20,5 @@ class MongoGridRepositoryAdapter(
             .save(grid.toDocument())
             .toDomain()
 
-    override fun existsByShortId(shortId: String): Boolean =
-        springDataRepo.existsByShortId(shortId)
+    override fun existsByShortId(shortId: String): Boolean = springDataRepo.existsByShortId(shortId)
 }

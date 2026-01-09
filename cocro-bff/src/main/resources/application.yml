@@ -1,0 +1,5 @@
+cocro:
+  jwt:
+    issuer: "cocro-api"
+    secret: "xdF/mP/gUVw+P7G3Quks1TuyxyYUf/A04fxMGxqKJjIAEzab3wDSxPnr/KaukNfRsR8wlpZ6sTvZhLr6uw90Hw=="
+    expirationSeconds: 86400

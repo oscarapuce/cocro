@@ -11,28 +11,20 @@ import java.util.UUID
 @CompoundIndex(
     name = "shortId_hashLetters_idx",
     def = "{'shortId': 1, 'hashLetters': 1}",
-    unique = true
+    unique = true,
 )
 data class GridDocument(
-
     @Id
     val id: UUID,
-
     @Indexed(unique = true)
     val shortId: String,
-
     val title: String,
-
     val metadata: GridMetadataDocument,
-
     @Indexed
     val hashLetters: Long,
-
     val width: Int,
     val height: Int,
-
     val cells: List<CellDocument>,
-
     val createdAt: Instant,
     val updatedAt: Instant,
 )

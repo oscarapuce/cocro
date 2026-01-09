@@ -6,23 +6,17 @@ import com.cocro.kernel.grid.error.GridError
 internal class GridValidationDsl(
     private val engine: GridValidationEngine,
 ) {
-    fun title(block: TitleDsl.() -> Unit) =
-        TitleDsl(engine).block()
+    fun title(block: TitleDsl.() -> Unit) = TitleDsl(engine).block()
 
-    fun size(block: SizeDsl.() -> Unit) =
-        SizeDsl(engine).block()
+    fun size(block: SizeDsl.() -> Unit) = SizeDsl(engine).block()
 
-    fun cells(block: CellsDsl.() -> Unit) =
-        CellsDsl(engine).block()
+    fun cells(block: CellsDsl.() -> Unit) = CellsDsl(engine).block()
 
-    fun author(block: SafeStringDsl.() -> Unit) =
-        SafeStringDsl(engine) { engine.author() }.block()
+    fun author(block: SafeStringDsl.() -> Unit) = SafeStringDsl(engine) { engine.author() }.block()
 
-    fun reference(block: SafeStringDsl.() -> Unit) =
-        SafeStringDsl(engine) { engine.reference() }.block()
+    fun reference(block: SafeStringDsl.() -> Unit) = SafeStringDsl(engine) { engine.reference() }.block()
 
-    fun description(block: SafeStringDsl.() -> Unit) =
-        SafeStringDsl(engine) { engine.description() }.block()
+    fun description(block: SafeStringDsl.() -> Unit) = SafeStringDsl(engine) { engine.description() }.block()
 }
 
 internal fun validateGrid(

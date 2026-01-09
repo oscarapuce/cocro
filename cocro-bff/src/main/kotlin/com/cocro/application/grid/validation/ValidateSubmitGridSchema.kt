@@ -5,9 +5,7 @@ import com.cocro.application.grid.validation.dsl.engine.validateGrid
 import com.cocro.kernel.grid.enums.CellType
 import com.cocro.kernel.grid.error.GridError
 
-internal fun validateSubmitGrid(
-    dto: SubmitGridDto,
-): List<GridError> =
+internal fun validateSubmitGrid(dto: SubmitGridDto): List<GridError> =
     validateGrid(dto) {
         title { required() }
 

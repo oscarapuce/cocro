@@ -1,7 +1,6 @@
 package com.cocro.kernel.common.rule
 
 object SafeStringRule : CocroRule<String> {
-
     const val SAFE_STRING_MAX_LENGTH = 200
     const val SAFE_STRING_BLACKLISTED_CHARS = "<>"
 
@@ -10,7 +9,9 @@ object SafeStringRule : CocroRule<String> {
     override fun isValid(values: List<String>): Boolean {
         val value = values.first()
         return value.isBlank() ||
-                (value.length <= SAFE_STRING_MAX_LENGTH
-                && value.none { it in SAFE_STRING_BLACKLISTED_CHARS })
+            (
+                value.length <= SAFE_STRING_MAX_LENGTH &&
+                    value.none { it in SAFE_STRING_BLACKLISTED_CHARS }
+            )
     }
 }
