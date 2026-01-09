@@ -10,7 +10,7 @@ class GridIdGenerator(
 ) {
     companion object {
         private const val ALPHANUM =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     }
 
     fun generateId(): String {

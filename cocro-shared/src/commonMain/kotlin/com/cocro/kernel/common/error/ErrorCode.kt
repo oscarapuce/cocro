@@ -13,8 +13,12 @@ enum class ErrorCode(
 
     // --- grid domain ---
     GRID_TITLE_MISSING("Grid title is required", 400),
+    GRID_INVALID_TITLE("Invalid grid title", 400),
     GRID_DIFFICULTY_MISSING("Grid difficulty is required", 400),
+    GRID_NOT_FOUND("Grid not found", 404),
+    GRID_UNAUTHORIZED_MODIFICATION("Unauthorized grid modification", 403),
     GRID_INVALID_CELL_COUNT("Grid size does not match cells count", 400),
+    GRID_INVALID_GRID_ID("Invalid grid ID", 400),
     GRID_DUPLICATE_LETTER_HASH("A grid with the same letters already exists", 409),
 
     GRID_INVALID_LETTER("Invalid letter in grid cell", 400),

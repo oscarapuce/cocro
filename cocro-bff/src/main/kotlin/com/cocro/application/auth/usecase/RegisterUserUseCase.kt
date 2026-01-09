@@ -10,7 +10,7 @@ import com.cocro.domain.auth.valueobject.Email
 import com.cocro.domain.auth.valueobject.Username
 import com.cocro.kernel.auth.error.AuthError
 import com.cocro.kernel.auth.model.AuthSuccess
-import com.cocro.kernel.common.Result
+import com.cocro.kernel.common.CocroResult
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -22,18 +22,18 @@ class RegisterUserUseCase(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun execute(command: RegisterUserCommand): Result<AuthSuccess, AuthError> {
+    fun execute(command: RegisterUserCommand): CocroResult<AuthSuccess, AuthError> {
         val errors = validateRegisterCommand(command)
 
         if (errors.isNotEmpty()) {
             logger.warn("Register command rejected: {} errors", errors.size)
-            return Result.Error(errors)
+            return CocroResult.Error(errors)
         }
 
         val username = Username(command.username)
 
         if (userRepository.findByUsername(username) != null) {
-            return Result.Error(
+            return CocroResult.Error(
                 listOf(AuthError.UsernameAlreadyExists(command.username)),
             )
         }
@@ -60,7 +60,7 @@ class RegisterUserUseCase(
                 roles = savedUser.roles,
             )
 
-        return Result.Success(
+        return CocroResult.Success(
             AuthSuccess(
                 userId = savedUser.id.value.toString(),
                 username = savedUser.username.value,

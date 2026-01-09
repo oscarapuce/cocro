@@ -1,9 +1,10 @@
 package com.cocro.domain.grid.model
 
+import com.cocro.domain.auth.valueobject.UserId
 import com.cocro.kernel.grid.enums.GridDifficulty
 
-class GridMetadata(
-    val author: String?,
+data class GridMetadata(
+    val author: UserId,
     val reference: String?,
     val description: String?,
     val difficulty: GridDifficulty,

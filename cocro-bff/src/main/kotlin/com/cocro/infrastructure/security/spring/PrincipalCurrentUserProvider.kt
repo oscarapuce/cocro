@@ -1,9 +1,9 @@
 package com.cocro.infrastructure.security.spring
 
 import com.cocro.application.auth.port.CurrentUserProvider
+import com.cocro.domain.auth.model.AuthenticatedUser
 import com.cocro.domain.auth.valueobject.UserId
 import com.cocro.kernel.auth.enum.Role
-import com.cocro.kernel.auth.model.AuthenticatedUser
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
@@ -26,7 +26,7 @@ class PrincipalCurrentUserProvider : CurrentUserProvider {
                 ?: emptySet()
 
         return AuthenticatedUser(
-            userId = userId.value.toString(),
+            userId = userId,
             roles = roles,
         )
     }

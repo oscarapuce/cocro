@@ -1,97 +1,103 @@
 package com.cocro.application.grid.validation.dsl.engine
 
+import com.cocro.application.common.validation.Presence
+import com.cocro.application.common.validation.RuleDsl
 import com.cocro.application.grid.dto.CellDto
-import com.cocro.application.grid.dto.SubmitGridDto
+import com.cocro.application.grid.dto.GridDto
 import com.cocro.kernel.common.rule.SafeStringRule
 import com.cocro.kernel.grid.enums.CellType
 import com.cocro.kernel.grid.error.GridError
 import com.cocro.kernel.grid.model.CellPos
 import com.cocro.kernel.grid.rule.GridHeightRule
+import com.cocro.kernel.grid.rule.GridIdRule
 import com.cocro.kernel.grid.rule.GridTitleRule
 import com.cocro.kernel.grid.rule.GridWidthRule
 import com.cocro.kernel.grid.rule.LetterRule
 
-/**
- * Validation engine for grid submission.
- *
- * - Contains ALL validation logic
- * - Accumulates errors (no exception throwing)
- * - Stateless from the outside, ephemeral per validation
- * - Designed to be driven by a DSL
- */
 class GridValidationEngine(
-    private val dto: SubmitGridDto,
+    private val dto: GridDto,
 ) {
-    /** Collected validation errors */
-    val errors: MutableList<GridError> = mutableListOf()
+    val errors = mutableListOf<GridError>()
 
-    // ---------------------------------------------------------------------------
-    // GRID-LEVEL VALIDATIONS
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // GRID ID
+    // -------------------------------------------------------------------------
 
-    fun validateTitleRequired() {
-        if (!GridTitleRule.validate(dto.title)) {
-            errors += GridError.TitleMissing
+    fun validateGridId(presence: Presence) =
+        RuleDsl(presence, { dto.gridId }) {
+            if (!GridIdRule.validate(dto.gridId!!)) {
+                errors += GridError.InvalidGridId(dto.gridId!!)
+            }
+        }.run()
+
+    // -------------------------------------------------------------------------
+    // TITLE
+    // -------------------------------------------------------------------------
+
+    fun validateTitle(presence: Presence) =
+        RuleDsl(presence, { dto.title }) {
+            if (!GridTitleRule.validate(dto.title!!)) {
+                errors += GridError.TitleInvalid(dto.title!!)
+            }
+        }.run()
+
+    // -------------------------------------------------------------------------
+    // SAFE STRING
+    // -------------------------------------------------------------------------
+
+    fun validateSafeString(
+        presence: Presence,
+        value: () -> String?,
+    ) = RuleDsl(presence, value) {
+        if (!SafeStringRule.validate(value()!!)) {
+            errors += GridError.InvalidSafeString(value()!!)
         }
-    }
+    }.run()
 
-    fun validateWidth() {
-        val width = dto.width
-        if (!GridWidthRule.validate(width)) {
-            // TODO: introduce a dedicated InvalidGridWidth error
-            errors += GridError.InvalidCellCount
-        }
-    }
+    // -------------------------------------------------------------------------
+    // SIZE (cohérence partielle)
+    // -------------------------------------------------------------------------
 
-    fun validateHeight() {
-        val height = dto.height
-        if (!GridHeightRule.validate(height)) {
-            // TODO: introduce a dedicated InvalidGridHeight error
-            errors += GridError.InvalidCellCount
-        }
-    }
+    fun validateSize(presence: Presence) =
+        RuleDsl(presence, {
+            dto.width != null || dto.height != null || dto.cells != null
+        }) {
+            val hasWidth = dto.width != null
+            val hasHeight = dto.height != null
+            val hasCells = dto.cells != null
 
-    fun validateCellCountMatches() {
-        val expected = dto.width * dto.height
-        if (dto.cells.size != expected) {
-            errors += GridError.InvalidCellCount
-        }
-    }
+            // ---- invariant PATCH ----
+            // Either all (width, height, cells) are present, or none
+            if (!(hasWidth && hasHeight && hasCells)) {
+                errors += GridError.InvalidCellCount
+                return@RuleDsl
+            }
 
-    // ---------------------------------------------------------------------------
-    // SAFE STRING FIELDS
-    // ---------------------------------------------------------------------------
+            val w = dto.width!!
+            val h = dto.height!!
+            val cells = dto.cells!!
 
-    fun author(): String? = dto.author
+            // ---- dimension rules ----
+            if (!GridWidthRule.validate(w) || !GridHeightRule.validate(h)) {
+                errors += GridError.InvalidCellCount
+                return@RuleDsl
+            }
 
-    fun reference(): String? = dto.reference
+            // ---- consistency rule ----
+            if (cells.size != w * h) {
+                errors += GridError.InvalidCellCount
+            }
+        }.run()
 
-    fun description(): String? = dto.description
+    // -------------------------------------------------------------------------
+    // CELLS
+    // -------------------------------------------------------------------------
 
-    fun validateOptionalSafeString(value: String?) {
-        if (value == null) return
-
-        if (!SafeStringRule.validate(value)) {
-            errors += GridError.InvalidSafeString(value)
-        }
-    }
-
-    // ---------------------------------------------------------------------------
-    // CELL ITERATION / CONTEXT
-    // ---------------------------------------------------------------------------
-
-    /**
-     * Mutable cell context.
-     *
-     * - Scoped strictly to forEachCell { ... }
-     * - Engine is ephemeral and mono-threaded
-     * - This trade-off keeps the DSL readable
-     */
     private var currentCell: CellDto? = null
 
     fun forEachCell(block: () -> Unit) {
-        dto.cells.forEach { cell ->
-            currentCell = cell
+        dto.cells?.forEach {
+            currentCell = it
             block()
         }
         currentCell = null
@@ -101,27 +107,19 @@ class GridValidationEngine(
         type: CellType,
         block: () -> Unit,
     ) {
-        if (currentCell?.type == type) {
-            block()
-        }
+        if (currentCell?.type == type) block()
     }
-
-    // ---------------------------------------------------------------------------
-    // CELL VALIDATIONS
-    // ---------------------------------------------------------------------------
 
     fun validateSingleUppercaseLetter() {
         val cell = currentCell ?: return
-        val value = cell.letter
-
-        if (value == null || value.length != 1 || !LetterRule.validate(value[0])) {
+        val v = cell.letter
+        if (v == null || v.length != 1 || !LetterRule.validate(v[0])) {
             errors += GridError.InvalidLetter(cellPos(cell))
         }
     }
 
     fun validateClueCount(expected: Int) {
         val cell = currentCell ?: return
-
         if (cell.clues == null || cell.clues.size != expected) {
             errors += GridError.InvalidClueCount(cellPos(cell))
         }
@@ -130,15 +128,18 @@ class GridValidationEngine(
     fun validateClueDirectionsDiffer() {
         val cell = currentCell ?: return
         val clues = cell.clues ?: return
-
         if (clues.size == 2 && clues[0].direction == clues[1].direction) {
             errors += GridError.DuplicateClueDirection(cellPos(cell))
         }
     }
 
-    // ---------------------------------------------------------------------------
-    // INTERNAL HELPERS
-    // ---------------------------------------------------------------------------
-
     private fun cellPos(cell: CellDto): CellPos = CellPos(cell.x, cell.y)
+
+    // -------------------------------------------------------------------------
+    // DTO READ ACCESS (for DSL only)
+    // -------------------------------------------------------------------------
+
+    internal fun getReference(): String? = dto.reference
+
+    internal fun getDescription(): String? = dto.description
 }

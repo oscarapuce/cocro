@@ -13,6 +13,56 @@ sealed interface GridError : CocroError {
         override val errorCode = ErrorCode.GRID_INVALID_CELL_COUNT
     }
 
+    data class GridNotFound(
+        val gridId: String,
+    ) : GridError {
+        override val errorCode = ErrorCode.GRID_NOT_FOUND
+
+        override fun context(): Map<String, String> =
+            mapOf(
+                "gridId" to gridId,
+            )
+    }
+
+    data class UnauthorizedGridModification(
+        val gridId: String,
+    ) : GridError {
+        override val errorCode = ErrorCode.GRID_UNAUTHORIZED_MODIFICATION
+
+        override fun context(): Map<String, String> =
+            mapOf(
+                "gridId" to gridId,
+            )
+    }
+
+    data class TitleInvalid(
+        val title: String,
+    ) : GridError {
+        override val errorCode = ErrorCode.GRID_INVALID_TITLE
+
+        override fun context(): Map<String, String> =
+            mapOf(
+                "title" to title,
+            )
+    }
+
+    data class InvalidGridId(
+        val gridId: String?,
+    ) : GridError {
+        override val errorCode = ErrorCode.GRID_INVALID_GRID_ID
+
+        override fun context(): Map<String, String> =
+            if (gridId == null) {
+                mapOf(
+                    "gridId" to "null",
+                )
+            } else {
+                mapOf(
+                    "gridId" to gridId,
+                )
+            }
+    }
+
     data class DuplicateLetterHash(
         val otherGridId: String,
     ) : GridError {

@@ -1,5 +1,6 @@
 package com.cocro.infrastructure.persistence.mongo.grid.mapper
 
+import com.cocro.domain.auth.valueobject.UserId
 import com.cocro.domain.grid.model.Cell
 import com.cocro.domain.grid.model.Clue
 import com.cocro.domain.grid.model.Grid
@@ -27,7 +28,7 @@ fun Grid.toDocument(): GridDocument =
         title = title.value,
         metadata =
             GridMetadataDocument(
-                author = metadata.author,
+                author = metadata.author.toString(),
                 reference = metadata.reference,
                 description = metadata.description,
                 difficulty = metadata.difficulty.name,
@@ -87,7 +88,7 @@ fun GridDocument.toDomain(): Grid =
         title = GridTitle(title),
         metadata =
             GridMetadata(
-                author = metadata.author,
+                author = UserId.from(metadata.author),
                 reference = metadata.reference,
                 description = metadata.description,
                 difficulty = GridDifficulty.valueOf(metadata.difficulty),

@@ -1,21 +1,20 @@
 package com.cocro.application.grid.validation.dsl.engine
 
+import com.cocro.application.common.validation.Presence
 import com.cocro.kernel.grid.enums.CellType
+
+class GridIdDsl(
+    private val engine: GridValidationEngine,
+) {
+    fun required() = engine.validateGridId(Presence.REQUIRED)
+}
 
 class TitleDsl(
     private val engine: GridValidationEngine,
 ) {
-    fun required() = engine.validateTitleRequired()
-}
+    fun required() = engine.validateTitle(Presence.REQUIRED)
 
-class SizeDsl(
-    private val engine: GridValidationEngine,
-) {
-    fun width(block: RuleDsl.() -> Unit) = RuleDsl { engine.validateWidth() }.block()
-
-    fun height(block: RuleDsl.() -> Unit) = RuleDsl { engine.validateHeight() }.block()
-
-    fun cellCountMatches() = engine.validateCellCountMatches()
+    fun optional() = engine.validateTitle(Presence.OPTIONAL)
 }
 
 class CellsDsl(
@@ -63,17 +62,17 @@ class CluesDsl(
     fun directionsMustDiffer() = engine.validateClueDirectionsDiffer()
 }
 
-class RuleDsl(
-    private val action: () -> Unit,
-) {
-    fun apply() = action()
-}
-
 class SafeStringDsl(
     private val engine: GridValidationEngine,
-    private val select: () -> String?,
+    private val value: () -> String?,
 ) {
-    fun optionalSafeString() {
-        engine.validateOptionalSafeString(select())
-    }
+    fun optional() = engine.validateSafeString(Presence.OPTIONAL, value)
+}
+
+class SizeDsl(
+    private val engine: GridValidationEngine,
+) {
+    fun required() = engine.validateSize(Presence.REQUIRED)
+
+    fun optional() = engine.validateSize(Presence.OPTIONAL)
 }

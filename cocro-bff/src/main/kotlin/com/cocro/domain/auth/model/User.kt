@@ -5,6 +5,7 @@ import com.cocro.domain.auth.valueobject.PasswordHash
 import com.cocro.domain.auth.valueobject.UserId
 import com.cocro.domain.auth.valueobject.Username
 import com.cocro.kernel.auth.enum.Role
+import com.cocro.kernel.auth.model.CocroUser
 
 class User private constructor(
     val id: UserId,
@@ -12,7 +13,13 @@ class User private constructor(
     val passwordHash: PasswordHash,
     val roles: Set<Role>,
     val email: Email? = null,
-) {
+) : CocroUser {
+    override fun userId(): String = id.toString()
+
+    override fun roles(): Set<String> = roles.map { it.name }.toSet()
+
+    override fun isAdmin(): Boolean = roles.contains(Role.ADMIN)
+
     companion object {
         fun register(
             username: Username,
@@ -42,8 +49,4 @@ class User private constructor(
                 email = email,
             )
     }
-
-    fun isAdmin(): Boolean = roles.contains(Role.ADMIN)
-
-    fun hasRole(role: Role): Boolean = roles.contains(role)
 }

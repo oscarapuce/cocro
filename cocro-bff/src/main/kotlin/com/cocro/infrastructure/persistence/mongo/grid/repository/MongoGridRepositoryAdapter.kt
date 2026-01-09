@@ -21,4 +21,9 @@ class MongoGridRepositoryAdapter(
             .toDomain()
 
     override fun existsByShortId(shortId: String): Boolean = springDataRepo.existsByShortId(shortId)
+
+    override fun findByShortId(shortId: String): Grid? =
+        springDataRepo
+            .findByShortId(shortId)
+            ?.toDomain()
 }

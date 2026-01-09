@@ -2,7 +2,9 @@ package com.cocro.application.grid.mapper
 
 import com.cocro.application.grid.dto.CellDto
 import com.cocro.application.grid.dto.ClueDto
+import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.dto.SubmitGridDto
+import com.cocro.domain.auth.valueobject.UserId
 import com.cocro.domain.grid.model.Cell
 import com.cocro.domain.grid.model.Clue
 import com.cocro.domain.grid.model.Grid
@@ -19,7 +21,10 @@ import com.cocro.kernel.grid.enums.SeparatorType
 import com.cocro.kernel.grid.model.CellPos
 import java.util.UUID
 
-fun SubmitGridDto.toDomain(shortId: String): Grid =
+internal fun SubmitGridDto.toDomain(
+    shortId: String,
+    userId: UserId,
+): Grid =
     Grid(
         id = UUID.randomUUID(),
         shortId = GridId(shortId),
@@ -27,7 +32,7 @@ fun SubmitGridDto.toDomain(shortId: String): Grid =
         metadata =
             GridMetadata(
                 difficulty = this.difficulty,
-                author = this.author,
+                author = userId,
                 reference = this.reference,
                 description = this.description,
             ),
@@ -35,6 +40,34 @@ fun SubmitGridDto.toDomain(shortId: String): Grid =
         height = GridHeight(this.height),
         cells = this.cells.map { it.toDomain() },
     )
+
+internal fun PatchGridDto.applyPatchTo(grid: Grid): Grid {
+    // --- metadata ---
+    val patchedMetadata =
+        grid.metadata.copy(
+            difficulty = this.difficulty ?: grid.metadata.difficulty,
+            reference = this.reference ?: grid.metadata.reference,
+            description = this.description ?: grid.metadata.description,
+        )
+
+    // --- dimensions ---
+    val patchedWidth = this.width?.let { GridWidth(it) } ?: grid.width
+    val patchedHeight = this.height?.let { GridHeight(it) } ?: grid.height
+
+    // --- cells ---
+    val patchedCells =
+        this.cells
+            ?.map { it.toDomain() }
+            ?: grid.cells
+
+    return grid.copy(
+        title = this.title?.let { GridTitle(it) } ?: grid.title,
+        metadata = patchedMetadata,
+        width = patchedWidth,
+        height = patchedHeight,
+        cells = patchedCells,
+    )
+}
 
 private fun CellDto.toDomain(): Cell {
     val pos = CellPos(this.x, this.y)

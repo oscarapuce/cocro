@@ -9,5 +9,7 @@ interface SpringDataGridRepository : MongoRepository<GridDocument, UUID> {
 
     fun existsByShortId(shortId: String): Boolean
 
+    fun findByShortId(shortId: String): GridDocument?
+
     fun save(document: GridDocument): GridDocument
 }

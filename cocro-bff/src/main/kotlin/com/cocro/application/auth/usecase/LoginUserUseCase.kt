@@ -8,7 +8,7 @@ import com.cocro.domain.auth.valueobject.Username
 import com.cocro.kernel.auth.error.AuthError
 import com.cocro.kernel.auth.model.AuthSuccess
 import com.cocro.kernel.auth.rule.UsernameRule
-import com.cocro.kernel.common.Result
+import com.cocro.kernel.common.CocroResult
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,16 +17,16 @@ class LoginUserUseCase(
     private val passwordHasher: PasswordHasher,
     private val tokenIssuer: TokenIssuer,
 ) {
-    fun execute(command: LoginUserCommand): Result<AuthSuccess, AuthError> {
+    fun execute(command: LoginUserCommand): CocroResult<AuthSuccess, AuthError> {
         if (!UsernameRule.validate(command.username)) {
-            return Result.Error(listOf(AuthError.UsernameInvalid))
+            return CocroResult.Error(listOf(AuthError.UsernameInvalid))
         }
 
         val username = Username(command.username)
 
         val user =
             userRepository.findByUsername(username)
-                ?: return Result.Error(listOf(AuthError.InvalidCredentials))
+                ?: return CocroResult.Error(listOf(AuthError.InvalidCredentials))
 
         val matches =
             passwordHasher.matches(
@@ -35,7 +35,7 @@ class LoginUserUseCase(
             )
 
         if (!matches) {
-            return Result.Error(listOf(AuthError.InvalidCredentials))
+            return CocroResult.Error(listOf(AuthError.InvalidCredentials))
         }
 
         val token =
@@ -44,7 +44,7 @@ class LoginUserUseCase(
                 roles = user.roles,
             )
 
-        return Result.Success(
+        return CocroResult.Success(
             AuthSuccess(
                 userId = user.id.value.toString(),
                 username = user.username.value,

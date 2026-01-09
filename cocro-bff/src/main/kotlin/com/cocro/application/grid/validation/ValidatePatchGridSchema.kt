@@ -1,19 +1,21 @@
 package com.cocro.application.grid.validation
 
-import com.cocro.application.grid.dto.SubmitGridDto
+import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.validation.dsl.engine.validateGrid
 import com.cocro.kernel.grid.enums.CellType
 import com.cocro.kernel.grid.error.GridError
 
-internal fun validateSubmitGrid(dto: SubmitGridDto): List<GridError> =
+internal fun validatePatchGrid(dto: PatchGridDto): List<GridError> =
     validateGrid(dto) {
-        title { required() }
+        gridId { required() }
+
+        title { optional() }
 
         reference { optional() }
         description { optional() }
 
         size {
-            required()
+            optional()
         }
 
         cells {

@@ -8,4 +8,6 @@ interface GridRepository {
     fun save(grid: Grid): Grid
 
     fun existsByShortId(shortId: String): Boolean
+
+    fun findByShortId(shortId: String): Grid?
 }
