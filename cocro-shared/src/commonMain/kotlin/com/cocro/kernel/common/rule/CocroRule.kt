@@ -1,9 +1,9 @@
 package com.cocro.kernel.common.rule
 
-interface CocroRule<T> {
-    val arity: Int
+abstract class CocroRule<T> {
+    abstract val arity: Int
 
-    fun isValid(values: List<T>): Boolean
+    protected abstract fun isValid(values: List<T>): Boolean
 
     fun validate(vararg values: T): Boolean {
         require(values.size == arity) {

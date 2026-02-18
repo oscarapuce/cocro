@@ -1,13 +1,13 @@
 package com.cocro.application.auth.usecase
 
-import com.cocro.application.auth.dto.RegisterUserCommand
+import com.cocro.application.auth.dto.RegisterUserCommandDto
 import com.cocro.application.auth.port.PasswordHasher
 import com.cocro.application.auth.port.TokenIssuer
 import com.cocro.application.auth.port.UserRepository
 import com.cocro.application.auth.validation.validateRegisterCommand
 import com.cocro.domain.auth.model.User
-import com.cocro.domain.auth.valueobject.Email
-import com.cocro.domain.auth.valueobject.Username
+import com.cocro.domain.auth.model.valueobject.Email
+import com.cocro.domain.auth.model.valueobject.Username
 import com.cocro.kernel.auth.error.AuthError
 import com.cocro.kernel.auth.model.AuthSuccess
 import com.cocro.kernel.common.CocroResult
@@ -22,7 +22,7 @@ class RegisterUserUseCase(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun execute(command: RegisterUserCommand): CocroResult<AuthSuccess, AuthError> {
+    fun execute(command: RegisterUserCommandDto): CocroResult<AuthSuccess, AuthError> {
         val errors = validateRegisterCommand(command)
 
         if (errors.isNotEmpty()) {

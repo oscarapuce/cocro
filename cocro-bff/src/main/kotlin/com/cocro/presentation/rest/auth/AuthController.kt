@@ -1,7 +1,7 @@
 package com.cocro.presentation.rest.auth
 
-import com.cocro.application.auth.dto.LoginUserCommand
-import com.cocro.application.auth.dto.RegisterUserCommand
+import com.cocro.application.auth.dto.RegisterUserCommandDto
+import com.cocro.application.auth.dto.LoginUserCommandDto
 import com.cocro.application.auth.usecase.LoginUserUseCase
 import com.cocro.application.auth.usecase.RegisterUserUseCase
 import com.cocro.presentation.rest.error.toResponseEntity
@@ -20,7 +20,7 @@ class AuthController(
 ) {
     @PostMapping("/register")
     fun register(
-        @RequestBody request: RegisterUserCommand,
+        @RequestBody request: RegisterUserCommandDto,
     ): ResponseEntity<*> =
         registerUserUseCase
             .execute(request)
@@ -28,7 +28,7 @@ class AuthController(
 
     @PostMapping("/login")
     fun login(
-        @RequestBody request: LoginUserCommand,
+        @RequestBody request: LoginUserCommandDto,
     ): ResponseEntity<*> =
         loginUserUseCase
             .execute(request)

@@ -1,9 +1,9 @@
 package com.cocro.domain.auth.model
 
-import com.cocro.domain.auth.valueobject.Email
-import com.cocro.domain.auth.valueobject.PasswordHash
-import com.cocro.domain.auth.valueobject.UserId
-import com.cocro.domain.auth.valueobject.Username
+import com.cocro.domain.auth.model.valueobject.Email
+import com.cocro.domain.auth.model.valueobject.PasswordHash
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.auth.model.valueobject.Username
 import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.CocroUser
 

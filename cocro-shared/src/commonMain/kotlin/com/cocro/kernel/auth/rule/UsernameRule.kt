@@ -2,7 +2,7 @@ package com.cocro.kernel.auth.rule
 
 import com.cocro.kernel.common.rule.CocroRule
 
-object UsernameRule : CocroRule<String> {
+object UsernameRule : CocroRule<String>() {
     const val USERNAME_MAX_LENGTH = 20
     const val USERNAME_MIN_LENGTH = 3
     const val USERNAME_REGEX = "^[a-zA-Z0-9_]+$"

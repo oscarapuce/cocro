@@ -1,15 +1,15 @@
 package com.cocro.domain.grid.model
 
-import com.cocro.domain.grid.valueobject.GridHeight
-import com.cocro.domain.grid.valueobject.GridId
-import com.cocro.domain.grid.valueobject.GridTitle
-import com.cocro.domain.grid.valueobject.GridWidth
+import com.cocro.domain.grid.model.valueobject.GridHeight
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.grid.model.valueobject.GridTitle
+import com.cocro.domain.grid.model.valueobject.GridWidth
 import java.time.Instant
 import java.util.UUID
 
 data class Grid(
     val id: UUID,
-    val shortId: GridId,
+    val shortId: GridShareCode,
     val title: GridTitle,
     val metadata: GridMetadata,
     val hashLetters: Long,
@@ -25,7 +25,7 @@ data class Grid(
      */
     constructor(
         id: UUID,
-        shortId: GridId,
+        shortId: GridShareCode,
         title: GridTitle,
         metadata: GridMetadata,
         width: GridWidth,

@@ -1,6 +1,6 @@
 package com.cocro.domain.grid.model
 
-import com.cocro.domain.auth.valueobject.UserId
+import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.kernel.grid.enums.GridDifficulty
 
 data class GridMetadata(

@@ -1,10 +1,10 @@
 package com.cocro.application.auth.usecase
 
-import com.cocro.application.auth.dto.LoginUserCommand
+import com.cocro.application.auth.dto.LoginUserCommandDto
 import com.cocro.application.auth.port.PasswordHasher
 import com.cocro.application.auth.port.TokenIssuer
 import com.cocro.application.auth.port.UserRepository
-import com.cocro.domain.auth.valueobject.Username
+import com.cocro.domain.auth.model.valueobject.Username
 import com.cocro.kernel.auth.error.AuthError
 import com.cocro.kernel.auth.model.AuthSuccess
 import com.cocro.kernel.auth.rule.UsernameRule
@@ -17,7 +17,7 @@ class LoginUserUseCase(
     private val passwordHasher: PasswordHasher,
     private val tokenIssuer: TokenIssuer,
 ) {
-    fun execute(command: LoginUserCommand): CocroResult<AuthSuccess, AuthError> {
+    fun execute(command: LoginUserCommandDto): CocroResult<AuthSuccess, AuthError> {
         if (!UsernameRule.validate(command.username)) {
             return CocroResult.Error(listOf(AuthError.UsernameInvalid))
         }

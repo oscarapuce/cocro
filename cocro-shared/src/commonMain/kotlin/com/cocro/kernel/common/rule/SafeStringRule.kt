@@ -1,6 +1,6 @@
 package com.cocro.kernel.common.rule
 
-object SafeStringRule : CocroRule<String> {
+object SafeStringRule : CocroRule<String>() {
     const val SAFE_STRING_MAX_LENGTH = 200
     const val SAFE_STRING_BLACKLISTED_CHARS = "<>"
 

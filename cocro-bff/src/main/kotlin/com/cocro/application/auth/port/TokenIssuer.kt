@@ -1,6 +1,6 @@
 package com.cocro.application.auth.port
 
-import com.cocro.domain.auth.valueobject.UserId
+import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.kernel.auth.enum.Role
 
 interface TokenIssuer {

@@ -1,7 +1,7 @@
 package com.cocro.infrastructure.security.jwt
 
 import com.cocro.application.auth.port.TokenIssuer
-import com.cocro.domain.auth.valueobject.UserId
+import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.kernel.auth.enum.Role
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.security.oauth2.jwt.JwtEncoder

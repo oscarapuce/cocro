@@ -6,7 +6,7 @@ import com.cocro.application.grid.mapper.toDomain
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.grid.service.GridIdGenerator
 import com.cocro.application.grid.validation.validateSubmitGrid
-import com.cocro.domain.grid.valueobject.GridId
+import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.error.GridError
 import org.slf4j.LoggerFactory
@@ -20,7 +20,7 @@ class SubmitGridUseCase(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun execute(dto: SubmitGridDto): CocroResult<GridId, GridError> {
+    fun execute(dto: SubmitGridDto): CocroResult<GridShareCode, GridError> {
         // VALIDATION
         val errors = validateSubmitGrid(dto)
         if (errors.isNotEmpty()) {

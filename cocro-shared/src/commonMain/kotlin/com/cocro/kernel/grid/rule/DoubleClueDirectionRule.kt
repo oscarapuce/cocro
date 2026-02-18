@@ -3,7 +3,7 @@ package com.cocro.kernel.grid.rule
 import com.cocro.kernel.common.rule.CocroRule
 import com.cocro.kernel.grid.enums.ClueDirection
 
-object DoubleClueDirectionRule : CocroRule<ClueDirection> {
+object DoubleClueDirectionRule : CocroRule<ClueDirection>() {
     override val arity: Int = 2
 
     override fun isValid(values: List<ClueDirection>): Boolean {

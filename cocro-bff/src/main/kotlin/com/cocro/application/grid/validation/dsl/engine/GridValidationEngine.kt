@@ -9,7 +9,7 @@ import com.cocro.kernel.grid.enums.CellType
 import com.cocro.kernel.grid.error.GridError
 import com.cocro.kernel.grid.model.CellPos
 import com.cocro.kernel.grid.rule.GridHeightRule
-import com.cocro.kernel.grid.rule.GridIdRule
+import com.cocro.kernel.grid.rule.GridShareCodeRule
 import com.cocro.kernel.grid.rule.GridTitleRule
 import com.cocro.kernel.grid.rule.GridWidthRule
 import com.cocro.kernel.grid.rule.LetterRule
@@ -25,7 +25,7 @@ class GridValidationEngine(
 
     fun validateGridId(presence: Presence) =
         RuleDsl(presence, { dto.gridId }) {
-            if (!GridIdRule.validate(dto.gridId!!)) {
+            if (!GridShareCodeRule.validate(dto.gridId!!)) {
                 errors += GridError.InvalidGridId(dto.gridId!!)
             }
         }.run()

@@ -1,6 +1,6 @@
 package com.cocro.domain.grid.model
 
-import com.cocro.domain.grid.valueobject.LetterValue
+import com.cocro.domain.grid.model.valueobject.LetterValue
 import com.cocro.kernel.grid.enums.SeparatorType
 
 data class Letter(

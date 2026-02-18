@@ -26,6 +26,19 @@ enum class ErrorCode(
     GRID_DUPLICATE_CLUE_DIRECTION("Duplicate clue direction in a cell", 400),
     GRID_INVALID_SAFE_STRING("Invalid safe string", 400),
 
+    // --- grid state domain ---
+    GRID_STATE_INVALID_LETTER("Invalid letter for grid state", 400),
+    GRID_STATE_INVALID_POSITION("Invalid position in grid state", 400),
+    GRID_STATE_NOT_INITIALIZED("Grid state not initialized", 400),
+
+    // --- session domain ---
+    SESSION_FULL("Session is full", 409),
+    SESSION_NOT_CREATOR("Only the session creator can perform this action", 403),
+    SESSION_INVALID_STATUS_FOR_ACTION("Invalid session status for this action", 400),
+    SESSION_ALREADY_PARTICIPANT("User is already a participant in this session", 409),
+    SESSION_NOT_INVITED("User is not invited to this session", 403),
+    SESSION_GRID_NOT_SELECTED("No grid selected for this session", 400),
+
     // --- auth domain ---
     AUTH_USERNAME_ALREADY_EXISTS("Username already exists", 409),
     AUTH_INVALID_CREDENTIALS("Invalid username or password", 401),

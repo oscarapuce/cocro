@@ -1,17 +1,17 @@
 package com.cocro.infrastructure.persistence.mongo.grid.mapper
 
-import com.cocro.domain.auth.valueobject.UserId
+import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.grid.model.Cell
 import com.cocro.domain.grid.model.Clue
 import com.cocro.domain.grid.model.Grid
 import com.cocro.domain.grid.model.GridMetadata
 import com.cocro.domain.grid.model.Letter
-import com.cocro.domain.grid.valueobject.ClueText
-import com.cocro.domain.grid.valueobject.GridHeight
-import com.cocro.domain.grid.valueobject.GridId
-import com.cocro.domain.grid.valueobject.GridTitle
-import com.cocro.domain.grid.valueobject.GridWidth
-import com.cocro.domain.grid.valueobject.LetterValue
+import com.cocro.domain.grid.model.valueobject.ClueText
+import com.cocro.domain.grid.model.valueobject.GridHeight
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.grid.model.valueobject.GridTitle
+import com.cocro.domain.grid.model.valueobject.GridWidth
+import com.cocro.domain.grid.model.valueobject.LetterValue
 import com.cocro.infrastructure.persistence.mongo.grid.document.CellDocument
 import com.cocro.infrastructure.persistence.mongo.grid.document.GridDocument
 import com.cocro.infrastructure.persistence.mongo.grid.document.GridMetadataDocument
@@ -84,7 +84,7 @@ fun Cell.toDocument(): CellDocument =
 fun GridDocument.toDomain(): Grid =
     Grid(
         id = id,
-        shortId = GridId(shortId),
+        shortId = GridShareCode(shortId),
         title = GridTitle(title),
         metadata =
             GridMetadata(

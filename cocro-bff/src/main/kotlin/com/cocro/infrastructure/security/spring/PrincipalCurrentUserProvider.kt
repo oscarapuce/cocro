@@ -2,7 +2,7 @@ package com.cocro.infrastructure.security.spring
 
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.domain.auth.model.AuthenticatedUser
-import com.cocro.domain.auth.valueobject.UserId
+import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.kernel.auth.enum.Role
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component

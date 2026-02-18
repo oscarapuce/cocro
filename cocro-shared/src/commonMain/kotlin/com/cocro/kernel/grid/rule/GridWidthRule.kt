@@ -2,7 +2,7 @@ package com.cocro.kernel.grid.rule
 
 import com.cocro.kernel.common.rule.CocroRule
 
-object GridWidthRule : CocroRule<Int> {
+object GridWidthRule : CocroRule<Int>() {
     const val MIN_WIDTH = 5
     const val MAX_WIDTH = 70
 

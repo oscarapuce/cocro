@@ -5,7 +5,7 @@ import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.mapper.applyPatchTo
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.grid.validation.validatePatchGrid
-import com.cocro.domain.grid.valueobject.GridId
+import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.error.GridError
 import org.slf4j.LoggerFactory
@@ -18,7 +18,7 @@ class PatchGridUseCase(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun execute(dto: PatchGridDto): CocroResult<GridId, GridError> {
+    fun execute(dto: PatchGridDto): CocroResult<GridShareCode, GridError> {
         // VALIDATION
         val errors = validatePatchGrid(dto)
         if (errors.isNotEmpty()) {

@@ -2,7 +2,7 @@ package com.cocro.kernel.grid.rule
 
 import com.cocro.kernel.common.rule.CocroRule
 
-object GridTitleRule : CocroRule<String> {
+object GridTitleRule : CocroRule<String>() {
     const val TITLE_MAX_LENGTH = 60
     const val TITLE_MIN_LENGTH = 5
 

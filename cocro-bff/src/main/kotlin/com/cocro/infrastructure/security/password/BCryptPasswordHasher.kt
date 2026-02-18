@@ -1,7 +1,7 @@
 package com.cocro.infrastructure.security.password
 
 import com.cocro.application.auth.port.PasswordHasher
-import com.cocro.domain.auth.valueobject.PasswordHash
+import com.cocro.domain.auth.model.valueobject.PasswordHash
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Component
 

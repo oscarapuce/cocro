@@ -1,4 +1,4 @@
-package com.cocro.domain.grid.valueobject
+package com.cocro.domain.grid.model.valueobject
 
 import com.cocro.kernel.grid.rule.GridTitleRule
 

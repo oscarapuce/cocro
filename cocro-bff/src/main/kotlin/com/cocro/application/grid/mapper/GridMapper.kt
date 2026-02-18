@@ -4,18 +4,18 @@ import com.cocro.application.grid.dto.CellDto
 import com.cocro.application.grid.dto.ClueDto
 import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.dto.SubmitGridDto
-import com.cocro.domain.auth.valueobject.UserId
+import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.grid.model.Cell
 import com.cocro.domain.grid.model.Clue
 import com.cocro.domain.grid.model.Grid
 import com.cocro.domain.grid.model.GridMetadata
 import com.cocro.domain.grid.model.Letter
-import com.cocro.domain.grid.valueobject.ClueText
-import com.cocro.domain.grid.valueobject.GridHeight
-import com.cocro.domain.grid.valueobject.GridId
-import com.cocro.domain.grid.valueobject.GridTitle
-import com.cocro.domain.grid.valueobject.GridWidth
-import com.cocro.domain.grid.valueobject.LetterValue
+import com.cocro.domain.grid.model.valueobject.ClueText
+import com.cocro.domain.grid.model.valueobject.GridHeight
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.grid.model.valueobject.GridTitle
+import com.cocro.domain.grid.model.valueobject.GridWidth
+import com.cocro.domain.grid.model.valueobject.LetterValue
 import com.cocro.kernel.grid.enums.CellType
 import com.cocro.kernel.grid.enums.SeparatorType
 import com.cocro.kernel.grid.model.CellPos
@@ -27,7 +27,7 @@ internal fun SubmitGridDto.toDomain(
 ): Grid =
     Grid(
         id = UUID.randomUUID(),
-        shortId = GridId(shortId),
+        shortId = GridShareCode(shortId),
         title = GridTitle(this.title),
         metadata =
             GridMetadata(

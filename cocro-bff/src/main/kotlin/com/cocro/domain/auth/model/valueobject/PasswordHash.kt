@@ -1,4 +1,4 @@
-package com.cocro.domain.auth.valueobject
+package com.cocro.domain.auth.model.valueobject
 
 @JvmInline
 value class PasswordHash(
