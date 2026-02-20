@@ -1,6 +1,6 @@
 package com.cocro.application.auth.port
 
-import com.cocro.domain.auth.model.valueobject.PasswordHash
+import com.cocro.kernel.auth.model.valueobject.PasswordHash
 
 interface PasswordHasher {
     fun hash(password: String): PasswordHash

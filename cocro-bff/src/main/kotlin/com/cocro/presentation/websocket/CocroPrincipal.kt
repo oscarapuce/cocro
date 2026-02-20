@@ -1,6 +1,6 @@
 package com.cocro.presentation.websocket
 
-import com.cocro.domain.auth.model.AuthenticatedUser
+import com.cocro.kernel.auth.model.AuthenticatedUser
 import java.security.Principal
 
 class CocroPrincipal(

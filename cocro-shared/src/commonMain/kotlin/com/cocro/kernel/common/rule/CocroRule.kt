@@ -6,7 +6,8 @@ abstract class CocroRule<T> {
     protected abstract fun isValid(values: List<T>): Boolean
 
     fun validate(vararg values: T): Boolean {
-        require(values.size == arity) {
+        val isSizeNonRestricted = arity < 0
+        require(isSizeNonRestricted || values.size == arity) {
             "Rule expects $arity values, got ${values.size}"
         }
         return isValid(values.toList())

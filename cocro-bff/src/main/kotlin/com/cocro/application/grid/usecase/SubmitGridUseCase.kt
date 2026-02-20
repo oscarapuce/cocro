@@ -6,9 +6,9 @@ import com.cocro.application.grid.mapper.toDomain
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.grid.service.GridIdGenerator
 import com.cocro.application.grid.validation.validateSubmitGrid
-import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.error.GridError
+import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -29,7 +29,13 @@ class SubmitGridUseCase(
         }
 
         // MAPPING
-        val user = currentUserProvider.currentUserOrNull() ?: throw IllegalStateException("User not logged in")
+        val user =
+            currentUserProvider.currentUserOrNull()
+                ?: run {
+                    logger.warn("Grid submission rejected: user not authenticated")
+                    return CocroResult.Error(listOf(GridError.UnauthorizedGridCreation))
+                }
+
         val shortId = gridIdGenerator.generateId()
         val grid = dto.toDomain(shortId, user.userId)
 

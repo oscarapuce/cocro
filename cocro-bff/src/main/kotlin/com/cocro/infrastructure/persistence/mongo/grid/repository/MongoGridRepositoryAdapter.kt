@@ -1,9 +1,10 @@
 package com.cocro.infrastructure.persistence.mongo.grid.repository
 
 import com.cocro.application.grid.port.GridRepository
-import com.cocro.domain.grid.model.Grid
 import com.cocro.infrastructure.persistence.mongo.grid.mapper.toDocument
 import com.cocro.infrastructure.persistence.mongo.grid.mapper.toDomain
+import com.cocro.kernel.grid.model.Grid
+import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -20,10 +21,10 @@ class MongoGridRepositoryAdapter(
             .save(grid.toDocument())
             .toDomain()
 
-    override fun existsByShortId(shortId: String): Boolean = springDataRepo.existsByShortId(shortId)
+    override fun existsByShortId(shortId: GridShareCode): Boolean = springDataRepo.existsByShortId(shortId.toString())
 
-    override fun findByShortId(shortId: String): Grid? =
+    override fun findByShortId(shortId: GridShareCode): Grid? =
         springDataRepo
-            .findByShortId(shortId)
+            .findByShortId(shortId.toString())
             ?.toDomain()
 }

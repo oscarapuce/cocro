@@ -1,10 +1,10 @@
 package com.cocro.infrastructure.persistence.mongo.user.repository
 
 import com.cocro.application.auth.port.UserRepository
-import com.cocro.domain.auth.model.User
-import com.cocro.domain.auth.model.valueobject.Username
 import com.cocro.infrastructure.persistence.mongo.user.mapper.toDocument
 import com.cocro.infrastructure.persistence.mongo.user.mapper.toDomain
+import com.cocro.kernel.auth.model.User
+import com.cocro.kernel.auth.model.valueobject.Username
 import org.springframework.stereotype.Repository
 
 @Repository

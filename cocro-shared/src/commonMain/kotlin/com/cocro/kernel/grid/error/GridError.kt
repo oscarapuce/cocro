@@ -13,6 +13,10 @@ sealed interface GridError : CocroError {
         override val errorCode = ErrorCode.GRID_INVALID_CELL_COUNT
     }
 
+    object UnauthorizedGridCreation : GridError {
+        override val errorCode = ErrorCode.GRID_UNAUTHORIZED_CREATION
+    }
+
     data class GridNotFound(
         val gridId: String,
     ) : GridError {

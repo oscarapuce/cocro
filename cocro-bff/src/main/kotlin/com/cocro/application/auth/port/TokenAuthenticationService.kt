@@ -1,6 +1,6 @@
 package com.cocro.application.auth.port
 
-import com.cocro.domain.auth.model.AuthenticatedUser
+import com.cocro.kernel.auth.model.AuthenticatedUser
 
 interface TokenAuthenticationService {
     /**

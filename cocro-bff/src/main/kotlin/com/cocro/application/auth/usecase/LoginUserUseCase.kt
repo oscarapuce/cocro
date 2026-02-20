@@ -1,14 +1,16 @@
 package com.cocro.application.auth.usecase
 
+import com.cocro.application.auth.dto.AuthSuccess
 import com.cocro.application.auth.dto.LoginUserCommandDto
+import com.cocro.application.auth.mapper.toAuthSuccess
 import com.cocro.application.auth.port.PasswordHasher
 import com.cocro.application.auth.port.TokenIssuer
 import com.cocro.application.auth.port.UserRepository
-import com.cocro.domain.auth.model.valueobject.Username
 import com.cocro.kernel.auth.error.AuthError
-import com.cocro.kernel.auth.model.AuthSuccess
+import com.cocro.kernel.auth.model.valueobject.Username
 import com.cocro.kernel.auth.rule.UsernameRule
 import com.cocro.kernel.common.CocroResult
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,16 +19,25 @@ class LoginUserUseCase(
     private val passwordHasher: PasswordHasher,
     private val tokenIssuer: TokenIssuer,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun execute(command: LoginUserCommandDto): CocroResult<AuthSuccess, AuthError> {
+        // VALIDATION
         if (!UsernameRule.validate(command.username)) {
+            logger.warn("Login rejected: invalid username format")
             return CocroResult.Error(listOf(AuthError.UsernameInvalid))
         }
 
+        // MAPPING
         val username = Username(command.username)
 
+        // CHECK
         val user =
             userRepository.findByUsername(username)
-                ?: return CocroResult.Error(listOf(AuthError.InvalidCredentials))
+                ?: run {
+                    logger.warn("Login rejected: user {} not found", command.username)
+                    return CocroResult.Error(listOf(AuthError.InvalidCredentials))
+                }
 
         val matches =
             passwordHasher.matches(
@@ -35,22 +46,18 @@ class LoginUserUseCase(
             )
 
         if (!matches) {
+            logger.warn("Login rejected: invalid password for user {}", command.username)
             return CocroResult.Error(listOf(AuthError.InvalidCredentials))
         }
 
+        // SUCCESS
         val token =
             tokenIssuer.issue(
                 userId = user.id,
                 roles = user.roles,
             )
 
-        return CocroResult.Success(
-            AuthSuccess(
-                userId = user.id.value.toString(),
-                username = user.username.value,
-                roles = user.roles,
-                token = token,
-            ),
-        )
+        logger.info("User {} successfully logged in", user.username.value)
+        return CocroResult.Success(user.toAuthSuccess(token))
     }
 }

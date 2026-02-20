@@ -6,7 +6,7 @@ enum class ErrorCode(
 ) {
     // --- génériques ---
     INTERNAL_SERVER_ERROR("Internal server error", 500),
-    UNAUTHORIZED("Unauthorized", 401),
+    UNAUTHORIZED("Not authenticated", 401),
     FORBIDDEN("Forbidden", 403),
     NOT_FOUND("Not found", 404),
     BAD_REQUEST("Bad request", 400),
@@ -21,6 +21,7 @@ enum class ErrorCode(
     GRID_INVALID_GRID_ID("Invalid grid ID", 400),
     GRID_DUPLICATE_LETTER_HASH("A grid with the same letters already exists", 409),
 
+    GRID_UNAUTHORIZED_CREATION("Unauthorized grid creation", 401),
     GRID_INVALID_LETTER("Invalid letter in grid cell", 400),
     GRID_INVALID_CLUE_COUNT("Too many clues in a cell", 400),
     GRID_DUPLICATE_CLUE_DIRECTION("Duplicate clue direction in a cell", 400),
@@ -33,11 +34,17 @@ enum class ErrorCode(
 
     // --- session domain ---
     SESSION_FULL("Session is full", 409),
+    SESSION_NOT_FOUND("Session not found", 403),
+    SESSION_INVALID_SHARE_CODE("Invalid session share code", 400),
+    SESSION_CANNOT_CREATE_WHEN_UNAUTHORIZED("Cannot create (or join) session when not authenticated", 401),
     SESSION_NOT_CREATOR("Only the session creator can perform this action", 403),
     SESSION_INVALID_STATUS_FOR_ACTION("Invalid session status for this action", 400),
     SESSION_ALREADY_PARTICIPANT("User is already a participant in this session", 409),
+    SESSION_USER_NOT_IN_SESSION("User is not a participant in this session", 403),
     SESSION_NOT_INVITED("User is not invited to this session", 403),
     SESSION_GRID_NOT_SELECTED("No grid selected for this session", 400),
+    SESSION_INVALID_COMMAND("Invalid command", 400),
+    SESSION_NOT_ENOUGH_PARTICIPANTS("At least one participant is required to start the session", 400),
 
     // --- auth domain ---
     AUTH_USERNAME_ALREADY_EXISTS("Username already exists", 409),

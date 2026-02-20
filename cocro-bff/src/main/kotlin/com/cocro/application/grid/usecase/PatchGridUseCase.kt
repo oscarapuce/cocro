@@ -5,9 +5,9 @@ import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.mapper.applyPatchTo
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.grid.validation.validatePatchGrid
-import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.error.GridError
+import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -27,11 +27,16 @@ class PatchGridUseCase(
         }
 
         // AUTHORIZATION
+        val gridId = GridShareCode(dto.gridId)
         val previousGrid =
-            gridRepository.findByShortId(dto.gridId)
-                ?: return CocroResult.Error(listOf(GridError.GridNotFound(dto.gridId)))
+            gridRepository.findByShortId(gridId)
+                ?: run {
+                    logger.warn("Grid patch rejected: grid {} not found", dto.gridId)
+                    return CocroResult.Error(listOf(GridError.GridNotFound(dto.gridId)))
+                }
         val user = currentUserProvider.currentUserOrNull()
         if (user == null || (previousGrid.metadata.author != user.userId && !user.isAdmin())) {
+            logger.warn("Grid patch rejected: unauthorized modification of grid {} by user {}", dto.gridId, user?.userId() ?: "anonymous")
             return CocroResult.Error(listOf(GridError.UnauthorizedGridModification(dto.gridId)))
         }
 

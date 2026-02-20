@@ -1,15 +1,16 @@
 package com.cocro.application.auth.usecase
 
+import com.cocro.application.auth.dto.AuthSuccess
 import com.cocro.application.auth.dto.RegisterUserCommandDto
+import com.cocro.application.auth.mapper.toAuthSuccess
 import com.cocro.application.auth.port.PasswordHasher
 import com.cocro.application.auth.port.TokenIssuer
 import com.cocro.application.auth.port.UserRepository
 import com.cocro.application.auth.validation.validateRegisterCommand
-import com.cocro.domain.auth.model.User
-import com.cocro.domain.auth.model.valueobject.Email
-import com.cocro.domain.auth.model.valueobject.Username
 import com.cocro.kernel.auth.error.AuthError
-import com.cocro.kernel.auth.model.AuthSuccess
+import com.cocro.kernel.auth.model.User
+import com.cocro.kernel.auth.model.valueobject.Email
+import com.cocro.kernel.auth.model.valueobject.Username
 import com.cocro.kernel.common.CocroResult
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -23,6 +24,7 @@ class RegisterUserUseCase(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun execute(command: RegisterUserCommandDto): CocroResult<AuthSuccess, AuthError> {
+        // VALIDATION
         val errors = validateRegisterCommand(command)
 
         if (errors.isNotEmpty()) {
@@ -30,9 +32,12 @@ class RegisterUserUseCase(
             return CocroResult.Error(errors)
         }
 
+        // MAPPING
         val username = Username(command.username)
 
+        // CHECK
         if (userRepository.findByUsername(username) != null) {
+            logger.warn("Registration rejected: username {} already exists", command.username)
             return CocroResult.Error(
                 listOf(AuthError.UsernameAlreadyExists(command.username)),
             )
@@ -40,6 +45,7 @@ class RegisterUserUseCase(
 
         val passwordHash = passwordHasher.hash(command.password)
 
+        // PERSISTENCE
         val user =
             User.register(
                 username = Username(command.username),
@@ -54,19 +60,14 @@ class RegisterUserUseCase(
 
         val savedUser = userRepository.save(user)
 
+        // SUCCESS
         val token =
             tokenIssuer.issue(
                 userId = savedUser.id,
                 roles = savedUser.roles,
             )
 
-        return CocroResult.Success(
-            AuthSuccess(
-                userId = savedUser.id.value.toString(),
-                username = savedUser.username.value,
-                roles = savedUser.roles,
-                token = token,
-            ),
-        )
+        logger.info("User {} successfully registered", savedUser.username.value)
+        return CocroResult.Success(savedUser.toAuthSuccess(token))
     }
 }
