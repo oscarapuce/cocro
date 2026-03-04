@@ -3,10 +3,11 @@ package com.cocro.kernel.session.model.state
 import com.cocro.kernel.grid.model.CellPos
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.grid.rule.LetterRule
+import com.cocro.kernel.session.model.valueobject.SessionId
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 
 data class SessionGridState(
-    val sessionId: SessionShareCode,
+    val sessionId: SessionId,
     val gridShareCode: GridShareCode,
     val revision: SessionGridStateRevision,
     val cells: Map<CellPos, SessionGridCellState>,
@@ -34,7 +35,7 @@ data class SessionGridState(
 
     companion object {
         fun initial(
-            sessionId: SessionShareCode,
+            sessionId: SessionId,
             gridShareCode: GridShareCode,
         ): SessionGridState =
             SessionGridState(

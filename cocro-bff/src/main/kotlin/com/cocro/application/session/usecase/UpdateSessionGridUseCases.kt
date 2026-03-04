@@ -3,9 +3,11 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.session.dto.SessionGridUpdateSuccess
 import com.cocro.application.session.dto.UpdateSessionGridDto
+import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.mapper.toCommand
 import com.cocro.application.session.mapper.toSuccess
 import com.cocro.application.session.port.SessionGridStateCache
+import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateUpdateSessionGridDto
 import com.cocro.kernel.common.CocroResult
@@ -19,6 +21,7 @@ class UpdateSessionGridUseCases(
     private val currentUserProvider: CurrentUserProvider,
     private val sessionRepository: SessionRepository,
     private val sessionGridStateCache: SessionGridStateCache,
+    private val sessionNotifier: SessionNotifier,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -54,33 +57,37 @@ class UpdateSessionGridUseCases(
         val sessionShareCode = SessionShareCode(dto.shareCode)
 
         // BUSINESS RULES
-        val sessionGridState =
-            sessionGridStateCache.load(sessionShareCode)
-                ?: sessionRepository.findByShareCode(sessionShareCode)?.sessionGridState
+        val session =
+            sessionRepository.findByShareCode(sessionShareCode)
                 ?: run {
-                    logger.warn("Session start rejected: session not found with shareCode={}", sessionShareCode)
+                    logger.warn("Session grid update rejected: session not found with shareCode={}", sessionShareCode)
                     return CocroResult.Error(listOf(SessionError.SessionNotFound(sessionShareCode.toString())))
                 }
 
-//        val isUserActiveInSession = session.participants
-//            .any { it.userId == user.userId && it.status == InviteStatus.JOINED }
-//        if (!isUserActiveInSession) {
-//            logger.warn("Session grid update rejected: user {} is not an active participant in session with shareCode={}", user.userId, sessionShareCode)
-//            return CocroResult.Error(listOf(SessionError.NotInSession(user.userId())))
-//        }
+        val currentState = sessionGridStateCache.get(session.id) ?: session.sessionGridState
 
         // MAPPING
-        val command = dto.toCommand(user.userId)
+        val command = dto.toCommand(session.id, user.userId)
 
         // APPLY COMMAND
-        sessionGridState.apply(command)
+        val newState = currentState.apply(command)
 
         // PERSISTENCE
-        sessionGridStateCache.save(sessionGridState)
+        sessionGridStateCache.compareAndSet(session.id, currentState.revision.value, newState)
 
-        // BROADCAST (FUTURE: only broadcast the command to other participants, not the whole state)
+        // BROADCAST
+        sessionNotifier.broadcast(
+            sessionShareCode,
+            SessionEvent.GridUpdated(
+                actorId = user.userId(),
+                posX = dto.posX,
+                posY = dto.posY,
+                commandType = dto.commandType,
+                letter = dto.letter,
+            ),
+        )
 
         // SUCCESS
-        return CocroResult.Success(dto.toSuccess())
+        return CocroResult.Success(dto.toSuccess(session.id))
     }
 }

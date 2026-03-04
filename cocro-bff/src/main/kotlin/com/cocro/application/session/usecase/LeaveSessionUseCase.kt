@@ -3,19 +3,23 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.session.dto.LeaveSessionDto
 import com.cocro.application.session.dto.SessionLeaveSuccess
+import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.mapper.toSessionLeaveSuccess
+import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateLeaveSessionDto
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.session.enum.InviteStatus
 import com.cocro.kernel.session.error.SessionError
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.kernel.session.rule.ParticipantsRule
 import org.springframework.stereotype.Service
 
 @Service
 class LeaveSessionUseCase(
     private val currentUserProvider: CurrentUserProvider,
     private val sessionRepository: SessionRepository,
+    private val sessionNotifier: SessionNotifier,
 ) {
     private val logger = org.slf4j.LoggerFactory.getLogger(javaClass)
 
@@ -54,6 +58,15 @@ class LeaveSessionUseCase(
         // APPLY AND PERSISTANCE
         val updatedSession = session.leave(user.userId)
         sessionRepository.save(updatedSession)
+
+        // NOTIFICATION
+        sessionNotifier.broadcast(
+            updatedSession.shareCode,
+            SessionEvent.ParticipantLeft(
+                userId = user.userId(),
+                participantCount = ParticipantsRule.countActiveParticipants(updatedSession.participants),
+            ),
+        )
 
         // SUCCESS
         logger.info("User {} left session {}", user.userId(), sessionShareCode.value)

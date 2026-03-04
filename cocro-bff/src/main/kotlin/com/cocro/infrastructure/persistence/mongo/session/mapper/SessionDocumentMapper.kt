@@ -38,7 +38,7 @@ fun Participant.toDocument(): ParticipantDocument =
 
 fun SessionGridState.toDocument(): SessionGridStateDocument =
     SessionGridStateDocument(
-        sessionShareCode = sessionId.toString(),
+        sessionId = sessionId.value,
         gridShortId = gridShareCode.toString(),
         revision = revision.value,
         cells =
@@ -76,7 +76,7 @@ fun ParticipantDocument.toDomain(): Participant =
 
 fun SessionGridStateDocument.toDomain(): SessionGridState =
     SessionGridState(
-        sessionId = SessionShareCode(sessionShareCode),
+        sessionId = SessionId(sessionId),
         gridShareCode = GridShareCode(gridShortId),
         revision = SessionGridStateRevision(revision),
         cells =

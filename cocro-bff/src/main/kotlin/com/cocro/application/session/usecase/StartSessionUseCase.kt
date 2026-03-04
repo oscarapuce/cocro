@@ -3,7 +3,9 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.session.dto.StartSessionDto
 import com.cocro.application.session.dto.StartSessionSuccess
+import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.mapper.toStartSessionSuccess
+import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateStartSessionDto
 import com.cocro.kernel.common.CocroResult
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service
 class StartSessionUseCase(
     private val currentUserProvider: CurrentUserProvider,
     private val sessionRepository: SessionRepository,
+    private val sessionNotifier: SessionNotifier,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -72,6 +75,12 @@ class StartSessionUseCase(
 
         // PERSISTENCE
         val savedSession = sessionRepository.save(startedSession)
+
+        // NOTIFICATION
+        sessionNotifier.broadcast(
+            savedSession.shareCode,
+            SessionEvent.SessionStarted(participantCount = activeCount),
+        )
 
         // SUCCESS
         logger.info(

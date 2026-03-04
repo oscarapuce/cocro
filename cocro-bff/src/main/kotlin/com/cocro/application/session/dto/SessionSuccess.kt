@@ -1,27 +1,25 @@
 package com.cocro.application.session.dto
 
 data class SessionCreationSuccess(
+    val sessionId: String,
     val shareCode: String,
 )
 
 data class SessionJoinSuccess(
-    val shareCode: String,
+    val sessionId: String,
     val participantCount: Int,
 )
 
 data class SessionLeaveSuccess(
-    val shareCode: String,
+    val sessionId: String,
 )
 
 data class StartSessionSuccess(
-    val shareCode: String,
+    val sessionId: String,
     val participantCount: Int,
 )
 
 data class SessionGridUpdateSuccess(
-    val shareCode: String,
-    val posX: Int,
-    val posY: Int,
+    val sessionId: String,
     val commandType: String,
-    val letter: Char?,
 )

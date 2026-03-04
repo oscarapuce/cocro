@@ -11,57 +11,55 @@ import com.cocro.kernel.grid.model.CellPos
 import com.cocro.kernel.session.enum.CommandType
 import com.cocro.kernel.session.model.Session
 import com.cocro.kernel.session.model.state.SessionGridCommand
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.kernel.session.model.valueobject.SessionId
 import com.cocro.kernel.session.rule.ParticipantsRule
 
 internal fun Session.toSessionCreationSuccess(): SessionCreationSuccess =
     SessionCreationSuccess(
+        sessionId = this.id.toString(),
         shareCode = this.shareCode.value,
     )
 
 internal fun Session.toSessionJoinSuccess(): SessionJoinSuccess =
     SessionJoinSuccess(
-        shareCode = this.shareCode.value,
+        sessionId = this.id.toString(),
         participantCount = ParticipantsRule.countActiveParticipants(participants),
     )
 
 internal fun Session.toSessionLeaveSuccess(): SessionLeaveSuccess =
     SessionLeaveSuccess(
-        shareCode = this.shareCode.value,
+        sessionId = this.id.toString(),
     )
 
 internal fun Session.toStartSessionSuccess(): StartSessionSuccess =
     StartSessionSuccess(
-        shareCode = shareCode.value,
+        sessionId = this.id.toString(),
         participantCount = ParticipantsRule.countActiveParticipants(participants),
     )
 
-internal fun UpdateSessionGridDto.toCommand(actorId: UserId): SessionGridCommand =
+internal fun UpdateSessionGridDto.toCommand(sessionId: SessionId, actorId: UserId): SessionGridCommand =
     when (CommandType.valueOf(this.commandType)) {
-        CommandType.PLACE_LETTER -> this.toSetLetterCommand(actorId)
-        CommandType.ERASE_LETTER -> this.toClearCellCommand(actorId)
+        CommandType.PLACE_LETTER -> this.toSetLetterCommand(sessionId, actorId)
+        CommandType.ERASE_LETTER -> this.toClearCellCommand(sessionId, actorId)
     }
 
-private fun UpdateSessionGridDto.toSetLetterCommand(actorId: UserId): SessionGridCommand.SetLetter =
+private fun UpdateSessionGridDto.toSetLetterCommand(sessionId: SessionId, actorId: UserId): SessionGridCommand.SetLetter =
     SessionGridCommand.SetLetter(
-        sessionId = SessionShareCode(this.shareCode),
+        sessionId = sessionId,
         actorId = actorId,
         position = CellPos(this.posX, this.posY),
         letter = this.letter!!,
     )
 
-private fun UpdateSessionGridDto.toClearCellCommand(actorId: UserId): SessionGridCommand.ClearCell =
+private fun UpdateSessionGridDto.toClearCellCommand(sessionId: SessionId, actorId: UserId): SessionGridCommand.ClearCell =
     SessionGridCommand.ClearCell(
-        sessionId = SessionShareCode(this.shareCode),
+        sessionId = sessionId,
         actorId = actorId,
         position = CellPos(this.posX, this.posY),
     )
 
-internal fun UpdateSessionGridDto.toSuccess(): SessionGridUpdateSuccess =
+internal fun UpdateSessionGridDto.toSuccess(sessionId: SessionId): SessionGridUpdateSuccess =
     SessionGridUpdateSuccess(
-        shareCode = this.shareCode,
-        posX = this.posX,
-        posY = this.posY,
-        letter = this.letter,
+        sessionId = sessionId.toString(),
         commandType = this.commandType,
     )

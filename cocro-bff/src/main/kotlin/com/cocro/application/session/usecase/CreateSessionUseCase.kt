@@ -52,7 +52,7 @@ class CreateSessionUseCase(
             )
         val savedSession = sessionRepository.save(session)
 
-        sessionGridStateCache.save(session.sessionGridState)
+        sessionGridStateCache.initialize(savedSession.id, savedSession.sessionGridState)
 
         // SUCCESS
         logger.info("Session {} successfully created by user {} for grid {}", savedSession.shareCode.value, user.userId(), gridId.value)

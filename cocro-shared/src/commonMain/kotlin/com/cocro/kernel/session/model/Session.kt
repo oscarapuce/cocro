@@ -40,7 +40,7 @@ data class Session private constructor(
                 gridId = gridId,
                 status = SessionStatus.CREATING,
                 participants = listOf(Participant.creator(creatorId)),
-                sessionGridState = SessionGridState.initial(shareCode, gridId),
+                sessionGridState = SessionGridState.initial(sessionId, gridId),
                 createdAt = now,
                 updatedAt = now,
             )

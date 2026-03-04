@@ -3,7 +3,9 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.SessionJoinSuccess
+import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.mapper.toSessionJoinSuccess
+import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateJoinSessionDto
 import com.cocro.kernel.common.CocroResult
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service
 class JoinSessionUseCase(
     private val currentUserProvider: CurrentUserProvider,
     private val sessionRepository: SessionRepository,
+    private val sessionNotifier: SessionNotifier,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -71,13 +74,23 @@ class JoinSessionUseCase(
         // PERSISTENCE
         val updatedSession = session.join(user.userId)
         val savedSession = sessionRepository.save(updatedSession)
+        ++activeParticipantCount
+
+        // NOTIFICATION
+        sessionNotifier.broadcast(
+            savedSession.shareCode,
+            SessionEvent.ParticipantJoined(
+                userId = user.userId(),
+                participantCount = activeParticipantCount,
+            ),
+        )
 
         // SUCCESS
         logger.info(
             "User {} successfully joined session {} ({} participants)",
             user.userId(),
             savedSession.shareCode.value,
-            ++activeParticipantCount,
+            activeParticipantCount,
         )
         return CocroResult.Success(savedSession.toSessionJoinSuccess())
     }

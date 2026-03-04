@@ -1,0 +1,95 @@
+package com.cocro.application.session.usecase
+
+import com.cocro.application.auth.port.CurrentUserProvider
+import com.cocro.application.session.dto.CreateSessionDto
+import com.cocro.application.session.port.SessionGridStateCache
+import com.cocro.application.session.port.SessionRepository
+import com.cocro.application.session.service.SessionCodeGenerator
+import com.cocro.kernel.auth.enum.Role
+import com.cocro.kernel.auth.model.AuthenticatedUser
+import com.cocro.kernel.auth.model.valueobject.UserId
+import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.grid.model.valueobject.GridShareCode
+import com.cocro.kernel.session.error.SessionError
+import com.cocro.kernel.session.model.Session
+import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.whenever
+
+class CreateSessionUseCaseTest {
+
+    private val currentUserProvider: CurrentUserProvider = mock()
+    private val sessionRepository: SessionRepository = mock()
+    private val sessionGridStateCache: SessionGridStateCache = mock()
+    private val shareCodeGenerator: SessionCodeGenerator = mock()
+
+    private val useCase = CreateSessionUseCase(
+        currentUserProvider,
+        sessionRepository,
+        sessionGridStateCache,
+        shareCodeGenerator,
+    )
+
+    private val authenticatedUser = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
+
+    @Test
+    fun `should create session successfully`() {
+        // given
+        val dto = CreateSessionDto(gridId = "GRID01")
+        val shareCode = SessionShareCode("AB12")
+        val session = Session.create(
+            creatorId = authenticatedUser.userId,
+            shareCode = shareCode,
+            gridId = GridShareCode("GRID01"),
+        )
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
+        whenever(shareCodeGenerator.generateId()).thenReturn(shareCode)
+        whenever(sessionRepository.save(any())).thenReturn(session)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+        val success = (result as CocroResult.Success).value
+        assertThat(success.shareCode).isEqualTo("AB12")
+        verify(sessionGridStateCache).initialize(session.id, session.sessionGridState)
+    }
+
+    @Test
+    fun `should return error when user is not authenticated`() {
+        // given
+        val dto = CreateSessionDto(gridId = "GRID01")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(null)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).contains(SessionError.Unauthorized)
+        verifyNoInteractions(sessionRepository)
+    }
+
+    @Test
+    fun `should return error when gridId format is invalid`() {
+        // given
+        val dto = CreateSessionDto(gridId = "bad!")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is SessionError.InvalidGridId }
+        verifyNoInteractions(sessionRepository)
+    }
+}
