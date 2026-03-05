@@ -22,9 +22,14 @@ sealed interface SessionEvent {
         val participantCount: Int,
     ) : SessionEvent
 
+    /**
+     * @param reason "explicit" when the user called POST /leave,
+     *               "timeout"  when the grace period expired after a STOMP disconnect.
+     */
     data class ParticipantLeft(
         val userId: String,
         val participantCount: Int,
+        val reason: String = "explicit",
     ) : SessionEvent
 
     data class SessionStarted(
@@ -38,5 +43,12 @@ sealed interface SessionEvent {
         val commandType: String,
         val letter: Char?,
     ) : SessionEvent
-}
 
+    /**
+     * Sent privately to the user when their local revision is behind the cache.
+     * The client should call GET /api/sessions/{code}/state to resync.
+     */
+    data class SyncRequired(
+        val currentRevision: Long,
+    ) : SessionEvent
+}

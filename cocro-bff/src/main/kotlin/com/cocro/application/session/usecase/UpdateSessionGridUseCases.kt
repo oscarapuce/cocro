@@ -14,7 +14,10 @@ import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.session.error.SessionError
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+
+private const val DEFAULT_FLUSH_THRESHOLD = 50L
 
 @Service
 class UpdateSessionGridUseCases(
@@ -22,6 +25,7 @@ class UpdateSessionGridUseCases(
     private val sessionRepository: SessionRepository,
     private val sessionGridStateCache: SessionGridStateCache,
     private val sessionNotifier: SessionNotifier,
+    @Value("\${cocro.session.flush.threshold:$DEFAULT_FLUSH_THRESHOLD}") private val flushThreshold: Long,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -32,10 +36,7 @@ class UpdateSessionGridUseCases(
                 ?: run {
                     logger.warn(
                         "Session grid update rejected: user not authenticated for shareCode={}, pos=({},{}), commandType={}",
-                        dto.shareCode,
-                        dto.posX,
-                        dto.posY,
-                        dto.commandType,
+                        dto.shareCode, dto.posX, dto.posY, dto.commandType,
                     )
                     return CocroResult.Error(listOf(SessionError.Unauthorized))
                 }
@@ -45,11 +46,7 @@ class UpdateSessionGridUseCases(
         if (errors.isNotEmpty()) {
             logger.warn(
                 "Session grid update rejected: {} validation errors for shareCode={}, pos=({},{}), commandType={}",
-                errors.size,
-                dto.shareCode,
-                dto.posX,
-                dto.posY,
-                dto.commandType,
+                errors.size, dto.shareCode, dto.posX, dto.posY, dto.commandType,
             )
             return CocroResult.Error(errors)
         }
@@ -66,14 +63,24 @@ class UpdateSessionGridUseCases(
 
         val currentState = sessionGridStateCache.get(session.id) ?: session.sessionGridState
 
-        // MAPPING
-        val command = dto.toCommand(session.id, user.userId)
-
         // APPLY COMMAND
+        val command = dto.toCommand(session.id, user.userId)
         val newState = currentState.apply(command)
 
-        // PERSISTENCE
+        // CACHE UPDATE (atomic, throws on revision conflict)
         sessionGridStateCache.compareAndSet(session.id, currentState.revision.value, newState)
+
+        // THRESHOLD FLUSH: persist to MongoDB every N revisions
+        val lastFlushed = sessionGridStateCache.getLastFlushedRevision(session.id)
+        if (newState.revision.value - lastFlushed >= flushThreshold) {
+            sessionRepository.updateGridState(session.id, newState)
+            sessionGridStateCache.markFlushed(session.id, newState.revision.value)
+            logger.debug(
+                "Threshold flush: session={}, revision={}",
+                session.shareCode.value,
+                newState.revision.value,
+            )
+        }
 
         // BROADCAST
         sessionNotifier.broadcast(
@@ -87,7 +94,6 @@ class UpdateSessionGridUseCases(
             ),
         )
 
-        // SUCCESS
         return CocroResult.Success(dto.toSuccess(session.id))
     }
 }

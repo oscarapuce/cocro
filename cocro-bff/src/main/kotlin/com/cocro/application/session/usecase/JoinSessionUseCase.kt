@@ -5,6 +5,8 @@ import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.SessionJoinSuccess
 import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.mapper.toSessionJoinSuccess
+import com.cocro.application.session.port.HeartbeatTracker
+import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateJoinSessionDto
@@ -20,7 +22,9 @@ import org.springframework.stereotype.Service
 class JoinSessionUseCase(
     private val currentUserProvider: CurrentUserProvider,
     private val sessionRepository: SessionRepository,
+    private val sessionGridStateCache: SessionGridStateCache,
     private val sessionNotifier: SessionNotifier,
+    private val heartbeatTracker: HeartbeatTracker,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -40,10 +44,8 @@ class JoinSessionUseCase(
             return CocroResult.Error(errors)
         }
 
-        // MAPPING
         val sessionShareCode = SessionShareCode(joinSessionDto.shareCode)
 
-        // CHECK BUSINESS RULES (FUTURE: check if user is banned or invited)
         val session =
             sessionRepository.findByShareCode(sessionShareCode)
                 ?: run {
@@ -60,6 +62,21 @@ class JoinSessionUseCase(
             return CocroResult.Error(listOf(SessionError.InvalidStatusForAction(session.status, "join")))
         }
 
+        // TRANSPARENT RECONNECTION: user disconnected (STOMP) but is still within grace period
+        if (heartbeatTracker.isAway(session.id, user.userId)) {
+            heartbeatTracker.markActive(session.id, user.userId)
+            val activeCount = ParticipantsRule.countActiveParticipants(session.participants)
+            logger.info(
+                "User {} transparently reconnected to session {} ({} participants)",
+                user.userId(),
+                session.shareCode.value,
+                activeCount,
+            )
+            // No broadcast — reconnection is invisible to other participants
+            return CocroResult.Success(session.toSessionJoinSuccess())
+        }
+
+        // STANDARD JOIN
         if (session.participants.any { it.userId == user.userId }) {
             logger.warn("Session join rejected: user {} already participant in session {}", user.userId(), session.shareCode.value)
             return CocroResult.Error(listOf(SessionError.AlreadyParticipant(user.userId(), session.shareCode.value)))
@@ -76,6 +93,16 @@ class JoinSessionUseCase(
         val savedSession = sessionRepository.save(updatedSession)
         ++activeParticipantCount
 
+        // Flush current grid state to Mongo alongside participant update
+        sessionGridStateCache.get(session.id)?.let { gridState ->
+            sessionRepository.updateGridState(session.id, gridState)
+            sessionGridStateCache.markFlushed(session.id, gridState.revision.value)
+        }
+
+        // HEARTBEAT
+        heartbeatTracker.markActive(session.id, user.userId)
+        heartbeatTracker.registerUserSession(user.userId, session.id)
+
         // NOTIFICATION
         sessionNotifier.broadcast(
             savedSession.shareCode,
@@ -85,7 +112,6 @@ class JoinSessionUseCase(
             ),
         )
 
-        // SUCCESS
         logger.info(
             "User {} successfully joined session {} ({} participants)",
             user.userId(),

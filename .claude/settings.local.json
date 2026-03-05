@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew cocro-shared:jvmTest cocro-bff:test 2>&1 | grep -E \"tests|passed|failed|error|BUILD|FAILURE|> Task\" | head -40)",
+      "Bash(./gradlew cocro-bff:test 2>&1 | grep -A 5 \"LoginUserUseCaseTest > should return error when username format\" | head -15)",
+      "Bash(./gradlew cocro-bff:test 2>&1 | grep -E \"FAILED|NullPointer|Exception|at.*Test\" | head -30)",
+      "Bash(./gradlew cocro-bff:test 2>&1 | grep -A 10 \"LoginUserUseCaseTest > should return error when username\" | head -15)",
+      "Bash(find /Users/oscar_mallet/Documents/cocro/cocro-bff/build/reports/tests/test -name \"*.xml\" | xargs grep -l \"LoginUserUseCaseTest\" | head -1 | xargs cat | grep -A 20 \"username format\")",
+      "Bash(find /Users/oscar_mallet/Documents/cocro/cocro-bff/build -name \"*.xml\" 2>/dev/null | head -5)",
+      "Bash(./gradlew cocro-shared:jvmTest cocro-bff:test 2>&1 | grep -E \"tests|passed|failed|error|BUILD|> Task :.*[Tt]est\" | head -20)",
+      "Bash(./gradlew cocro-shared:jvmTest cocro-bff:test 2>&1 | grep -E \"tests|passed|failed|error|BUILD|> Task :.*[Tt]est|FAILED\" | head -20)",
+      "Bash(./gradlew cocro-shared:jvmTest cocro-bff:test 2>&1 | grep -E \"tests|passed|failed|BUILD|FAILED\" | head -10)",
+      "Bash(./gradlew cocro-shared:jvmTest cocro-bff:test --rerun 2>&1 | grep -E \"[0-9]+ tests|BUILD\" | head -5)",
+      "Bash(find /Users/oscar_mallet/Documents/cocro -path \"*/build/test-results/**/*.xml\" | xargs grep -h \"tests=\" | grep -oP 'tests=\"\\\\K[0-9]+' | paste -sd+ | bc && find /Users/oscar_mallet/Documents/cocro -path \"*/build/test-results/**/*.xml\" | xargs grep -h \"tests=\" | grep -oP 'failures=\"\\\\K[0-9]+' | paste -sd+ | bc)",
+      "Bash(./gradlew cocro-bff:compileKotlin 2>&1 | tail -50)"
+    ]
+  }
+}

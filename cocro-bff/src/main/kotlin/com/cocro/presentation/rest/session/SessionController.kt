@@ -5,6 +5,7 @@ import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.LeaveSessionDto
 import com.cocro.application.session.dto.StartSessionDto
 import com.cocro.application.session.usecase.CreateSessionUseCase
+import com.cocro.application.session.usecase.GetSessionStateUseCase
 import com.cocro.application.session.usecase.JoinSessionUseCase
 import com.cocro.application.session.usecase.LeaveSessionUseCase
 import com.cocro.application.session.usecase.StartSessionUseCase
@@ -12,6 +13,8 @@ import com.cocro.presentation.rest.error.toResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -24,6 +27,7 @@ class SessionController(
     private val joinSessionUseCase: JoinSessionUseCase,
     private val leaveSessionUseCase: LeaveSessionUseCase,
     private val startSessionUseCase: StartSessionUseCase,
+    private val getSessionStateUseCase: GetSessionStateUseCase,
 ) {
     @PostMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
@@ -59,5 +63,15 @@ class SessionController(
     ): ResponseEntity<*> =
         startSessionUseCase
             .execute(dto)
+            .toResponseEntity(HttpStatus.OK)
+
+    /** Resync endpoint: returns the current grid state from cache. */
+    @GetMapping("/{shareCode}/state")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
+    fun getSessionState(
+        @PathVariable shareCode: String,
+    ): ResponseEntity<*> =
+        getSessionStateUseCase
+            .execute(shareCode)
             .toResponseEntity(HttpStatus.OK)
 }
