@@ -1,0 +1,181 @@
+@startuml Cocro API — REST & WebSocket
+
+skinparam defaultFontName Courier
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 20
+
+' ============================================================
+' ACTORS / PARTICIPANTS
+' ============================================================
+actor       "Client (mobile/web)"  as C
+participant "Spring Security\n(JWT filter)"  as SEC
+participant "AuthController\n/auth"          as AUTH
+participant "GridController\n/api/grids"     as GRID
+participant "SessionController\n/api/sessions" as SC
+participant "SessionWebSocketController\n/ws (STOMP)" as WSC
+participant "StompAuthChannelInterceptor"    as INT
+participant "Use Cases"                      as UC
+participant "MongoDB"                        as DB
+participant "Redis\n(grid state cache)"      as REDIS
+
+' ============================================================
+' 1. AUTHENTICATION
+' ============================================================
+== Authentication ==
+
+C  -> AUTH : POST /auth/register\n{ username, password }
+AUTH -> DB  : save User
+AUTH --> C  : 201 { token, userId, username, roles }
+
+C  -> AUTH : POST /auth/login\n{ username, password }
+AUTH -> DB  : load + verify password
+AUTH --> C  : 200 { token, userId, username, roles }
+
+C  -> AUTH : POST /auth/guest
+AUTH -> DB  : create anonymous User\n(generated username, ANONYMOUS role)
+AUTH --> C  : 201 { token, userId, username, roles }
+
+note right of C
+  All subsequent REST calls include:
+  Authorization: Bearer <token>
+end note
+
+' ============================================================
+' 2. GRID MANAGEMENT
+' ============================================================
+== Grid Management ==
+
+C  -> SEC  : POST /api/grids\n{ gridShareCode, sizeX, sizeY, cells, clues }
+SEC -> GRID : authenticated
+GRID -> DB  : persist Grid
+GRID --> C  : 200 { gridId }
+
+C  -> SEC  : PATCH /api/grids\n{ gridShareCode, cells, clues }
+SEC -> GRID : authenticated
+GRID -> DB  : update Grid
+GRID --> C  : 200
+
+' ============================================================
+' 3. SESSION LIFECYCLE — REST
+' ============================================================
+== Session Lifecycle (REST) ==
+
+C  -> SEC  : POST /api/sessions\n{ gridId }
+SEC -> SC  : authenticated
+SC -> UC   : CreateSessionUseCase
+UC -> DB   : persist Session (status=CREATING)
+UC --> SC  : Success { shareCode }
+SC --> C   : 201 { shareCode }
+
+C  -> SEC  : POST /api/sessions/join\n{ shareCode }
+SEC -> SC  : authenticated
+SC -> UC   : JoinSessionUseCase
+UC -> DB   : add Participant (status=JOINED)
+UC --> SC  : Success { participantCount }
+SC --> C   : 200 { shareCode, participantCount }\nor 409 SessionFull / AlreadyParticipant
+
+C  -> SEC  : POST /api/sessions/start\n{ shareCode }
+SEC -> SC  : authenticated (creator only)
+SC -> UC   : StartSessionUseCase
+UC -> DB   : set Session.status = PLAYING
+UC --> SC  : Success
+SC --> C   : 200\nor 400 NotCreator / InvalidStatusForAction
+
+C  -> SEC  : POST /api/sessions/leave\n{ shareCode }
+SEC -> SC  : authenticated
+SC -> UC   : LeaveSessionUseCase
+UC -> DB   : set Participant.status = LEFT
+UC --> SC  : Success
+SC --> C   : 200
+
+note right of C
+  Grid updates are WebSocket-only.
+  See "WebSocket — Grid Update" below.
+end note
+
+C  -> SEC  : GET /api/sessions/{shareCode}/state
+SEC -> SC  : authenticated
+SC -> UC   : GetSessionStateUseCase
+UC -> REDIS: get cached SessionGridState\n(fallback → MongoDB)
+UC --> SC  : SessionGridStateDto
+SC --> C   : 200 { revision, cells[] }
+
+' ============================================================
+' 4. WEBSOCKET / STOMP
+' ============================================================
+== WebSocket / STOMP Connection ==
+
+C  -> WSC  : WS handshake  ws://<host>/ws
+C  -> INT  : STOMP CONNECT\n{ Authorization: Bearer <token>,\n  shareCode: <code> }
+INT -> INT : validate JWT\nstore CocroAuthentication\n+ shareCode in session attributes
+INT --> C  : STOMP CONNECTED
+
+note right of INT
+  StompAuthChannelInterceptor (ExecutorChannelInterceptor)
+  - preSend()     → validates JWT on CONNECT (Tomcat thread)
+  - beforeHandle()→ restores auth to SecurityContextHolder
+                    on executor thread for each SEND/SUBSCRIBE
+  - afterMessageHandled() → clears SecurityContextHolder
+end note
+
+== WebSocket — Welcome ==
+
+C  -> WSC  : SUBSCRIBE /app/session/{shareCode}/welcome
+WSC -> DB  : load Session
+WSC -> REDIS: get cached grid revision
+WSC --> C  : SessionWelcome {\n  shareCode, topicToSubscribe,\n  participantCount, status,\n  gridRevision }
+
+note right of C
+  Client then subscribes to:
+  /topic/session/{shareCode}
+  to receive all broadcast events.
+end note
+
+== WebSocket — Grid Update ==
+
+C  -> WSC  : SEND /app/session/{shareCode}/grid\n{ posX, posY, commandType, letter? }
+WSC -> UC  : UpdateSessionGridUseCase
+UC -> REDIS: CAS update (revision++)
+UC -> WSC  : broadcast GridUpdated event
+WSC --> C  : broadcast to /topic/session/{shareCode}\nGridUpdated { actorId, posX, posY,\n  commandType, letter }
+
+note right of REDIS
+  On CAS conflict:
+  StompSessionNotifier sends private
+  SyncRequired { currentRevision }
+  to the lagging client via:
+  /user/queue/session
+end note
+
+== WebSocket — Broadcast Events ==
+
+note over WSC
+  All broadcasts to /topic/session/{shareCode}:
+
+  ParticipantJoined  { userId, participantCount }
+  ParticipantLeft    { userId, participantCount, reason }
+  SessionStarted     { participantCount }
+  GridUpdated        { actorId, posX, posY, commandType, letter }
+
+  Private to user (/user/queue/session):
+  SessionWelcome     (via @SubscribeMapping)
+  SyncRequired       { currentRevision }
+end note
+
+' ============================================================
+' 5. BACKGROUND SCHEDULERS
+' ============================================================
+== Background Schedulers ==
+
+note over REDIS, DB
+  HeartbeatTimeoutScheduler (every 15s)
+    For each tracked participant:
+      if lastHeartbeat > 30s ago → LeaveSessionUseCase (reason=timeout)
+      broadcasts ParticipantLeft { reason: "timeout" }
+
+  SessionFlushScheduler (every 30s)
+    For each idle SessionGridState in Redis:
+      flush updated state to MongoDB
+end note
+
+@enduml
