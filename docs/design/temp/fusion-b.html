@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fusion B — Cahier de Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Plus+Jakarta+Sans:wght@500;600&family=Lexend:wght@400&family=Spline+Sans:wght@400&family=Patrick+Hand:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:       #F5F0E8;
+  --paper-dark:  #EDE8D0;
+  --surface:     #FFFFFF;
+  --surface-alt: #F7F4ED;
+  --forest:      #2D5A3D;
+  --forest-light:#7AB89A;
+  --ink:         #1A1A1A;
+  --ink-muted:   #6B5E4E;
+  --border:      #1A1A1A;
+  --border-soft: #C8C0A8;
+  --red:         #B83225;
+  --gold:        #C4952A;
+  --ruled:       rgba(191,207,232,0.45);
+  --margin-line: #E8A090;
+  --font-title:  'Space Grotesk', sans-serif;
+  --font-ui:     'Plus Jakarta Sans', sans-serif;
+  --font-body:   'Lexend', sans-serif;
+  --font-label:  'Spline Sans', sans-serif;
+  --font-hand:   'Patrick Hand', cursive;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  background-image:
+    repeating-linear-gradient(transparent, transparent 23px, var(--ruled) 23px, var(--ruled) 24px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: var(--font-body);
+  position: relative;
+}
+
+/* Margin line */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 72px;
+  width: 2px; height: 100%;
+  background: var(--margin-line);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page { max-width: 900px; margin: 0 auto; padding: 48px 48px 80px 108px; position: relative; z-index: 1; }
+
+/* ── PROPOSAL HEADER ───────────────────────────── */
+.proposal-tag {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+.proposal-title {
+  font-family: var(--font-title);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.proposal-desc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ink-muted);
+  max-width: 540px;
+  line-height: 1.65;
+  margin-bottom: 40px;
+}
+.sep { height: 1px; background: var(--border); margin-bottom: 40px; }
+.sep-soft { height: 1px; background: var(--border-soft); margin: 36px 0; }
+
+.section-label {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 16px;
+}
+
+/* ── NAV ───────────────────────────────────────── */
+.nav {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  box-shadow: 4px 4px 0 var(--ink);
+  margin-bottom: 32px;
+  gap: 12px;
+}
+.nav-logo {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.5px;
+  flex: 1;
+}
+
+/* Buttons — Patrick Hand pour CTAs principaux */
+.btn {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.btn-cta {
+  font-family: var(--font-hand);
+  font-size: 15px;
+  padding: 9px 20px;
+  border: 2px solid var(--border);
+  background: var(--forest);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #1a3d26;
+  transition: all 0.12s;
+  letter-spacing: 0.3px;
+}
+.btn-cta:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 #1a3d26; }
+.btn-cta-secondary {
+  font-family: var(--font-hand);
+  font-size: 15px;
+  padding: 9px 20px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: all 0.12s;
+}
+.btn-cta-secondary:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--ink); }
+.btn-cta-danger {
+  font-family: var(--font-hand);
+  font-size: 15px;
+  padding: 9px 20px;
+  border: 2px solid var(--red);
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--red);
+  transition: all 0.12s;
+}
+.btn-cta-danger:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--red); background: var(--red); color: #fff; }
+.btn-ghost { background: transparent; color: var(--ink); border: none; cursor: pointer; font-family: var(--font-ui); font-size: 13px; font-weight: 500; padding: 8px 12px; }
+.btn-ghost:hover { text-decoration: underline; }
+
+/* ── HERO ──────────────────────────────────────── */
+.hero { margin-bottom: 0; }
+.hero-eyebrow {
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+}
+.hero-title {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 52px;
+  letter-spacing: -1.5px;
+  line-height: 1.0;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.hero-sub {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink-muted);
+}
+
+/* ── PANELS ────────────────────────────────────── */
+.panels { display: grid; grid-template-columns: 1fr 1fr; margin: 28px 0; gap: 16px; }
+
+.panel {
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  padding: 32px;
+  box-shadow: 4px 4px 0 var(--ink);
+  position: relative;
+}
+.panel-forest {
+  background: var(--forest);
+  border: 2px dashed rgba(255,255,255,0.3);
+  box-shadow: 4px 4px 0 #1a3d26;
+  padding: 32px;
+}
+
+/* Small cut marks on panel corners */
+.panel::after {
+  content: '✂';
+  position: absolute;
+  top: -10px; right: -8px;
+  font-size: 12px;
+  color: var(--ink-muted);
+  opacity: 0.4;
+  transform: rotate(90deg);
+}
+
+.panel-label {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+.panel-label-inv {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 8px;
+}
+.panel-title { font-family: var(--font-title); font-weight: 700; font-size: 22px; letter-spacing: -0.3px; color: var(--ink); margin-bottom: 6px; }
+.panel-title-inv { font-family: var(--font-title); font-weight: 700; font-size: 22px; letter-spacing: -0.3px; color: #fff; margin-bottom: 6px; }
+.panel-desc { font-size: 13px; color: var(--ink-muted); margin-bottom: 18px; }
+.panel-desc-inv { font-size: 13px; color: rgba(255,255,255,0.75); margin-bottom: 18px; }
+
+.field-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field-label { font-family: var(--font-label); font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--ink-muted); }
+.field-input {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ink);
+  padding: 9px 11px;
+  border: none;
+  border-bottom: 2px solid var(--border-soft);
+  background: transparent;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.12s;
+}
+.field-input:focus { border-bottom-color: var(--forest); }
+
+/* ── CARDS (prédécoupées) ──────────────────────── */
+.cards-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 40px; }
+
+.card {
+  background: var(--paper-dark);
+  border: 2px dashed var(--border);
+  padding: 22px;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  position: relative;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 16px; right: 16px; height: 4px;
+  background: repeating-linear-gradient(90deg, transparent, transparent 3px, var(--paper-dark) 3px, var(--paper-dark) 6px);
+  border-top: 1px dashed var(--border-soft);
+}
+.card:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--ink); }
+.card-eyebrow { font-family: var(--font-label); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
+.card-title { font-family: var(--font-title); font-weight: 700; font-size: 17px; letter-spacing: -0.2px; color: var(--ink); margin-bottom: 8px; }
+.card-body { font-family: var(--font-body); font-size: 13px; color: var(--ink-muted); line-height: 1.6; margin-bottom: 14px; }
+
+.card-forest { background: var(--forest); border-color: rgba(255,255,255,0.25); box-shadow: 4px 4px 0 #1a3d26; }
+.card-forest::before { border-top-color: rgba(255,255,255,0.2); background: repeating-linear-gradient(90deg, transparent, transparent 3px, var(--forest) 3px, var(--forest) 6px); }
+.card-forest:hover { box-shadow: 6px 6px 0 #1a3d26; }
+.card-forest .card-eyebrow { color: rgba(255,255,255,0.6); }
+.card-forest .card-title { color: #fff; }
+.card-forest .card-body { color: rgba(255,255,255,0.8); }
+
+/* ── BUTTONS SHOWCASE ──────────────────────────── */
+.btn-showcase {
+  background: var(--paper-dark);
+  border: 2px dashed var(--border);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 28px;
+  margin-bottom: 40px;
+}
+.btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+/* ── GAME BOARD ────────────────────────────────── */
+.game-preview { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: start; }
+.grid-wrap {
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+  display: inline-block;
+  background: var(--surface);
+}
+.grid-inner { display: grid; grid-template-columns: repeat(5,44px); grid-template-rows: repeat(5,44px); }
+.cell {
+  width: 44px; height: 44px;
+  border: 1px solid #aaa;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  font-family: var(--font-body);
+  font-size: 16px;
+  background: var(--surface);
+}
+.cell-black { background: var(--ink); }
+.cell-sel { border: 2px solid var(--forest); background: rgba(122,184,154,0.15); }
+.cell-num { position: absolute; top: 2px; left: 3px; font-family: var(--font-label); font-size: 8px; color: var(--ink-muted); }
+.cell-dir { position: absolute; top: 2px; right: 3px; font-family: var(--font-label); font-size: 9px; font-weight: 700; color: var(--forest); }
+.cell-dot { position: absolute; bottom: 2px; right: 2px; width: 9px; height: 9px; border-radius: 50%; }
+
+.keyboard {
+  background: var(--surface-alt);
+  border: 2px dashed var(--border-soft);
+  box-shadow: 3px 3px 0 var(--border-soft);
+  padding: 12px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 12px;
+}
+.key-row { display: flex; gap: 4px; justify-content: center; }
+.key {
+  font-family: var(--font-body);
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  height: 38px;
+  min-width: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--border-soft);
+  color: var(--ink);
+  padding: 0 4px;
+  transition: all 0.1s;
+}
+.key:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--border-soft); }
+.key:active { transform: none; box-shadow: none; background: var(--ink); color: #fff; }
+.key-dir { background: var(--forest); color: #fff; border-color: var(--forest); box-shadow: 2px 2px 0 #1a3d26; min-width: 44px; }
+
+/* ── PLAYER LIST ───────────────────────────────── */
+.player-card {
+  background: var(--paper-dark);
+  border: 2px dashed var(--border);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 20px;
+  max-width: 320px;
+}
+.player-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--border-soft); }
+.player-row:last-child { border-bottom: none; }
+.player-dot { width: 10px; height: 10px; border-radius: 50%; }
+.player-name { font-family: var(--font-hand); font-size: 16px; color: var(--ink); flex: 1; }
+.player-status { font-family: var(--font-label); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Proposal header -->
+  <div class="proposal-tag">Design — Fusion B</div>
+  <h1 class="proposal-title">Cahier de Notes</h1>
+  <p class="proposal-desc">Lignes Séyes bien visibles (45% d'opacité) et trait de marge corail marqué. Cards à bordure tiretée avec effet "prédécoupé" — encoche en haut et ciseaux en coin. Boutons principaux en Patrick Hand avec ombre offset. Inputs style soulignement cahier. Palette et structure éditoriale conservées.</p>
+  <div class="sep"></div>
+
+  <!-- Nav -->
+  <div class="section-label">Navigation</div>
+  <div class="nav">
+    <span class="nav-logo">CoCro</span>
+    <button class="btn-ghost">Connexion</button>
+    <button class="btn-cta" style="font-size:14px;padding:8px 16px;">Inscription</button>
+  </div>
+
+  <!-- Hero + panels -->
+  <div class="section-label">Landing — Hero</div>
+  <div class="hero">
+    <div class="hero-eyebrow">L'Atelier du Cruciverbiste</div>
+    <h2 class="hero-title">Mots fléchés<br>collaboratifs</h2>
+    <p class="hero-sub">Jouez ensemble, en temps réel.</p>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-label">Rejoindre</div>
+      <div class="panel-title">Rejoindre une partie</div>
+      <p class="panel-desc">Vous avez un code de session ?</p>
+      <div class="field-group">
+        <label class="field-label">Code de session</label>
+        <input class="field-input" type="text" placeholder="ex. ABC123">
+      </div>
+      <button class="btn-cta" style="width:100%;">Rejoindre →</button>
+    </div>
+    <div class="panel-forest">
+      <div class="panel-label-inv">Créer</div>
+      <div class="panel-title-inv">Votre Atelier</div>
+      <p class="panel-desc-inv">Concevez, invitez, jouez ensemble.</p>
+      <button class="btn-cta" style="width:100%;display:block;background:#fff;color:var(--forest);border-color:rgba(255,255,255,0.4);box-shadow:3px 3px 0 rgba(0,0,0,0.2);margin-bottom:10px;">Créer un compte →</button>
+      <button class="btn-cta" style="width:100%;display:block;background:transparent;color:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.35);box-shadow:none;">Déjà un compte ?</button>
+    </div>
+  </div>
+
+  <div class="sep-soft"></div>
+
+  <!-- Cards prédécoupées -->
+  <div class="section-label">Cards — effet prédécoupé</div>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-eyebrow">Session</div>
+      <div class="card-title">Nouvelle partie</div>
+      <p class="card-body">Choisissez une grille, invitez jusqu'à 4 joueurs.</p>
+      <button class="btn-cta" style="font-size:14px;padding:7px 14px;">Lancer →</button>
+    </div>
+    <div class="card card-forest">
+      <div class="card-eyebrow">En cours</div>
+      <div class="card-title" style="color:#fff;">Weekend #3</div>
+      <p class="card-body">3 joueurs · Rév. 47 · HARD</p>
+      <button class="btn-cta" style="font-size:14px;padding:7px 14px;background:#fff;color:var(--forest);border-color:rgba(255,255,255,0.5);box-shadow:3px 3px 0 rgba(0,0,0,0.2);">Rejoindre</button>
+    </div>
+    <div class="card">
+      <div class="card-eyebrow">Édition</div>
+      <div class="card-title">Ma grille</div>
+      <p class="card-body">12×12 · 8 définitions · Brouillon</p>
+      <button class="btn-cta-secondary" style="font-size:14px;padding:7px 14px;">Éditer →</button>
+    </div>
+  </div>
+
+  <div class="sep-soft"></div>
+
+  <!-- Buttons -->
+  <div class="section-label">Boutons — Patrick Hand pour les CTAs</div>
+  <div class="btn-showcase">
+    <p style="font-family:var(--font-hand);font-size:13px;color:var(--ink-muted);margin-bottom:16px;">Les boutons d'action utilisent Patrick Hand — plus de caractère, toujours sérieux.</p>
+    <div class="btn-row" style="margin-bottom:16px;">
+      <button class="btn-cta">Rejoindre →</button>
+      <button class="btn-cta-secondary">Annuler</button>
+      <button class="btn-ghost">En savoir plus</button>
+      <button class="btn-cta-danger">Quitter</button>
+    </div>
+    <div style="height:1px;background:var(--border-soft);margin-bottom:16px;"></div>
+    <div class="btn-row">
+      <button class="btn-cta" style="transform:translate(-2px,-2px);box-shadow:5px 5px 0 #1a3d26;">Rejoindre →</button>
+      <button class="btn-cta-secondary" style="transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink);">Annuler</button>
+      <span style="font-family:var(--font-label);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);">← hover state</span>
+    </div>
+  </div>
+
+  <div class="sep-soft"></div>
+
+  <!-- Game board + player list -->
+  <div class="section-label">Plateau de jeu + participants</div>
+  <div style="display:grid;grid-template-columns:auto auto 1fr;gap:32px;align-items:start;">
+    <div>
+      <div class="grid-wrap">
+        <div class="grid-inner">
+          <div class="cell"><span class="cell-num">1</span>C</div>
+          <div class="cell">R</div><div class="cell">O</div><div class="cell">I</div><div class="cell">X</div>
+          <div class="cell">A</div>
+          <div class="cell cell-black"></div>
+          <div class="cell cell-sel"><span class="cell-dir">›</span>U</div>
+          <div class="cell"><div class="cell-dot" style="background:#2C4A8A;"></div></div>
+          <div class="cell"></div>
+          <div class="cell">R</div>
+          <div class="cell"><span class="cell-num">3</span>M</div>
+          <div class="cell">O</div><div class="cell">T</div>
+          <div class="cell cell-black"></div>
+          <div class="cell">R</div>
+          <div class="cell cell-black"></div>
+          <div class="cell"></div>
+          <div class="cell"><div class="cell-dot" style="background:#B83225;"></div></div>
+          <div class="cell">E</div>
+          <div class="cell">E</div><div class="cell">S</div><div class="cell">T</div>
+          <div class="cell cell-black"></div>
+          <div class="cell"></div>
+        </div>
+      </div>
+      <div class="keyboard">
+        <div class="key-row">
+          <div class="key">A</div><div class="key">Z</div><div class="key">E</div><div class="key">R</div>
+          <div class="key">T</div><div class="key">Y</div><div class="key">U</div><div class="key">I</div>
+          <div class="key">O</div><div class="key">P</div>
+        </div>
+        <div class="key-row">
+          <div class="key">Q</div><div class="key">S</div><div class="key">D</div><div class="key">F</div>
+          <div class="key">G</div><div class="key">H</div><div class="key">J</div><div class="key">K</div>
+          <div class="key">L</div><div class="key">M</div>
+        </div>
+        <div class="key-row">
+          <div class="key key-dir">→</div>
+          <div class="key">W</div><div class="key">X</div><div class="key">C</div>
+          <div class="key">V</div><div class="key">B</div><div class="key">N</div>
+          <div class="key" style="min-width:44px;">⌫</div>
+        </div>
+      </div>
+    </div>
+    <div class="player-card">
+      <div style="font-family:var(--font-label);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;">Participants (2/4)</div>
+      <div class="player-row">
+        <div class="player-dot" style="background:#2D5A3D;"></div>
+        <span class="player-name">Alice</span>
+        <span class="player-status" style="color:#2D5A3D;">● online</span>
+      </div>
+      <div class="player-row">
+        <div class="player-dot" style="background:#2C4A8A;"></div>
+        <span class="player-name">Bob</span>
+        <span class="player-status" style="color:#2C4A8A;">● online</span>
+      </div>
+      <div class="player-row" style="opacity:0.4;">
+        <div class="player-dot" style="background:#ccc;"></div>
+        <span class="player-name" style="color:var(--ink-muted);">...</span>
+        <span class="player-status" style="color:var(--ink-muted);">○ wait</span>
+      </div>
+      <button class="btn-cta" style="width:100%;margin-top:16px;font-size:14px;">Démarrer !</button>
+    </div>
+    <div>
+      <div style="font-family:var(--font-label);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;">Spécificités visuelles</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:28px;height:14px;border:2px dashed var(--ink);box-shadow:3px 3px 0 var(--ink);"></div>
+          <span style="font-family:var(--font-body);font-size:13px;">Bordures tiretées sur cards et panels</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-family:var(--font-hand);font-size:16px;color:var(--forest);">Rejoindre →</span>
+          <span style="font-family:var(--font-body);font-size:13px;">Patrick Hand sur les CTAs</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:28px;height:2px;border-bottom:2px solid var(--forest);"></div>
+          <span style="font-family:var(--font-body);font-size:13px;">Inputs soulignés (style cahier)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:4px;height:24px;background:var(--margin-line);"></div>
+          <span style="font-family:var(--font-body);font-size:13px;">Marge corail visible et marquée</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
