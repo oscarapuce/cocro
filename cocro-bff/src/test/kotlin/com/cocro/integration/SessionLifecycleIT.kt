@@ -11,9 +11,8 @@ import com.cocro.application.session.dto.UpdateSessionGridDto
 import com.cocro.infrastructure.security.jwt.JwtTokenIssuer
 import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.valueobject.UserId
-import com.redis.testcontainers.RedisServer
+import com.redis.testcontainers.RedisContainer
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -38,7 +37,6 @@ import org.testcontainers.junit.jupiter.Testcontainers
  *
  * Remove @Disabled once the test environment is validated (CI Docker available).
  */
-@Disabled("Integration tests — require Docker")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers
 class SessionLifecycleIT {
@@ -49,12 +47,12 @@ class SessionLifecycleIT {
         val mongo = MongoDBContainer("mongo:7")
 
         @Container
-        val redis = RedisServer()
+        val redis = RedisContainer("redis:7-alpine")
 
         @JvmStatic
         @DynamicPropertySource
         fun redisProperties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.data.redis.host", redis::getHost)
+            registry.add("spring.data.redis.host") { redis.host }
             registry.add("spring.data.redis.port") { redis.getMappedPort(6379) }
             registry.add("spring.data.redis.password") { "" }
         }
@@ -92,7 +90,7 @@ class SessionLifecycleIT {
 
         // --- CREATE ---
         val createResp = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
-        assertThat(createResp.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(createResp.statusCode).isEqualTo(HttpStatus.CREATED)
         val shareCode = createResp.body!!.shareCode
 
         // --- JOIN ---
@@ -104,8 +102,7 @@ class SessionLifecycleIT {
         val startResp = post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
         assertThat(startResp.statusCode).isEqualTo(HttpStatus.OK)
 
-        // --- UPDATE GRID (REST fallback, primary path is WebSocket) ---
-        // TODO: switch to STOMP once WebSocket integration is wired (see SessionWebSocketIT below)
+        // --- UPDATE GRID (REST fallback) — STOMP path covered in SessionWebSocketIT ---
         val updateResp = post(
             "/api/sessions/grid",
             UpdateSessionGridDto(shareCode = shareCode, posX = 0, posY = 0, commandType = "PLACE_LETTER", letter = 'A'),
@@ -133,7 +130,7 @@ class SessionLifecycleIT {
         }
 
         val overflowResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), tokenFor(), Any::class.java)
-        assertThat(overflowResp.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(overflowResp.statusCode).isEqualTo(HttpStatus.CONFLICT)
     }
 
     @Test
@@ -165,80 +162,7 @@ class SessionLifecycleIT {
         // Left participants cannot rejoin (status LEFT — not re-joinable under current rules)
         // TODO: update this test if re-join is allowed in the future
         val rejoin = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
-        assertThat(rejoin.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(rejoin.statusCode).isEqualTo(HttpStatus.CONFLICT)
     }
 }
 
-// =============================================================================
-// WebSocket integration — sketch
-// =============================================================================
-//
-// To test STOMP in integration:
-//
-//  1. Use WebSocketStompClient + StandardWebSocketClient from Spring
-//  2. Connect with JWT in the "Authorization" header (passed as STOMP CONNECT header)
-//  3. Subscribe to /user/queue/session → receive SessionWelcome
-//  4. Subscribe to /topic/session/{shareCode} → receive broadcasts
-//  5. Send to /app/session/{shareCode}/grid → triggers grid updates
-//
-// Example skeleton:
-//
-// @Disabled
-// @SpringBootTest(webEnvironment = RANDOM_PORT)
-// @Testcontainers
-// class SessionWebSocketIT {
-//     // ... same container setup as SessionLifecycleIT
-//
-//     @LocalServerPort var port: Int = 0
-//
-//     @Test
-//     fun `grid update via STOMP broadcasts GridUpdated to all subscribers`() {
-//         val token = tokenFor()
-//         val client = WebSocketStompClient(StandardWebSocketClient())
-//         client.messageConverter = MappingJackson2MessageConverter()
-//
-//         val stompSession = client
-//             .connectAsync("ws://localhost:$port/ws", StompSessionHandlerAdapter()) { headers ->
-//                 headers.add("Authorization", "Bearer $token")
-//                 headers.add("shareCode", shareCode)
-//             }
-//             .get(5, TimeUnit.SECONDS)
-//
-//         val received = LinkedBlockingQueue<SessionEvent>()
-//         stompSession.subscribe("/topic/session/$shareCode") { payload ->
-//             received.offer(objectMapper.readValue(payload, SessionEvent::class.java))
-//         }
-//
-//         stompSession.send("/app/session/$shareCode/grid", GridUpdatePayload(0, 0, "PLACE_LETTER", 'A'))
-//
-//         val event = received.poll(3, TimeUnit.SECONDS)
-//         assertThat(event).isInstanceOf(SessionEvent.GridUpdated::class.java)
-//         assertThat((event as SessionEvent.GridUpdated).letter).isEqualTo('A')
-//     }
-// }
-//
-// =============================================================================
-// Concurrency / CAS — sketch
-// =============================================================================
-//
-// To test optimistic locking under concurrent updates:
-//
-// @Test
-// fun `concurrent grid updates — only one wins per revision`() {
-//     // ... setup session in PLAYING state
-//
-//     val latch = CountDownLatch(2)
-//     val results = ConcurrentLinkedQueue<Int>()
-//
-//     repeat(2) { i ->
-//         thread {
-//             latch.countDown()
-//             latch.await()
-//             val resp = post("/api/sessions/grid", UpdateSessionGridDto(..., letter = 'A' + i), token, Any::class.java)
-//             results += resp.statusCode.value()
-//         }
-//     }
-//
-//     // Exactly one 200 and one 409 (or both 200 if Redis CAS serialises correctly)
-//     // This test validates that no silent data loss occurs
-// }

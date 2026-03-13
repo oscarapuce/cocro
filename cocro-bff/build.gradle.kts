@@ -34,8 +34,15 @@ dependencies {
     // Tests
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+
+    // Integration tests
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:mongodb")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("com.redis:testcontainers-redis:2.2.2")
 }
 
 tasks.test {
     useJUnitPlatform()
+    environment("TESTCONTAINERS_RYUK_DISABLED", "true")
 }

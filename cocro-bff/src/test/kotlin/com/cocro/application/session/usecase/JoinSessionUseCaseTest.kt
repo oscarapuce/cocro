@@ -2,6 +2,8 @@ package com.cocro.application.session.usecase
 
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.session.dto.JoinSessionDto
+import com.cocro.application.session.port.HeartbeatTracker
+import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.kernel.auth.enum.Role
@@ -26,9 +28,11 @@ class JoinSessionUseCaseTest {
 
     private val currentUserProvider: CurrentUserProvider = mock()
     private val sessionRepository: SessionRepository = mock()
+    private val sessionGridStateCache: SessionGridStateCache = mock()
     private val sessionNotifier: SessionNotifier = mock()
+    private val heartbeatTracker: HeartbeatTracker = mock()
 
-    private val useCase = JoinSessionUseCase(currentUserProvider, sessionRepository, sessionNotifier)
+    private val useCase = JoinSessionUseCase(currentUserProvider, sessionRepository, sessionGridStateCache, sessionNotifier, heartbeatTracker)
 
     private val creatorId = UserId.new()
     private val joiningUserId = UserId.new()

@@ -2,6 +2,8 @@ package com.cocro.application.session.usecase
 
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.session.dto.LeaveSessionDto
+import com.cocro.application.session.port.HeartbeatTracker
+import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.kernel.auth.enum.Role
@@ -26,9 +28,11 @@ class LeaveSessionUseCaseTest {
 
     private val currentUserProvider: CurrentUserProvider = mock()
     private val sessionRepository: SessionRepository = mock()
+    private val sessionGridStateCache: SessionGridStateCache = mock()
     private val sessionNotifier: SessionNotifier = mock()
+    private val heartbeatTracker: HeartbeatTracker = mock()
 
-    private val useCase = LeaveSessionUseCase(currentUserProvider, sessionRepository, sessionNotifier)
+    private val useCase = LeaveSessionUseCase(currentUserProvider, sessionRepository, sessionGridStateCache, sessionNotifier, heartbeatTracker)
 
     private val creatorId = UserId.new()
     private val participantId = UserId.new()
@@ -57,7 +61,7 @@ class LeaveSessionUseCaseTest {
         assertThat(success.sessionId).isEqualTo(session.id.toString())
         verify(sessionNotifier).broadcast(
             session.shareCode,
-            SessionEvent.ParticipantLeft(userId = participantId.toString(), participantCount = 1),
+            SessionEvent.ParticipantLeft(userId = participantId.toString(), participantCount = 1, reason = "explicit"),
         )
     }
 
