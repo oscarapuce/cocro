@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoCro — Catalogue de Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Patrick+Hand:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Lexend:wght@300;400;500&family=Spline+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ─── Design Tokens — Fusion B (Cahier de Notes) ─────────── */
+    :root {
+      --paper:        #F5F0E8;
+      --paper-dark:   #EDE8D0;
+      --surface:      #FFFFFF;
+      --surface-alt:  #F7F4ED;
+      --forest:       #2D5A3D;
+      --forest-dark:  #1E3E2A;
+      --forest-light: #7AB89A;
+      --ink:          #1A1A1A;
+      --ink-muted:    #6B5E4E;
+      --border:       #1A1A1A;
+      --border-soft:  #C8C0A8;
+      --margin-line:  #E8A090;
+      --red:          #B83225;
+      --gold:         #C4952A;
+      --ink-blue:     #2C4A8A;
+
+      --font-title: 'Space Grotesk', sans-serif;
+      --font-hand:  'Patrick Hand', cursive;
+      --font-ui:    'Plus Jakarta Sans', sans-serif;
+      --font-body:  'Lexend', sans-serif;
+      --font-label: 'Spline Sans', sans-serif;
+
+      --shadow-card:   4px 4px 0 var(--ink);
+      --shadow-btn-p:  3px 3px 0 var(--forest-dark);
+      --shadow-btn-s:  3px 3px 0 var(--ink);
+      --shadow-btn-d:  3px 3px 0 var(--red);
+    }
+
+    /* ─── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--paper);
+      background-image:
+        repeating-linear-gradient(
+          transparent,
+          transparent 23px,
+          rgba(191, 207, 232, 0.45) 23px,
+          rgba(191, 207, 232, 0.45) 24px
+        ),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      color: var(--ink);
+      font-family: var(--font-body);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 72px;
+      width: 2px;
+      height: 100%;
+      background: var(--margin-line);
+      opacity: 0.7;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── App Layout ────────────────────────────────────────── */
+    .app {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ─── Sidebar ───────────────────────────────────────────── */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-brand {
+      padding: 28px 24px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-brand-name {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      color: var(--ink);
+    }
+
+    .sidebar-brand-sub {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      list-style: none;
+      padding: 20px 0;
+      flex: 1;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 24px;
+      text-decoration: none;
+      color: var(--ink-muted);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      border-left: 2px solid transparent;
+      transition: color 0.12s, background 0.12s, border-color 0.12s;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      color: var(--ink);
+      border-left-color: var(--forest);
+      background: var(--paper);
+    }
+
+    .nav-num {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: var(--border-soft);
+      min-width: 18px;
+    }
+
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .sidebar-footer-text {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      line-height: 1.8;
+    }
+
+    /* ─── Main ──────────────────────────────────────────────── */
+    .main { overflow-x: hidden; }
+
+    /* ─── Page Header ───────────────────────────────────────── */
+    .page-header {
+      padding: 64px 72px 56px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::after {
+      content: 'DS';
+      position: absolute;
+      right: 48px;
+      bottom: -20px;
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 200px;
+      color: var(--paper);
+      letter-spacing: -8px;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .header-eyebrow {
+      font-family: var(--font-label);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 16px;
+    }
+
+    .header-title {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 56px;
+      letter-spacing: -2px;
+      line-height: 1.0;
+      color: var(--ink);
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-title em {
+      font-style: italic;
+      color: var(--forest);
+    }
+
+    .header-meta {
+      display: flex;
+      gap: 0;
+      margin-top: 36px;
+      border-top: 1px solid var(--border-soft);
+      padding-top: 24px;
+    }
+
+    .header-meta-item {
+      flex: 1;
+      padding-right: 24px;
+      border-right: 1px solid var(--border-soft);
+      margin-right: 24px;
+    }
+
+    .header-meta-item:last-child {
+      border-right: none;
+      margin-right: 0;
+      padding-right: 0;
+    }
+
+    .meta-label {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 4px;
+    }
+
+    .meta-value {
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    /* ─── Sections ──────────────────────────────────────────── */
+    .section {
+      padding: 64px 72px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .section:last-child { border-bottom: none; }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+
+    .section-num {
+      font-family: var(--font-label);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--border-soft);
+    }
+
+    .section-title {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 30px;
+      letter-spacing: -0.5px;
+      color: var(--ink);
+    }
+
+    .section-desc {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--ink-muted);
+      margin-left: auto;
+      max-width: 260px;
+      line-height: 1.65;
+      text-align: right;
+    }
+
+    .sub-label {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 14px;
+    }
+
+    /* ─── 1. Palette ────────────────────────────────────────── */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      border: 1px solid var(--border);
+    }
+
+    .swatch {
+      border-right: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      overflow: hidden;
+    }
+
+    .swatch-color { height: 72px; }
+
+    .swatch-info {
+      padding: 10px 12px;
+      background: var(--surface);
+    }
+
+    .swatch-token {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .swatch-hex {
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-top: 2px;
+    }
+
+    /* ─── 2. Typography ─────────────────────────────────────── */
+    .type-specimen {
+      padding-bottom: 48px;
+      margin-bottom: 48px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .type-specimen:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .type-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .type-role-tag {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .type-detail {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--border-soft);
+    }
+
+    .type-divider {
+      width: 1px;
+      height: 12px;
+      background: var(--border-soft);
+    }
+
+    .type-scale { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+    .type-scale-row { display: flex; align-items: baseline; gap: 16px; }
+
+    .type-size-tag {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--border-soft);
+      min-width: 36px;
+    }
+
+    /* ─── 3. Buttons ────────────────────────────────────────── */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border);
+    }
+
+    .btn-cell {
+      padding: 28px 24px;
+      border-right: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .btn-cell:nth-child(2n) { border-right: none; }
+    .btn-cell:nth-last-child(-n+2) { border-bottom: none; }
+
+    .btn-cell-label {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 18px;
+    }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    .btn {
+      font-family: var(--font-hand);
+      font-size: 15px;
+      font-weight: 400;
+      padding: 9px 20px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s, border-color 0.1s, transform 0.1s, box-shadow 0.1s;
+      letter-spacing: 0.2px;
+      /* no border-radius */
+    }
+
+    .btn-primary {
+      background: var(--forest); color: #fff; border-color: var(--forest);
+      box-shadow: var(--shadow-btn-p);
+    }
+    .btn-primary:hover, .btn-primary.h {
+      transform: translate(-2px,-2px);
+      box-shadow: 5px 5px 0 var(--forest-dark);
+    }
+
+    .btn-secondary {
+      background: #fff; color: var(--ink); border-color: var(--border);
+      box-shadow: var(--shadow-btn-s);
+    }
+    .btn-secondary:hover, .btn-secondary.h {
+      transform: translate(-2px,-2px);
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .btn-ghost {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      background: transparent; color: var(--ink); border-color: transparent;
+      box-shadow: none;
+    }
+    .btn-ghost:hover, .btn-ghost.h { text-decoration: underline; }
+
+    .btn-danger {
+      background: transparent; color: var(--red); border-color: var(--red);
+      box-shadow: var(--shadow-btn-d);
+    }
+    .btn-danger:hover, .btn-danger.h {
+      transform: translate(-2px,-2px);
+      box-shadow: 5px 5px 0 var(--red);
+      background: var(--red); color: #fff;
+    }
+
+    /* ─── 4. Form Fields ────────────────────────────────────── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--border);
+    }
+
+    .field-cell {
+      padding: 28px 24px;
+      border-right: 1px solid var(--border-soft);
+    }
+
+    .field-cell:last-child { border-right: none; }
+
+    .field-state-tag {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 20px;
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 20px; }
+
+    .field-label {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .field-label.err { color: var(--red); }
+
+    .field-input {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--ink);
+      padding: 9px 4px;
+      /* Style underline seulement (cahier Séyès) */
+      border: none;
+      border-bottom: 2px solid var(--border-soft);
+      background: transparent;
+      outline: none;
+      width: 100%;
+      transition: border-bottom-color 0.12s;
+    }
+
+    .field-input::placeholder { color: var(--ink-muted); font-style: italic; }
+    .field-input.focus { border-bottom-color: var(--forest); }
+    .field-input.err { border-bottom-color: var(--red); }
+
+    .field-hint {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: var(--red);
+    }
+
+    /* Code input variant */
+    .code-input-display {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-top: 4px;
+    }
+
+    .code-input-char {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-title);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+      border-right: 1px solid var(--border-soft);
+    }
+
+    .code-input-char:last-child { border-right: none; }
+    .code-input-char.active { border-bottom: 2px solid var(--forest); }
+
+    /* ─── 5. Separators ─────────────────────────────────────── */
+    .sep-list { display: flex; flex-direction: column; gap: 36px; }
+
+    .sep-demo { }
+
+    .sep { height: 1px; background: var(--border); }
+    .sep-soft { height: 1px; background: var(--border-soft); }
+
+    /* ─── 6. Keyboard ───────────────────────────────────────── */
+    .keyboard {
+      background: var(--surface-alt);
+      padding: 12px;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 5px;
+      border: 2px dashed var(--border-soft);
+      box-shadow: 3px 3px 0 var(--border-soft);
+    }
+
+    .key-row { display: flex; gap: 4px; justify-content: center; }
+
+    .key {
+      font-family: var(--font-body);
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      height: 38px;
+      min-width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.1s;
+      color: var(--ink);
+      user-select: none;
+      padding: 0 4px;
+      box-shadow: 2px 2px 0 var(--border-soft);
+      position: relative;
+    }
+
+    .key:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--border-soft); }
+    .key:active { transform: none; box-shadow: none; background: var(--ink); color: #fff; }
+
+    .key-dir {
+      background: var(--forest);
+      color: #fff;
+      border-color: var(--forest);
+      min-width: 44px;
+      box-shadow: 2px 2px 0 #1a3d26;
+    }
+
+    .key-dir:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 #1a3d26; }
+
+    .key-del { min-width: 50px; }
+
+    /* ─── 7. Grid ───────────────────────────────────────────── */
+    .grid-showcase { display: flex; gap: 56px; align-items: flex-start; flex-wrap: wrap; }
+
+    .crossword-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(5, 44px);
+      grid-template-rows: repeat(5, 44px);
+      border: 1px solid var(--border);
+    }
+
+    .cell {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-family: var(--font-body);
+      font-size: 16px;
+      color: var(--ink);
+      background: var(--surface);
+    }
+
+    .cell-black { background: var(--ink); }
+
+    .cell-selected {
+      border: 2px solid var(--forest);
+      background: rgba(122, 184, 154, 0.15);
+    }
+
+    .cell-num {
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      font-family: var(--font-label);
+      font-size: 8px;
+      color: var(--ink-muted);
+      line-height: 1;
+    }
+
+    .cell-dir {
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      font-family: var(--font-label);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--forest);
+    }
+
+    .cell-cursor {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .grid-legend { display: flex; flex-direction: column; gap: 14px; }
+
+    .legend-row { display: flex; align-items: center; gap: 14px; }
+
+    .legend-cell-sample {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      position: relative;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-body);
+      font-size: 14px;
+    }
+
+    .legend-text { }
+
+    .legend-main {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .legend-sub {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+
+    /* ─── 8. Participant Cursors ────────────────────────────── */
+    .cursor-row {
+      display: flex;
+      border: 1px solid var(--border);
+    }
+
+    .cursor-slot {
+      flex: 1;
+      padding: 28px 20px;
+      border-right: 1px solid var(--border-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .cursor-slot:last-child { border-right: none; }
+
+    .cursor-dot { width: 28px; height: 28px; border-radius: 50%; }
+
+    .cursor-name {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      text-align: center;
+    }
+
+    .cursor-hex {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--ink-muted);
+    }
+
+    .cursor-cell-preview {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      position: relative;
+      font-family: var(--font-body);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Participant list component */
+    .participant-list {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      max-width: 360px;
+      margin-top: 40px;
+    }
+
+    .participant-item {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .participant-item:last-child { border-bottom: none; }
+
+    .participant-left { display: flex; align-items: center; gap: 10px; }
+
+    .participant-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .participant-name { font-family: var(--font-ui); font-size: 14px; font-weight: 500; color: var(--ink); }
+
+    .participant-badge {
+      font-family: var(--font-label);
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .participant-status {
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ─── 9. Page Previews ──────────────────────────────────── */
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      border: 1px solid var(--border);
+    }
+
+    .page-preview {
+      border-right: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      overflow: hidden;
+    }
+
+    .page-preview:nth-child(2n) { border-right: none; }
+    .page-preview:nth-last-child(-n+2) { border-bottom: none; }
+
+    .preview-label {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-soft);
+      font-family: var(--font-label);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      background: var(--surface);
+    }
+
+    .preview-frame {
+      height: 380px;
+      overflow: hidden;
+      position: relative;
+      background: var(--paper);
+    }
+
+    .preview-scale {
+      transform: scale(0.44);
+      transform-origin: top left;
+      width: 227%;
+      height: 227%;
+      pointer-events: none;
+    }
+
+    /* ─── Mini page components ──────────────────────────────── */
+    .m-nav {
+      display: flex;
+      align-items: center;
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      gap: 12px;
+    }
+
+    .m-logo {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      flex: 1;
+      color: var(--ink);
+    }
+
+    .m-btn {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .m-btn-primary { background: var(--forest); color: #fff; border-color: var(--forest); }
+    .m-btn-secondary { background: #fff; color: var(--ink); border-color: var(--border); }
+    .m-btn-ghost { background: transparent; color: var(--ink); }
+    .m-btn-danger { background: transparent; color: var(--red); border-color: var(--red); }
+    .m-btn-forest-inv { background: #fff; color: var(--forest); border-color: #fff; }
+    .m-btn-forest-ghost { background: transparent; color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.4); }
+
+    .m-sep { height: 1px; background: var(--border); }
+    .m-sep-soft { height: 1px; background: var(--border-soft); }
+
+    /* LANDING */
+    .m-landing { background: var(--paper); min-height: 900px; }
+    .m-hero { padding: 56px 40px 40px; }
+    .m-hero-eyebrow { font-family: var(--font-label); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 12px; }
+    .m-hero-title { font-family: var(--font-title); font-weight: 700; font-size: 56px; letter-spacing: -2px; line-height: 1.0; color: var(--ink); margin-bottom: 10px; }
+    .m-hero-sub { font-family: var(--font-body); font-size: 16px; color: var(--ink-muted); }
+    .m-panels { display: grid; grid-template-columns: 1fr 1fr; }
+    .m-panel-white { background: var(--paper-dark); padding: 40px; border-right: 1px solid var(--border); border: 2px dashed var(--border); box-shadow: 4px 4px 0 var(--ink); }
+    .m-panel-forest { background: var(--forest); padding: 40px; color: white; }
+    .m-panel-label { font-family: var(--font-label); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
+    .m-panel-label-inv { font-family: var(--font-label); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+    .m-panel-title { font-family: var(--font-title); font-weight: 700; font-size: 26px; letter-spacing: -0.5px; color: var(--ink); margin-bottom: 6px; }
+    .m-panel-title-inv { font-family: var(--font-title); font-weight: 700; font-size: 26px; letter-spacing: -0.5px; color: #fff; margin-bottom: 6px; }
+    .m-panel-desc { font-size: 13px; color: var(--ink-muted); margin-bottom: 18px; }
+    .m-panel-desc-inv { font-size: 13px; color: rgba(255,255,255,0.75); margin-bottom: 18px; }
+    .m-code-input { border: 1px solid var(--border-soft); padding: 10px 12px; font-family: var(--font-title); font-size: 22px; letter-spacing: 8px; color: var(--ink); background: var(--paper); margin-bottom: 14px; width: 100%; }
+    .m-full-btn { width: 100%; display: block; text-align: center; margin-bottom: 10px; }
+
+    /* HOME */
+    .m-home { background: var(--paper); min-height: 900px; }
+    .m-home-hero { padding: 48px 40px 36px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .m-greeting { font-family: var(--font-title); font-weight: 700; font-size: 46px; letter-spacing: -1px; line-height: 1.05; color: var(--ink); }
+    .m-greeting-sub { font-family: var(--font-body); font-size: 14px; color: var(--ink-muted); margin-top: 6px; }
+    .m-home-panel { padding: 32px 40px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .m-home-panel-label { font-family: var(--font-label); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 6px; }
+    .m-home-panel-title { font-family: var(--font-title); font-weight: 700; font-size: 22px; color: var(--ink); margin-bottom: 6px; }
+    .m-home-panel-desc { font-size: 13px; color: var(--ink-muted); margin-bottom: 14px; }
+    .m-join-row { display: flex; gap: 10px; }
+    .m-join-input { flex: 1; border: none; border-bottom: 2px solid var(--border-soft); padding: 9px 4px; font-family: var(--font-body); font-size: 14px; background: transparent; color: var(--ink); outline: none; }
+
+    /* LOBBY */
+    .m-lobby { background: var(--paper); min-height: 900px; }
+    .m-lobby-header { background: var(--surface); padding: 40px; border-bottom: 1px solid var(--border); }
+    .m-lobby-eyebrow { font-family: var(--font-label); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
+    .m-lobby-title { font-family: var(--font-title); font-weight: 700; font-size: 36px; letter-spacing: -1px; color: var(--ink); }
+    .m-code-display { display: flex; gap: 6px; justify-content: center; padding: 18px; border: 1px solid var(--border-soft); background: var(--surface); margin-top: 16px; }
+    .m-code-ch { font-family: var(--font-title); font-size: 38px; font-weight: 700; color: var(--ink); letter-spacing: -1px; }
+    .m-lobby-body { padding: 32px 40px; }
+    .m-participant-block { border: 1px solid var(--border); background: var(--surface); margin-top: 12px; }
+    .m-participant-row { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 10px; }
+    .m-participant-row:last-child { border-bottom: none; }
+    .m-p-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .m-p-name { font-family: var(--font-ui); font-size: 14px; font-weight: 500; color: var(--ink); }
+    .m-p-badge { font-family: var(--font-label); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-muted); }
+    .m-grid-info { font-family: var(--font-body); font-size: 13px; color: var(--ink-muted); margin-top: 20px; }
+
+    /* GAME BOARD */
+    .m-game { background: var(--paper); display: flex; flex-direction: column; min-height: 900px; }
+    .m-game-bar { background: var(--surface); padding: 10px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+    .m-game-code { font-family: var(--font-title); font-weight: 700; font-size: 16px; color: var(--ink); }
+    .m-game-dots { display: flex; gap: 5px; flex: 1; }
+    .m-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .m-rev { font-family: var(--font-label); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-muted); }
+    .m-grid-area { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .m-crossword { display: inline-grid; grid-template-columns: repeat(8, 36px); grid-template-rows: repeat(6, 36px); border: 1px solid var(--border); }
+    .m-cell { width: 36px; height: 36px; border: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: center; position: relative; font-family: var(--font-body); font-size: 13px; color: var(--ink); }
+    .m-cell-black { background: var(--ink); }
+    .m-cell-sel { border: 2px solid var(--forest); background: rgba(122,184,154,0.15); }
+    .m-dir-bar { padding: 7px 14px; border-top: 1px solid var(--border-soft); background: var(--surface); display: flex; align-items: center; gap: 8px; }
+    .m-dir-text { font-family: var(--font-body); font-size: 13px; color: var(--ink-muted); }
+    .m-keyboard { background: var(--surface-alt); padding: 9px 10px; border-top: 1px solid var(--border); }
+    .m-key-row { display: flex; gap: 3px; justify-content: center; margin-bottom: 3px; }
+    .m-key { height: 26px; min-width: 22px; background: var(--surface); border: 1px solid var(--border-soft); font-size: 10px; font-family: var(--font-body); display: flex; align-items: center; justify-content: center; color: var(--ink); padding: 0 4px; }
+    .m-key-dir { background: var(--forest); color: white; border-color: var(--forest); min-width: 30px; }
+
+    /* ─── Animations ────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .reveal.in { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══ SIDEBAR ═══════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">CoCro</div>
+      <div class="sidebar-brand-sub">Design System</div>
+    </div>
+    <nav>
+      <ul class="sidebar-nav">
+        <li><a href="#palette"    class="active"><span class="nav-num">01</span>Palette</a></li>
+        <li><a href="#typography"           ><span class="nav-num">02</span>Typographie</a></li>
+        <li><a href="#buttons"              ><span class="nav-num">03</span>Boutons</a></li>
+        <li><a href="#fields"               ><span class="nav-num">04</span>Champs</a></li>
+        <li><a href="#separators"           ><span class="nav-num">05</span>Séparateurs</a></li>
+        <li><a href="#keyboard"             ><span class="nav-num">06</span>Clavier AZERTY</a></li>
+        <li><a href="#grid"                 ><span class="nav-num">07</span>Cellules</a></li>
+        <li><a href="#cursors"              ><span class="nav-num">08</span>Participants</a></li>
+        <li><a href="#pages"                ><span class="nav-num">09</span>Écrans</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text">
+        L'Atelier du<br>Cruciverbiste<br><br>
+        Angular · CMP
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Page Header -->
+    <div class="page-header reveal">
+      <div class="header-eyebrow">Design Catalog — Fusion B · Cahier de Notes</div>
+      <h1 class="header-title">L'Atelier du<br><em>Cruciverbiste</em></h1>
+      <div class="header-meta">
+        <div class="header-meta-item">
+          <div class="meta-label">Direction</div>
+          <div class="meta-value">Éditorial · Magazine</div>
+        </div>
+        <div class="header-meta-item">
+          <div class="meta-label">Couleurs</div>
+          <div class="meta-value">11 tokens</div>
+        </div>
+        <div class="header-meta-item">
+          <div class="meta-label">Typographies</div>
+          <div class="meta-value">4 familles</div>
+        </div>
+        <div class="header-meta-item">
+          <div class="meta-label">Border-radius</div>
+          <div class="meta-value">0px partout</div>
+        </div>
+        <div class="header-meta-item">
+          <div class="meta-label">Plateformes</div>
+          <div class="meta-value">Angular · CMP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 01 · PALETTE ════════════════════════════════════════ -->
+    <section id="palette" class="section reveal">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2 class="section-title">Palette de Couleurs</h2>
+        <p class="section-desc">Chaque token est utilisable en CSS var (Angular) et en Compose Color (CMP).</p>
+      </div>
+
+      <div class="palette-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#F5F0E8; border-bottom:1px solid #C8C0A8;"></div>
+          <div class="swatch-info"><div class="swatch-token">paper</div><div class="swatch-hex">#F5F0E8</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#EDE8D0; border-bottom:1px solid #C8C0A8;"></div>
+          <div class="swatch-info"><div class="swatch-token">paperDark</div><div class="swatch-hex">#EDE8D0</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FFFFFF; border-bottom:1px solid #C8C0A8;"></div>
+          <div class="swatch-info"><div class="swatch-token">surface</div><div class="swatch-hex">#FFFFFF</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#F7F4ED; border-bottom:1px solid #C8C0A8;"></div>
+          <div class="swatch-info"><div class="swatch-token">surfaceAlt</div><div class="swatch-hex">#F7F4ED</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#2D5A3D;"></div>
+          <div class="swatch-info"><div class="swatch-token">forest</div><div class="swatch-hex">#2D5A3D</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#7AB89A;"></div>
+          <div class="swatch-info"><div class="swatch-token">forestLight</div><div class="swatch-hex">#7AB89A</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#1A1A1A;"></div>
+          <div class="swatch-info">
+            <div class="swatch-token" style="color:#888;">ink</div>
+            <div class="swatch-hex" style="color:#888;">#1A1A1A</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#6B5E4E;"></div>
+          <div class="swatch-info">
+            <div class="swatch-token" style="color:#888;">inkMuted</div>
+            <div class="swatch-hex" style="color:#888;">#6B5E4E</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#1A1A1A;"></div>
+          <div class="swatch-info">
+            <div class="swatch-token" style="color:#888;">border</div>
+            <div class="swatch-hex" style="color:#888;">#1A1A1A</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#C8C0A8; border-bottom:1px solid #bbb;"></div>
+          <div class="swatch-info"><div class="swatch-token">borderSoft</div><div class="swatch-hex">#C8C0A8</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:rgba(232,160,144,0.7); border-bottom:1px solid #ccc;"></div>
+          <div class="swatch-info"><div class="swatch-token">marginLine</div><div class="swatch-hex">rgba(232,160,144,.7)</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#B83225;"></div>
+          <div class="swatch-info">
+            <div class="swatch-token" style="color:#888;">red</div>
+            <div class="swatch-hex" style="color:#888;">#B83225</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#C4952A;"></div>
+          <div class="swatch-info"><div class="swatch-token">gold</div><div class="swatch-hex">#C4952A</div></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#2C4A8A;"></div>
+          <div class="swatch-info">
+            <div class="swatch-token" style="color:#888;">inkBlue</div>
+            <div class="swatch-hex" style="color:#888;">#2C4A8A</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 02 · TYPOGRAPHY ═════════════════════════════════════ -->
+    <section id="typography" class="section reveal">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2 class="section-title">Typographie</h2>
+        <p class="section-desc">Cinq familles, chacune avec un rôle sémantique précis. Patrick Hand sur les boutons CTA — la touche cahier de Fusion B.</p>
+      </div>
+
+      <!-- Space Grotesk -->
+      <div class="type-specimen">
+        <div class="type-meta-row">
+          <span class="type-role-tag">Titres de section</span>
+          <div class="type-divider"></div>
+          <span class="type-detail">Space Grotesk · 700 · FontTitle</span>
+        </div>
+        <div style="font-family:var(--font-title);font-weight:700;font-size:64px;letter-spacing:-2.5px;line-height:1.0;color:var(--ink);">
+          L'Atelier du<br>Cruciverbiste
+        </div>
+        <div class="type-scale">
+          <div class="type-scale-row"><span class="type-size-tag">52px</span><span style="font-family:var(--font-title);font-weight:700;font-size:52px;letter-spacing:-1.5px;line-height:1;">Grille du soir</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">36px</span><span style="font-family:var(--font-title);font-weight:700;font-size:36px;letter-spacing:-0.8px;">Salle d'attente</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">28px</span><span style="font-family:var(--font-title);font-weight:700;font-size:28px;">Rejoindre une partie</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">20px</span><span style="font-family:var(--font-title);font-weight:700;font-size:20px;">Nouvelle session · Code ABC123</span></div>
+        </div>
+      </div>
+
+      <!-- Patrick Hand (NEW — Fusion B) -->
+      <div class="type-specimen">
+        <div class="type-meta-row">
+          <span class="type-role-tag" style="background:var(--forest);color:#fff;border-color:var(--forest);">Boutons CTA — Fusion B</span>
+          <div class="type-divider"></div>
+          <span class="type-detail">Patrick Hand · 400 · FontHand · Primary / Secondary / Danger</span>
+        </div>
+        <div style="font-family:var(--font-hand);font-size:56px;line-height:1.1;color:var(--ink);">
+          Rejoindre · Démarrer<br>Quitter la partie
+        </div>
+        <div class="type-scale">
+          <div class="type-scale-row"><span class="type-size-tag">18px</span><span style="font-family:var(--font-hand);font-size:18px;">Rejoindre la partie →</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">16px</span><span style="font-family:var(--font-hand);font-size:16px;">Démarrer · Copier le lien · Quitter</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">15px</span><span style="font-family:var(--font-hand);font-size:15px;">Connexion · Inscription · Nouvelle session</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">14px</span><span style="font-family:var(--font-hand);font-size:14px;">Alice · Bob · Participant 3 · Slot 4</span></div>
+        </div>
+      </div>
+
+      <!-- Plus Jakarta Sans -->
+      <div class="type-specimen">
+        <div class="type-meta-row">
+          <span class="type-role-tag">Menus / Boutons Ghost</span>
+          <div class="type-divider"></div>
+          <span class="type-detail">Plus Jakarta Sans · 500 · FontUi</span>
+        </div>
+        <div style="font-family:var(--font-ui);font-weight:500;font-size:48px;letter-spacing:-0.5px;line-height:1.1;color:var(--ink);">
+          Navigation, ghost buttons,<br>étiquettes d'interface
+        </div>
+        <div class="type-scale">
+          <div class="type-scale-row"><span class="type-size-tag">16px</span><span style="font-family:var(--font-ui);font-weight:500;font-size:16px;">Rejoindre la partie →</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">14px</span><span style="font-family:var(--font-ui);font-weight:500;font-size:14px;">Démarrer · Copier le lien · Quitter</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">13px</span><span style="font-family:var(--font-ui);font-weight:500;font-size:13px;">Connexion · Inscription · Nouveau compte</span></div>
+        </div>
+      </div>
+
+      <!-- Lexend -->
+      <div class="type-specimen">
+        <div class="type-meta-row">
+          <span class="type-role-tag">Corps / Grille</span>
+          <div class="type-divider"></div>
+          <span class="type-detail">Lexend · 400 · FontBody / FontGrid</span>
+        </div>
+        <div style="font-family:var(--font-body);font-size:48px;line-height:1.15;color:var(--ink);">
+          Textes courants,<br>lettres dans les cellules
+        </div>
+        <div class="type-scale">
+          <div class="type-scale-row"><span class="type-size-tag">20px</span><span style="font-family:var(--font-body);font-size:20px;letter-spacing:4px;">A B C D E F G H I J</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">16px</span><span style="font-family:var(--font-body);font-size:16px;">Mots fléchés collaboratifs en temps réel.</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">14px</span><span style="font-family:var(--font-body);font-size:14px;">Vous avez un code de session ? Rejoignez la partie en cours.</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">13px</span><span style="font-family:var(--font-body);font-size:13px;">Concevez une grille, invitez vos amis, jouez ensemble.</span></div>
+        </div>
+      </div>
+
+      <!-- Spline Sans -->
+      <div class="type-specimen">
+        <div class="type-meta-row">
+          <span class="type-role-tag">Labels / Metadata</span>
+          <div class="type-divider"></div>
+          <span class="type-detail">Spline Sans · 400 · FontLabel · UPPERCASE · 2px letter-spacing</span>
+        </div>
+        <div style="font-family:var(--font-label);font-size:36px;text-transform:uppercase;letter-spacing:8px;line-height:1.3;color:var(--ink);">
+          Code de partage
+        </div>
+        <div class="type-scale">
+          <div class="type-scale-row"><span class="type-size-tag">11px</span><span style="font-family:var(--font-label);font-size:11px;text-transform:uppercase;letter-spacing:2.5px;color:var(--ink-muted);">CODE DE PARTAGE · PARTICIPANTS · GRILLE</span></div>
+          <div class="type-scale-row"><span class="type-size-tag">10px</span><span style="font-family:var(--font-label);font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--ink-muted);">Section 01 · Status · Révision 12</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 03 · BUTTONS ════════════════════════════════════════ -->
+    <section id="buttons" class="section reveal">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2 class="section-title">Boutons</h2>
+        <p class="section-desc">Aucun border-radius. Le survol inverse complètement fond et texte.</p>
+      </div>
+
+      <div class="btn-grid">
+        <div class="btn-cell">
+          <div class="btn-cell-label">Par défaut</div>
+          <div class="btn-row">
+            <button class="btn btn-primary">Rejoindre →</button>
+            <button class="btn btn-secondary">Annuler</button>
+            <button class="btn btn-ghost">En savoir plus</button>
+            <button class="btn btn-danger">Quitter</button>
+          </div>
+        </div>
+        <div class="btn-cell">
+          <div class="btn-cell-label">Survol (hover)</div>
+          <div class="btn-row">
+            <button class="btn btn-primary h">Rejoindre →</button>
+            <button class="btn btn-secondary h">Annuler</button>
+            <button class="btn btn-ghost h">En savoir plus</button>
+            <button class="btn btn-danger h">Quitter</button>
+          </div>
+        </div>
+        <div class="btn-cell" style="background:var(--surface-alt);">
+          <div class="btn-cell-label">Sur fond forest</div>
+          <div style="background:var(--forest);padding:20px 0 20px;">
+            <div class="btn-row" style="padding: 0 0 0 0;">
+              <button class="btn m-btn-forest-inv">Démarrer la partie</button>
+              <button class="btn m-btn-forest-ghost">Annuler</button>
+            </div>
+          </div>
+        </div>
+        <div class="btn-cell" style="background:var(--surface-alt);">
+          <div class="btn-cell-label">Tailles &amp; variantes</div>
+          <div class="btn-row" style="align-items:center; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-primary" style="font-size:11px;padding:6px 12px;">Petit</button>
+            <button class="btn btn-primary">Standard</button>
+            <button class="btn btn-primary" style="font-size:15px;padding:12px 28px;">Large</button>
+            <button class="btn btn-primary" style="width:100%;display:block;text-align:center;">Pleine largeur</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 04 · FORM FIELDS ════════════════════════════════════ -->
+    <section id="fields" class="section reveal">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2 class="section-title">Champs de saisie</h2>
+        <p class="section-desc">Label Spline Sans uppercase. Bordure : borderSoft → forest (focus) → red (erreur).</p>
+      </div>
+
+      <div class="field-grid">
+        <div class="field-cell">
+          <div class="field-state-tag">Par défaut</div>
+          <div class="field-group">
+            <label class="field-label">Code de session</label>
+            <input class="field-input" type="text" placeholder="ex. ABC123">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nom d'utilisateur</label>
+            <input class="field-input" type="text" placeholder="Votre pseudo">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Mot de passe</label>
+            <input class="field-input" type="password" placeholder="••••••••">
+          </div>
+        </div>
+        <div class="field-cell">
+          <div class="field-state-tag">Focus actif</div>
+          <div class="field-group">
+            <label class="field-label">Code de session</label>
+            <input class="field-input focus" type="text" value="ABC1">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Nom d'utilisateur</label>
+            <input class="field-input focus" type="text" value="Alice">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Mot de passe</label>
+            <input class="field-input focus" type="password" value="••••••••">
+          </div>
+        </div>
+        <div class="field-cell">
+          <div class="field-state-tag">Erreur</div>
+          <div class="field-group">
+            <label class="field-label err">Code de session</label>
+            <input class="field-input err" type="text" value="XX">
+            <span class="field-hint">Code invalide ou session introuvable.</span>
+          </div>
+          <div class="field-group">
+            <label class="field-label err">Mot de passe</label>
+            <input class="field-input err" type="password" value="••••">
+            <span class="field-hint">Mot de passe incorrect.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code input display variant -->
+      <div style="margin-top:36px;">
+        <div class="sub-label">Saisie de code — variante grille caractère par caractère</div>
+        <div class="code-input-display">
+          <div class="code-input-char">A</div>
+          <div class="code-input-char">B</div>
+          <div class="code-input-char">C</div>
+          <div class="code-input-char active">1</div>
+          <div class="code-input-char" style="color:var(--border-soft);">_</div>
+          <div class="code-input-char" style="color:var(--border-soft);">_</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 05 · SEPARATORS ════════════════════════════════════ -->
+    <section id="separators" class="section reveal">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2 class="section-title">Séparateurs</h2>
+        <p class="section-desc">1px solid. Le trait fort (#1A1A1A) est la signature éditoriale du design.</p>
+      </div>
+
+      <div class="sep-list">
+        <div class="sep-demo">
+          <div class="sub-label">Séparateur fort — 1px #1A1A1A — pleine largeur</div>
+          <div class="sep"></div>
+        </div>
+        <div class="sep-demo">
+          <div class="sub-label">Séparateur doux — 1px #D4CEC4 — pleine largeur</div>
+          <div class="sep-soft"></div>
+        </div>
+        <div class="sep-demo">
+          <div class="sub-label">Séparateur fort — avec marges 40px</div>
+          <div style="padding:0 40px;"><div class="sep"></div></div>
+        </div>
+        <div class="sep-demo">
+          <div class="sub-label">Séparateur avec label centré (divider entre sections)</div>
+          <div style="display:flex;align-items:center;gap:20px;">
+            <div class="sep" style="flex:1;"></div>
+            <span style="font-family:var(--font-label);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);white-space:nowrap;">ou</span>
+            <div class="sep" style="flex:1;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 06 · KEYBOARD ══════════════════════════════════════ -->
+    <section id="keyboard" class="section reveal">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2 class="section-title">Clavier AZERTY</h2>
+        <p class="section-desc">N'active jamais le clavier système. Fond surfaceAlt. Touches 42px hauteur, Lexend 14px.</p>
+      </div>
+
+      <div class="sub-label">Layout complet</div>
+      <div class="keyboard">
+        <div class="key-row">
+          <div class="key">A</div><div class="key">Z</div><div class="key">E</div><div class="key">R</div>
+          <div class="key">T</div><div class="key">Y</div><div class="key">U</div><div class="key">I</div>
+          <div class="key">O</div><div class="key">P</div>
+        </div>
+        <div class="key-row">
+          <div class="key">Q</div><div class="key">S</div><div class="key">D</div><div class="key">F</div>
+          <div class="key">G</div><div class="key">H</div><div class="key">J</div><div class="key">K</div>
+          <div class="key">L</div><div class="key">M</div>
+        </div>
+        <div class="key-row">
+          <div class="key key-dir">→</div>
+          <div class="key">W</div><div class="key">X</div><div class="key">C</div>
+          <div class="key">V</div><div class="key">B</div><div class="key">N</div>
+          <div class="key key-del">⌫</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:36px;margin-top:36px;">
+        <div>
+          <div class="sub-label">Direction HORIZONTALE</div>
+          <div class="keyboard" style="padding:10px;">
+            <div class="key-row">
+              <div class="key key-dir" style="min-width:80px;font-size:13px;">→ HORIZ</div>
+              <div class="key">A</div><div class="key">Z</div><div class="key">E</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sub-label">Direction VERTICALE</div>
+          <div class="keyboard" style="padding:10px;">
+            <div class="key-row">
+              <div class="key key-dir" style="min-width:80px;font-size:13px;">↓ VERT</div>
+              <div class="key">A</div><div class="key">Z</div><div class="key">E</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 07 · GRID CELLS ════════════════════════════════════ -->
+    <section id="grid" class="section reveal">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2 class="section-title">Cellules de Grille</h2>
+        <p class="section-desc">44×44dp, 1px ink border. Aucun border-radius. Numéros d'indices en haut-gauche.</p>
+      </div>
+
+      <div class="grid-showcase">
+        <!-- Demo 5×5 crossword -->
+        <div>
+          <div class="sub-label">Grille de démonstration 5×5</div>
+          <div class="crossword-grid">
+            <!-- Row 1 -->
+            <div class="cell"><span class="cell-num">1</span>C</div>
+            <div class="cell">R</div>
+            <div class="cell">O</div>
+            <div class="cell">I</div>
+            <div class="cell">X</div>
+            <!-- Row 2 -->
+            <div class="cell">A</div>
+            <div class="cell cell-black"></div>
+            <div class="cell cell-selected">
+              <span class="cell-dir">›</span>
+              U
+            </div>
+            <div class="cell"><div class="cell-cursor" style="background:var(--ink-blue);"></div></div>
+            <div class="cell"></div>
+            <!-- Row 3 -->
+            <div class="cell">R</div>
+            <div class="cell"><span class="cell-num">3</span>M</div>
+            <div class="cell">O</div>
+            <div class="cell">T</div>
+            <div class="cell cell-black"></div>
+            <!-- Row 4 -->
+            <div class="cell">R</div>
+            <div class="cell cell-black"></div>
+            <div class="cell"></div>
+            <div class="cell"><div class="cell-cursor" style="background:var(--red);"></div></div>
+            <div class="cell">E</div>
+            <!-- Row 5 -->
+            <div class="cell">E</div>
+            <div class="cell">S</div>
+            <div class="cell">T</div>
+            <div class="cell cell-black"></div>
+            <div class="cell"></div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="grid-legend">
+          <div class="legend-row">
+            <div class="legend-cell-sample">A</div>
+            <div class="legend-text">
+              <div class="legend-main">Lettre placée</div>
+              <div class="legend-sub">Surface blanche · Lexend 16px</div>
+            </div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-cell-sample"></div>
+            <div class="legend-text">
+              <div class="legend-main">Cellule vide</div>
+              <div class="legend-sub">Surface blanche · pas de contenu</div>
+            </div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-cell-sample" style="border:2px solid var(--forest);background:rgba(122,184,154,0.15);">
+              <span style="position:absolute;top:2px;right:3px;font-size:9px;color:var(--forest);font-weight:700;font-family:var(--font-label);">›</span>
+              U
+            </div>
+            <div class="legend-text">
+              <div class="legend-main">Sélection locale (slot 0)</div>
+              <div class="legend-sub">2px forest border · forestLight 10% · indicateur direction</div>
+            </div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-cell-sample" style="background:var(--ink);"></div>
+            <div class="legend-text">
+              <div class="legend-main">Cellule noire</div>
+              <div class="legend-sub">ink background · jamais de lettre</div>
+            </div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-cell-sample">
+              <div style="position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;background:var(--ink-blue);"></div>
+            </div>
+            <div class="legend-text">
+              <div class="legend-main">Curseur distant (slot 1)</div>
+              <div class="legend-sub">9px dot · bottom-right · couleur du slot</div>
+            </div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-cell-sample">
+              <span style="position:absolute;top:2px;left:3px;font-family:var(--font-label);font-size:8px;color:var(--ink-muted);line-height:1;">3</span>
+            </div>
+            <div class="legend-text">
+              <div class="legend-main">Numéro d'indice</div>
+              <div class="legend-sub">Spline Sans 8px · top-left</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 08 · PARTICIPANT CURSORS ═══════════════════════════ -->
+    <section id="cursors" class="section reveal">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2 class="section-title">Indicateurs Participants</h2>
+        <p class="section-desc">4 slots de couleur. Le joueur local est toujours slot 0 (forest). Dots ronds dans cellules.</p>
+      </div>
+
+      <div class="cursor-row">
+        <!-- Slot 0 -->
+        <div class="cursor-slot">
+          <div class="cursor-dot" style="background:#2D5A3D;"></div>
+          <div>
+            <div class="cursor-name">Slot 0 — Local</div>
+            <div class="cursor-hex">Forest · #2D5A3D</div>
+          </div>
+          <div class="cursor-cell-preview">
+            <span style="font-family:var(--font-body);font-size:14px;">A</span>
+            <div style="position:absolute;inset:0;border:2px solid #2D5A3D;background:rgba(45,90,61,0.1);pointer-events:none;"></div>
+            <span style="position:absolute;top:2px;right:3px;font-size:8px;color:#2D5A3D;font-weight:700;font-family:var(--font-label);">›</span>
+          </div>
+          <div class="legend-sub" style="text-align:center;">2px border + 10% tint</div>
+        </div>
+        <!-- Slot 1 -->
+        <div class="cursor-slot">
+          <div class="cursor-dot" style="background:#2C4A8A;"></div>
+          <div>
+            <div class="cursor-name">Slot 1</div>
+            <div class="cursor-hex">Ink Blue · #2C4A8A</div>
+          </div>
+          <div class="cursor-cell-preview">
+            <div style="position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;background:#2C4A8A;"></div>
+          </div>
+          <div class="legend-sub" style="text-align:center;">9px dot · bottom-right</div>
+        </div>
+        <!-- Slot 2 -->
+        <div class="cursor-slot">
+          <div class="cursor-dot" style="background:#B83225;"></div>
+          <div>
+            <div class="cursor-name">Slot 2</div>
+            <div class="cursor-hex">Red · #B83225</div>
+          </div>
+          <div class="cursor-cell-preview">
+            <div style="position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;background:#B83225;"></div>
+          </div>
+          <div class="legend-sub" style="text-align:center;">9px dot · bottom-right</div>
+        </div>
+        <!-- Slot 3 -->
+        <div class="cursor-slot">
+          <div class="cursor-dot" style="background:#C4952A;"></div>
+          <div>
+            <div class="cursor-name">Slot 3</div>
+            <div class="cursor-hex">Gold · #C4952A</div>
+          </div>
+          <div class="cursor-cell-preview">
+            <div style="position:absolute;bottom:2px;right:2px;width:9px;height:9px;border-radius:50%;background:#C4952A;"></div>
+          </div>
+          <div class="legend-sub" style="text-align:center;">9px dot · bottom-right</div>
+        </div>
+      </div>
+
+      <!-- Participant list -->
+      <div style="margin-top:40px;">
+        <div class="sub-label">Composant liste de participants — lobby</div>
+        <div class="participant-list">
+          <div class="participant-item">
+            <div class="participant-left">
+              <div class="participant-dot" style="background:#2D5A3D;"></div>
+              <span class="participant-name">Alice</span>
+              <span class="participant-badge">créatrice</span>
+            </div>
+            <span class="participant-status" style="color:#2D5A3D;">● connectée</span>
+          </div>
+          <div class="participant-item">
+            <div class="participant-left">
+              <div class="participant-dot" style="background:#2C4A8A;"></div>
+              <span class="participant-name">Bob</span>
+            </div>
+            <span class="participant-status" style="color:#2C4A8A;">● connecté</span>
+          </div>
+          <div class="participant-item" style="opacity:0.45;">
+            <div class="participant-left">
+              <div class="participant-dot" style="background:var(--border-soft);"></div>
+              <span class="participant-name">...</span>
+            </div>
+            <span class="participant-status" style="color:var(--ink-muted);">○ en attente</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 09 · PAGE PREVIEWS ══════════════════════════════════ -->
+    <section id="pages" class="section reveal" style="padding-bottom:80px;">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2 class="section-title">Aperçus des Écrans</h2>
+        <p class="section-desc">Maquettes à l'échelle 44%. Chaque écran applique les tokens définis ci-dessus.</p>
+      </div>
+
+      <div class="pages-grid">
+
+        <!-- ── LANDING ────────────────────────────────── -->
+        <div class="page-preview">
+          <div class="preview-label">Landing — Non authentifié / Anonyme</div>
+          <div class="preview-frame">
+            <div class="preview-scale">
+              <div class="m-landing">
+                <div class="m-nav">
+                  <span class="m-logo">CoCro</span>
+                  <button class="m-btn m-btn-ghost">Connexion</button>
+                  <button class="m-btn m-btn-primary">Inscription</button>
+                </div>
+                <div class="m-hero">
+                  <div class="m-hero-eyebrow">L'Atelier du Cruciverbiste</div>
+                  <div class="m-hero-title">Mots fléchés<br>collaboratifs</div>
+                  <div class="m-hero-sub">Jouez ensemble, en temps réel.</div>
+                </div>
+                <div class="m-sep"></div>
+                <div class="m-panels">
+                  <div class="m-panel-white">
+                    <div class="m-panel-label">REJOINDRE</div>
+                    <div class="m-panel-title">Rejoindre une partie</div>
+                    <div class="m-panel-desc">Vous avez un code de session ?</div>
+                    <input class="m-code-input" value="ABC123" readonly>
+                    <button class="m-btn m-btn-primary m-full-btn">Rejoindre →</button>
+                  </div>
+                  <div class="m-panel-forest">
+                    <div class="m-panel-label-inv">CRÉER</div>
+                    <div class="m-panel-title-inv">Votre Atelier</div>
+                    <div class="m-panel-desc-inv">Concevez, invitez, jouez ensemble.</div>
+                    <button class="m-btn m-btn-forest-inv m-full-btn" style="margin-bottom:10px;">Créer un compte →</button>
+                    <button class="m-btn m-btn-forest-ghost m-full-btn">Déjà un compte ? Login</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── HOME ──────────────────────────────────── -->
+        <div class="page-preview">
+          <div class="preview-label">Home — Authentifié (PLAYER / ADMIN)</div>
+          <div class="preview-frame">
+            <div class="preview-scale">
+              <div class="m-home">
+                <div class="m-nav">
+                  <span class="m-logo">CoCro</span>
+                  <span style="font-family:var(--font-ui);font-size:13px;color:var(--ink-muted);">Alice</span>
+                  <button class="m-btn m-btn-ghost">Déconnexion</button>
+                </div>
+                <div class="m-home-hero">
+                  <div class="m-greeting">Bonjour,<br>Alice</div>
+                  <div class="m-greeting-sub">Que souhaitez-vous faire aujourd'hui ?</div>
+                </div>
+                <div class="m-home-panel" style="background:var(--surface); border-bottom:1px solid var(--border);">
+                  <div class="m-home-panel-label">REJOINDRE UNE PARTIE</div>
+                  <div class="m-home-panel-title">Rejoindre</div>
+                  <div class="m-join-row">
+                    <input class="m-join-input" placeholder="Code ABC123">
+                    <button class="m-btn m-btn-primary">Rejoindre →</button>
+                  </div>
+                </div>
+                <div class="m-home-panel" style="background:var(--forest);">
+                  <div class="m-home-panel-label" style="color:rgba(255,255,255,0.6);">LANCER UNE SESSION</div>
+                  <div class="m-home-panel-title" style="color:#fff;">Nouvelle session</div>
+                  <div class="m-home-panel-desc" style="color:rgba(255,255,255,0.75);">Choisissez une grille et invitez vos amis.</div>
+                  <button class="m-btn m-btn-forest-inv">Nouvelle session →</button>
+                </div>
+                <div class="m-home-panel" style="background:var(--surface-alt);">
+                  <div class="m-home-panel-label">ÉDITION</div>
+                  <div class="m-home-panel-title">Éditeur de grille</div>
+                  <button class="m-btn m-btn-secondary">Éditeur de grille →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LOBBY ─────────────────────────────────── -->
+        <div class="page-preview">
+          <div class="preview-label">Lobby — Salle d'attente</div>
+          <div class="preview-frame">
+            <div class="preview-scale">
+              <div class="m-lobby">
+                <div class="m-nav">
+                  <span class="m-logo">CoCro</span>
+                  <button class="m-btn m-btn-danger">Quitter</button>
+                </div>
+                <div class="m-lobby-header">
+                  <div class="m-lobby-eyebrow">SALLE D'ATTENTE</div>
+                  <div class="m-lobby-title">ABC 123</div>
+                  <div class="m-code-display">
+                    <span class="m-code-ch">A</span>
+                    <span class="m-code-ch">B</span>
+                    <span class="m-code-ch">C</span>
+                    <span style="color:var(--border-soft);font-size:36px;line-height:1.1;">·</span>
+                    <span class="m-code-ch">1</span>
+                    <span class="m-code-ch">2</span>
+                    <span class="m-code-ch">3</span>
+                  </div>
+                  <button class="m-btn m-btn-secondary" style="margin-top:12px;">Copier le lien</button>
+                </div>
+                <div class="m-lobby-body">
+                  <div style="font-family:var(--font-label);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-muted);">PARTICIPANTS (2/4)</div>
+                  <div class="m-participant-block">
+                    <div class="m-participant-row">
+                      <div class="m-p-dot" style="background:#2D5A3D;"></div>
+                      <span class="m-p-name">Alice</span>
+                      <span class="m-p-badge">créatrice</span>
+                    </div>
+                    <div class="m-participant-row">
+                      <div class="m-p-dot" style="background:#2C4A8A;"></div>
+                      <span class="m-p-name">Bob</span>
+                    </div>
+                    <div class="m-participant-row" style="opacity:0.4;">
+                      <div class="m-p-dot" style="background:var(--border-soft);"></div>
+                      <span class="m-p-name">...</span>
+                    </div>
+                  </div>
+                  <div class="m-grid-info">Grille : <strong style="color:var(--ink);">"Weekend"</strong> — HARD — 12×12</div>
+                  <button class="m-btn m-btn-primary" style="width:100%;display:block;text-align:center;padding:14px;font-size:15px;margin-top:20px;letter-spacing:0.5px;">DÉMARRER LA PARTIE</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── GAME BOARD ─────────────────────────────── -->
+        <div class="page-preview">
+          <div class="preview-label">Game Board — En jeu</div>
+          <div class="preview-frame">
+            <div class="preview-scale">
+              <div class="m-game">
+                <div class="m-game-bar">
+                  <span class="m-game-code">ABC123</span>
+                  <div class="m-game-dots">
+                    <div class="m-dot" style="background:#2D5A3D;"></div>
+                    <div class="m-dot" style="background:#2C4A8A;"></div>
+                    <div class="m-dot" style="background:var(--border-soft);"></div>
+                    <div class="m-dot" style="background:var(--border-soft);"></div>
+                  </div>
+                  <span class="m-rev">Rév.12</span>
+                  <button class="m-btn m-btn-danger" style="font-size:11px;padding:5px 10px;">Quitter</button>
+                </div>
+                <div class="m-grid-area">
+                  <div class="m-crossword">
+                    <div class="m-cell"><span style="position:absolute;top:1px;left:2px;font-size:7px;color:var(--ink-muted);font-family:var(--font-label);">1</span>C</div>
+                    <div class="m-cell">R</div><div class="m-cell">O</div><div class="m-cell">I</div>
+                    <div class="m-cell">X</div><div class="m-cell"></div>
+                    <div class="m-cell m-cell-black"></div><div class="m-cell"></div>
+
+                    <div class="m-cell">A</div>
+                    <div class="m-cell m-cell-black"></div>
+                    <div class="m-cell m-cell-sel" style="position:relative;">
+                      U<span style="position:absolute;top:1px;right:2px;font-size:7px;color:var(--forest);font-family:var(--font-label);">›</span>
+                    </div>
+                    <div class="m-cell" style="position:relative;">
+                      <div style="position:absolute;bottom:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--ink-blue);"></div>
+                    </div>
+                    <div class="m-cell"></div><div class="m-cell"></div>
+                    <div class="m-cell m-cell-black"></div><div class="m-cell">E</div>
+
+                    <div class="m-cell">R</div>
+                    <div class="m-cell"><span style="position:absolute;top:1px;left:2px;font-size:7px;color:var(--ink-muted);font-family:var(--font-label);">3</span>M</div>
+                    <div class="m-cell">O</div><div class="m-cell">T</div>
+                    <div class="m-cell m-cell-black"></div>
+                    <div class="m-cell"></div><div class="m-cell"></div><div class="m-cell"></div>
+
+                    <div class="m-cell">R</div>
+                    <div class="m-cell m-cell-black"></div>
+                    <div class="m-cell"></div>
+                    <div class="m-cell" style="position:relative;">
+                      <div style="position:absolute;bottom:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--red);"></div>
+                    </div>
+                    <div class="m-cell">E</div>
+                    <div class="m-cell"></div><div class="m-cell"></div><div class="m-cell"></div>
+
+                    <div class="m-cell">E</div><div class="m-cell">S</div><div class="m-cell">T</div>
+                    <div class="m-cell m-cell-black"></div>
+                    <div class="m-cell"></div><div class="m-cell"></div><div class="m-cell"></div><div class="m-cell"></div>
+
+                    <div class="m-cell"></div><div class="m-cell"></div>
+                    <div class="m-cell m-cell-black"></div>
+                    <div class="m-cell"></div><div class="m-cell"></div>
+                    <div class="m-cell m-cell-black"></div>
+                    <div class="m-cell"></div><div class="m-cell"></div>
+                  </div>
+                </div>
+                <div class="m-dir-bar">
+                  <span style="font-family:var(--font-body);font-size:13px;">→</span>
+                  <span class="m-dir-text">Col 3, Ligne 2</span>
+                  <button class="m-btn m-btn-ghost" style="font-size:11px;padding:4px 8px;margin-left:auto;">Effacer</button>
+                </div>
+                <div style="height:1px;background:var(--border);"></div>
+                <div class="m-keyboard">
+                  <div class="m-key-row">
+                    <div class="m-key">A</div><div class="m-key">Z</div><div class="m-key">E</div><div class="m-key">R</div>
+                    <div class="m-key">T</div><div class="m-key">Y</div><div class="m-key">U</div><div class="m-key">I</div>
+                    <div class="m-key">O</div><div class="m-key">P</div>
+                  </div>
+                  <div class="m-key-row">
+                    <div class="m-key">Q</div><div class="m-key">S</div><div class="m-key">D</div><div class="m-key">F</div>
+                    <div class="m-key">G</div><div class="m-key">H</div><div class="m-key">J</div><div class="m-key">K</div>
+                    <div class="m-key">L</div><div class="m-key">M</div>
+                  </div>
+                  <div class="m-key-row">
+                    <div class="m-key m-key-dir">→</div>
+                    <div class="m-key">W</div><div class="m-key">X</div><div class="m-key">C</div>
+                    <div class="m-key">V</div><div class="m-key">B</div><div class="m-key">N</div>
+                    <div class="m-key" style="min-width:30px;">⌫</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /pages-grid -->
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Active nav tracking
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.sidebar-nav a');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const a = document.querySelector(`.sidebar-nav a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -65% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+</script>
+</body>
+</html>
