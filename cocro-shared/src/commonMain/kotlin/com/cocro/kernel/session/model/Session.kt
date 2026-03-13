@@ -12,6 +12,7 @@ import com.cocro.kernel.session.model.valueobject.SessionId
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 import com.cocro.kernel.session.rule.ParticipantsRule
 import java.time.Instant
+import com.cocro.kernel.session.model.SessionLifecycleCommand
 
 data class Session private constructor(
     val id: SessionId,
@@ -76,6 +77,45 @@ data class Session private constructor(
                 updatedAt,
             )
         }
+    }
+
+    // ---------- Lifecycle Command ----------
+
+    fun apply(command: SessionLifecycleCommand): CocroResult<Session, SessionError> =
+        when (command) {
+            is SessionLifecycleCommand.Join -> applyJoin(command.actorId)
+            is SessionLifecycleCommand.Leave -> applyLeave(command.actorId)
+            is SessionLifecycleCommand.Start -> applyStart()
+        }
+
+    private fun applyJoin(actorId: UserId): CocroResult<Session, SessionError> {
+        if (status !in setOf(SessionStatus.CREATING, SessionStatus.PLAYING)) {
+            return err(SessionError.InvalidStatusForAction(status, "join"))
+        }
+        if (participants.any { it.userId == actorId }) {
+            return err(SessionError.AlreadyParticipant(actorId.toString(), shareCode.value))
+        }
+        if (!ParticipantsRule.canJoin(participants)) {
+            return err(SessionError.SessionFull)
+        }
+        return ok(join(actorId))
+    }
+
+    private fun applyLeave(actorId: UserId): CocroResult<Session, SessionError> {
+        if (!participants.any { it.userId == actorId && it.status == InviteStatus.JOINED }) {
+            return err(SessionError.UserNotParticipant(actorId.toString(), shareCode.value))
+        }
+        return ok(leave(actorId))
+    }
+
+    private fun applyStart(): CocroResult<Session, SessionError> {
+        if (status != SessionStatus.CREATING) {
+            return err(SessionError.InvalidStatusForAction(status, "start"))
+        }
+        if (ParticipantsRule.countActiveParticipants(participants) < 1) {
+            return err(SessionError.NotEnoughParticipants)
+        }
+        return ok(startPlaying())
     }
 
     // ---------- Commands / Rules ----------

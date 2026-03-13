@@ -146,4 +146,12 @@ sealed interface SessionError : CocroError {
     object NotEnoughParticipants : SessionError {
         override val errorCode = ErrorCode.SESSION_NOT_ENOUGH_PARTICIPANTS
     }
+
+    data class ReferenceGridNotFound(
+        val gridCode: String,
+    ) : SessionError {
+        override val errorCode = ErrorCode.SESSION_REFERENCE_GRID_NOT_FOUND
+
+        override fun context(): Map<String, String> = mapOf("gridCode" to gridCode)
+    }
 }

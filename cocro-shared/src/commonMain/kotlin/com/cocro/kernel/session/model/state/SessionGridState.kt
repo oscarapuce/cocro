@@ -1,6 +1,8 @@
 package com.cocro.kernel.session.model.state
 
+import com.cocro.kernel.grid.model.Cell
 import com.cocro.kernel.grid.model.CellPos
+import com.cocro.kernel.grid.model.Grid
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.grid.rule.LetterRule
 import com.cocro.kernel.session.model.valueobject.SessionId
@@ -32,6 +34,35 @@ data class SessionGridState(
             cells = cells - cmd.position,
             revision = revision.next(),
         )
+
+    /**
+     * Checks this session grid state against the reference [grid].
+     *
+     * Iterates every [Cell.LetterCell] in the reference grid and compares it with
+     * the corresponding entry in [cells]. The comparison is purely positional and
+     * case-sensitive (both sides store uppercase chars via [LetterRule]).
+     *
+     * This is pure domain logic — no side effects, no state mutation.
+     */
+    fun checkAgainst(grid: Grid): GridCheckResult {
+        val referenceLetters: Map<CellPos, Char> = grid.cells
+            .filterIsInstance<Cell.LetterCell>()
+            .associate { it.pos to it.letter.value.value }
+
+        val totalCount = referenceLetters.size
+        val filledCount = referenceLetters.keys.count { pos -> cells.containsKey(pos) }
+        val isComplete = filledCount == totalCount
+        val isCorrect = isComplete && referenceLetters.all { (pos, expectedChar) ->
+            (cells[pos] as? SessionGridCellState.Letter)?.value == expectedChar
+        }
+
+        return GridCheckResult(
+            isComplete = isComplete,
+            isCorrect = isCorrect,
+            filledCount = filledCount,
+            totalCount = totalCount,
+        )
+    }
 
     companion object {
         fun initial(
