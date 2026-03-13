@@ -4,6 +4,7 @@ import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
+import com.cocro.infrastructure.security.spring.CocroAuthentication
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 import com.cocro.kernel.session.rule.ParticipantsRule
 import com.cocro.kernel.session.rule.SessionShareCodeRule
@@ -39,15 +40,17 @@ class SessionConnectEventListener(
 
     override fun onApplicationEvent(event: SessionConnectedEvent) {
         val accessor = StompHeaderAccessor.wrap(event.message)
-        val principal = accessor.user as? CocroPrincipal ?: return
+        val principal = accessor.user as? CocroAuthentication ?: return
 
-        val shareCode = accessor.getFirstNativeHeader("shareCode")
+        // The CONNECTED frame doesn't carry client CONNECT headers; shareCode was stored in session attributes
+        // by StompAuthChannelInterceptor during CONNECT processing
+        val shareCode = (accessor.sessionAttributes?.get(StompAuthChannelInterceptor.SESSION_SHARE_CODE_KEY) as? String)
             ?.takeIf { SessionShareCodeRule.validate(it) }
-            ?: return // no shareCode header → not joining a session tunnel, ignore
+            ?: return // no shareCode → not joining a session tunnel, ignore
 
         logger.info(
             "WS connected: user={} for session shareCode={}",
-            principal.userId(),
+            principal.user.userId,
             shareCode,
         )
 
@@ -59,7 +62,7 @@ class SessionConnectEventListener(
             logger.warn(
                 "WS connected: session not found for shareCode={}, user={}",
                 shareCode,
-                principal.userId(),
+                principal.user.userId,
             )
             return
         }
@@ -71,7 +74,7 @@ class SessionConnectEventListener(
         val topic = "/topic/session/$shareCode"
 
         sessionNotifier.notifyUser(
-            principal.userId(),
+            principal.user.userId,
             SessionEvent.SessionWelcome(
                 shareCode = shareCode,
                 topicToSubscribe = topic,
@@ -83,7 +86,7 @@ class SessionConnectEventListener(
 
         logger.debug(
             "SessionWelcome sent to user={} for session={} ({} participants, status={}, gridRevision={})",
-            principal.userId(),
+            principal.user.userId,
             shareCode,
             participantCount,
             session.status,

@@ -12,22 +12,21 @@ class PrincipalCurrentUserProvider : CurrentUserProvider {
     override fun currentUserOrNull(): AuthenticatedUser? {
         val auth = SecurityContextHolder.getContext().authentication ?: return null
 
-        val jwt =
-            auth.principal as? org.springframework.security.oauth2.jwt.Jwt
-                ?: return null
-
-        val userId = UserId.from(jwt.subject)
-
-        val roles =
-            jwt
-                .getClaimAsStringList("roles")
-                ?.map { Role.valueOf(it) }
-                ?.toSet()
-                ?: emptySet()
-
-        return AuthenticatedUser(
-            userId = userId,
-            roles = roles,
-        )
+        return when (val principal = auth.principal) {
+            // HTTP request authenticated via JWT resource server
+            is org.springframework.security.oauth2.jwt.Jwt -> {
+                val userId = UserId.from(principal.subject)
+                val roles =
+                    principal
+                        .getClaimAsStringList("roles")
+                        ?.map { Role.valueOf(it) }
+                        ?.toSet()
+                        ?: emptySet()
+                AuthenticatedUser(userId = userId, roles = roles)
+            }
+            // WebSocket/STOMP request authenticated via CocroAuthentication
+            is AuthenticatedUser -> principal
+            else -> null
+        }
     }
 }

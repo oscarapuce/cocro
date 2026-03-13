@@ -1,12 +1,11 @@
 package com.cocro.presentation.websocket
 
 import com.cocro.application.session.port.HeartbeatTracker
-import com.cocro.kernel.auth.model.valueobject.UserId
+import com.cocro.infrastructure.security.spring.CocroAuthentication
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.messaging.SessionDisconnectEvent
-import java.util.UUID
 
 /**
  * Listens for STOMP WebSocket disconnect events.
@@ -22,12 +21,12 @@ class StompSessionEventListener(
 
     @EventListener
     fun onDisconnect(event: SessionDisconnectEvent) {
-        val principal = event.user as? CocroPrincipal ?: run {
-            logger.debug("STOMP disconnect without CocroPrincipal — skipping heartbeat update")
+        val principal = event.user as? CocroAuthentication ?: run {
+            logger.debug("STOMP disconnect without CocroAuthentication — skipping heartbeat update")
             return
         }
 
-        val userId = principal.userId()
+        val userId = principal.user.userId
         val sessionId = heartbeatTracker.getSessionIdForUser(userId) ?: run {
             logger.debug("User {} disconnected but was not tracked in any session", userId)
             return

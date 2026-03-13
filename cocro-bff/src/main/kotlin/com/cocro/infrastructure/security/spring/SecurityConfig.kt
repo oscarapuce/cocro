@@ -14,12 +14,10 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/auth/**")
-                    .permitAll()
-                    .requestMatchers("/admin/**")
-                    .hasRole("ADMIN")
-                    .anyRequest()
-                    .authenticated()
+                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/ws/**").permitAll() // WebSocket upgrade — auth handled by StompAuthChannelInterceptor on CONNECT
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .anyRequest().authenticated()
             }.oauth2ResourceServer {
                 it.jwt { jwt ->
                     jwt.jwtAuthenticationConverter(JwtAuthenticationConverter())

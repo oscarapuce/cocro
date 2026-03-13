@@ -1,19 +1,75 @@
 package com.cocro.presentation.websocket
 
 import com.cocro.application.session.dto.UpdateSessionGridDto
+import com.cocro.application.session.dto.notification.SessionEvent
+import com.cocro.application.session.port.SessionGridStateCache
+import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.usecase.UpdateSessionGridUseCases
+import com.cocro.infrastructure.security.spring.CocroAuthentication
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.kernel.session.rule.ParticipantsRule
+import com.cocro.kernel.session.rule.SessionShareCodeRule
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor
+import org.springframework.messaging.simp.annotation.SubscribeMapping
 import org.springframework.stereotype.Controller
 
 @Controller
 class SessionWebSocketController(
     private val updateSessionGridUseCases: UpdateSessionGridUseCases,
+    private val sessionRepository: SessionRepository,
+    private val sessionGridStateCache: SessionGridStateCache,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    /**
+     * Client subscribes to: /app/session/{shareCode}/welcome
+     * Server replies with [SessionEvent.SessionWelcome] directly (no timing race, no user-dest resolution).
+     *
+     * Client flow:
+     *  1. CONNECT
+     *  2. SUBSCRIBE /app/session/{shareCode}/welcome   ← receives SessionWelcome synchronously
+     *  3. SUBSCRIBE /topic/session/{shareCode}         ← ongoing broadcasts
+     */
+    @SubscribeMapping("/session/{shareCode}/welcome")
+    fun onWelcomeSubscribe(
+        @DestinationVariable shareCode: String,
+        headerAccessor: SimpMessageHeaderAccessor,
+    ): SessionEvent.SessionWelcome? {
+        val auth = headerAccessor.sessionAttributes
+            ?.get(StompAuthChannelInterceptor.SESSION_AUTH_KEY) as? CocroAuthentication
+            ?: run {
+                logger.warn("onWelcomeSubscribe: unauthenticated subscribe for shareCode={}", shareCode)
+                return null
+            }
+        if (!SessionShareCodeRule.validate(shareCode)) return null
+
+        val session = sessionRepository.findByShareCode(SessionShareCode(shareCode)) ?: run {
+            logger.warn("onWelcomeSubscribe: session not found shareCode={}", shareCode)
+            return null
+        }
+
+        val gridRevision = sessionGridStateCache.get(session.id)?.revision?.value
+            ?: session.sessionGridState.revision.value
+        val participantCount = ParticipantsRule.countActiveParticipants(session.participants)
+
+        logger.debug(
+            "SessionWelcome → user={} shareCode={} participants={} status={}",
+            auth.user.userId, shareCode, participantCount, session.status,
+        )
+
+        return SessionEvent.SessionWelcome(
+            shareCode = shareCode,
+            topicToSubscribe = "/topic/session/$shareCode",
+            participantCount = participantCount,
+            status = session.status.name,
+            gridRevision = gridRevision,
+        )
+    }
 
     /**
      * Client sends to: /app/session/{shareCode}/grid
