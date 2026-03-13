@@ -11,8 +11,8 @@ import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateJoinSessionDto
 import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.error.SessionError
+import com.cocro.kernel.session.model.SessionLifecycleCommand
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 import com.cocro.kernel.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
@@ -29,7 +29,6 @@ class JoinSessionUseCase(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun execute(joinSessionDto: JoinSessionDto): CocroResult<SessionJoinSuccess, SessionError> {
-        // EARLY AUTH CHECK
         val user =
             currentUserProvider.currentUserOrNull()
                 ?: run {
@@ -37,7 +36,6 @@ class JoinSessionUseCase(
                     return CocroResult.Error(listOf(SessionError.Unauthorized))
                 }
 
-        // VALIDATION
         val errors = validateJoinSessionDto(joinSessionDto)
         if (errors.isNotEmpty()) {
             logger.warn("Session join rejected: {} validation errors for shareCode={}", errors.size, joinSessionDto.shareCode)
@@ -45,7 +43,6 @@ class JoinSessionUseCase(
         }
 
         val sessionShareCode = SessionShareCode(joinSessionDto.shareCode)
-
         val session =
             sessionRepository.findByShareCode(sessionShareCode)
                 ?: run {
@@ -53,47 +50,31 @@ class JoinSessionUseCase(
                     return CocroResult.Error(listOf(SessionError.SessionNotFound(sessionShareCode.toString())))
                 }
 
-        if (session.status !in setOf(SessionStatus.CREATING, SessionStatus.PLAYING)) {
-            logger.warn(
-                "Session join rejected: invalid status {} for session {} (expected CREATING or PLAYING)",
-                session.status,
-                session.shareCode.value,
-            )
-            return CocroResult.Error(listOf(SessionError.InvalidStatusForAction(session.status, "join")))
-        }
-
-        // TRANSPARENT RECONNECTION: user disconnected (STOMP) but is still within grace period
+        // TRANSPARENT RECONNECTION: app-layer concern (heartbeat is infrastructure)
         if (heartbeatTracker.isAway(session.id, user.userId)) {
             heartbeatTracker.markActive(session.id, user.userId)
-            val activeCount = ParticipantsRule.countActiveParticipants(session.participants)
             logger.info(
                 "User {} transparently reconnected to session {} ({} participants)",
-                user.userId(),
-                session.shareCode.value,
-                activeCount,
+                user.userId(), session.shareCode.value,
+                ParticipantsRule.countActiveParticipants(session.participants),
             )
-            // No broadcast — reconnection is invisible to other participants
             return CocroResult.Success(session.toSessionJoinSuccess())
         }
 
-        // STANDARD JOIN
-        if (session.participants.any { it.userId == user.userId }) {
-            logger.warn("Session join rejected: user {} already participant in session {}", user.userId(), session.shareCode.value)
-            return CocroResult.Error(listOf(SessionError.AlreadyParticipant(user.userId(), session.shareCode.value)))
-        }
-
-        var activeParticipantCount = ParticipantsRule.countActiveParticipants(session.participants)
-        if (!ParticipantsRule.canJoin(session.participants)) {
-            logger.warn("Session join rejected: session {} is full ({} participants)", session.shareCode.value, activeParticipantCount)
-            return CocroResult.Error(listOf(SessionError.SessionFull))
-        }
+        // DOMAIN COMMAND (validates status, capacity, duplicates)
+        val updatedSession =
+            when (val result = session.apply(SessionLifecycleCommand.Join(user.userId))) {
+                is CocroResult.Success -> result.value
+                is CocroResult.Error -> {
+                    logger.warn("Session join rejected: {} for session {}", result.errors, session.shareCode.value)
+                    return CocroResult.Error(result.errors)
+                }
+            }
 
         // PERSISTENCE
-        val updatedSession = session.join(user.userId)
         val savedSession = sessionRepository.save(updatedSession)
-        ++activeParticipantCount
+        val activeParticipantCount = ParticipantsRule.countActiveParticipants(savedSession.participants)
 
-        // Flush current grid state to Mongo alongside participant update
         sessionGridStateCache.get(session.id)?.let { gridState ->
             sessionRepository.updateGridState(session.id, gridState)
             sessionGridStateCache.markFlushed(session.id, gridState.revision.value)
@@ -106,17 +87,12 @@ class JoinSessionUseCase(
         // NOTIFICATION
         sessionNotifier.broadcast(
             savedSession.shareCode,
-            SessionEvent.ParticipantJoined(
-                userId = user.userId(),
-                participantCount = activeParticipantCount,
-            ),
+            SessionEvent.ParticipantJoined(userId = user.userId(), participantCount = activeParticipantCount),
         )
 
         logger.info(
             "User {} successfully joined session {} ({} participants)",
-            user.userId(),
-            savedSession.shareCode.value,
-            activeParticipantCount,
+            user.userId(), savedSession.shareCode.value, activeParticipantCount,
         )
         return CocroResult.Success(savedSession.toSessionJoinSuccess())
     }

@@ -9,8 +9,8 @@ import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateStartSessionDto
 import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.error.SessionError
+import com.cocro.kernel.session.model.SessionLifecycleCommand
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 import com.cocro.kernel.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
@@ -25,7 +25,6 @@ class StartSessionUseCase(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun execute(dto: StartSessionDto): CocroResult<StartSessionSuccess, SessionError> {
-        // EARLY AUTH CHECK
         val user =
             currentUserProvider.currentUserOrNull()
                 ?: run {
@@ -33,17 +32,13 @@ class StartSessionUseCase(
                     return CocroResult.Error(listOf(SessionError.Unauthorized))
                 }
 
-        // VALIDATION
         val errors = validateStartSessionDto(dto)
         if (errors.isNotEmpty()) {
             logger.warn("Session start rejected: {} validation errors for shareCode={}", errors.size, dto.shareCode)
             return CocroResult.Error(errors)
         }
 
-        // MAPPING
         val sessionShareCode = SessionShareCode(dto.shareCode)
-
-        // BUSINESS RULES
         val session =
             sessionRepository.findByShareCode(sessionShareCode)
                 ?: run {
@@ -51,43 +46,26 @@ class StartSessionUseCase(
                     return CocroResult.Error(listOf(SessionError.SessionNotFound(sessionShareCode.toString())))
                 }
 
-        if (session.status != SessionStatus.CREATING) {
-            logger.warn(
-                "Session start rejected: invalid status {} for session {} (expected CREATING)",
-                session.status,
-                session.shareCode.value,
-            )
-            return CocroResult.Error(listOf(SessionError.InvalidStatusForAction(session.status, "start")))
-        }
-
-        val activeCount = ParticipantsRule.countActiveParticipants(session.participants)
-        if (activeCount < 1) {
-            logger.warn(
-                "Session start rejected: not enough participants in session {} ({}/1 minimum)",
-                session.shareCode.value,
-                activeCount,
-            )
-            return CocroResult.Error(listOf(SessionError.NotEnoughParticipants))
-        }
-
-        // DOMAIN
-        val startedSession = session.startPlaying()
+        // DOMAIN COMMAND (validates status and minimum participant count)
+        val startedSession =
+            when (val result = session.apply(SessionLifecycleCommand.Start(user.userId))) {
+                is CocroResult.Success -> result.value
+                is CocroResult.Error -> {
+                    logger.warn("Session start rejected: {} for session {}", result.errors, session.shareCode.value)
+                    return CocroResult.Error(result.errors)
+                }
+            }
 
         // PERSISTENCE
         val savedSession = sessionRepository.save(startedSession)
+        val activeCount = ParticipantsRule.countActiveParticipants(savedSession.participants)
 
         // NOTIFICATION
-        sessionNotifier.broadcast(
-            savedSession.shareCode,
-            SessionEvent.SessionStarted(participantCount = activeCount),
-        )
+        sessionNotifier.broadcast(savedSession.shareCode, SessionEvent.SessionStarted(participantCount = activeCount))
 
-        // SUCCESS
         logger.info(
             "Session {} successfully started by user {} with {} participants",
-            savedSession.shareCode.value,
-            user.userId(),
-            activeCount,
+            savedSession.shareCode.value, user.userId(), activeCount,
         )
         return CocroResult.Success(savedSession.toStartSessionSuccess())
     }

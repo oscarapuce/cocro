@@ -11,8 +11,8 @@ import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateLeaveSessionDto
 import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.session.enum.InviteStatus
 import com.cocro.kernel.session.error.SessionError
+import com.cocro.kernel.session.model.SessionLifecycleCommand
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 import com.cocro.kernel.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
@@ -29,7 +29,6 @@ class LeaveSessionUseCase(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun execute(leaveSessionDto: LeaveSessionDto): CocroResult<SessionLeaveSuccess, SessionError> {
-        // EARLY AUTH CHECK
         val user =
             currentUserProvider.currentUserOrNull()
                 ?: run {
@@ -37,7 +36,6 @@ class LeaveSessionUseCase(
                     return CocroResult.Error(listOf(SessionError.Unauthorized))
                 }
 
-        // VALIDATION
         val errors = validateLeaveSessionDto(leaveSessionDto)
         if (errors.isNotEmpty()) {
             logger.warn("Session leave rejected: {} validation errors for shareCode={}", errors.size, leaveSessionDto.shareCode)
@@ -45,8 +43,6 @@ class LeaveSessionUseCase(
         }
 
         val sessionShareCode = SessionShareCode(leaveSessionDto.shareCode)
-
-        // CHECK BUSINESS RULES
         val session =
             sessionRepository.findByShareCode(sessionShareCode)
                 ?: run {
@@ -54,16 +50,19 @@ class LeaveSessionUseCase(
                     return CocroResult.Error(listOf(SessionError.SessionNotFound(sessionShareCode.toString())))
                 }
 
-        if (!session.participants.any { it.userId == user.userId && it.status == InviteStatus.JOINED }) {
-            logger.warn("Session leave rejected: user {} is not a participant of session {}", user.userId(), sessionShareCode.value)
-            return CocroResult.Error(listOf(SessionError.UserNotParticipant(user.userId(), sessionShareCode.value)))
-        }
+        // DOMAIN COMMAND (validates user is a joined participant)
+        val updatedSession =
+            when (val result = session.apply(SessionLifecycleCommand.Leave(user.userId))) {
+                is CocroResult.Success -> result.value
+                is CocroResult.Error -> {
+                    logger.warn("Session leave rejected: {} for session {}", result.errors, session.shareCode.value)
+                    return CocroResult.Error(result.errors)
+                }
+            }
 
-        // APPLY AND PERSISTENCE
-        val updatedSession = session.leave(user.userId)
+        // PERSISTENCE
         sessionRepository.save(updatedSession)
 
-        // Flush current grid state to Mongo alongside participant update
         sessionGridStateCache.get(session.id)?.let { gridState ->
             sessionRepository.updateGridState(session.id, gridState)
             sessionGridStateCache.markFlushed(session.id, gridState.revision.value)
