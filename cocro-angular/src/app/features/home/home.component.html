@@ -1,0 +1,70 @@
+<div class="home">
+  <!-- Banner post-connexion anonyme -->
+  @if (fromAnonymousBanner()) {
+    <div class="home__banner">
+      Votre session invitée a été quittée — rejoignez à nouveau avec votre compte.
+      <button class="home__banner-close" (click)="fromAnonymousBanner.set(false)">✕</button>
+    </div>
+  }
+
+  <!-- Navbar magazine -->
+  <nav class="home__nav">
+    <span class="home__nav-brand text-display">CoCro</span>
+    <div class="home__nav-actions">
+      <span class="home__nav-user text-muted">{{ username() }}</span>
+      <cocro-button variant="ghost" (click)="logout()">Déconnexion</cocro-button>
+    </div>
+  </nav>
+  <hr class="divider" />
+
+  <!-- Hero -->
+  <header class="home__hero">
+    <h1>Mots fléchés<br />collaboratifs</h1>
+    <p class="text-muted">Créez ou rejoignez une session — jusqu'à 4 joueurs en temps réel.</p>
+  </header>
+
+  <hr class="divider" />
+
+  <!-- Two-column layout -->
+  <main class="home__grid">
+
+    <!-- Left: join -->
+    <section class="home__panel">
+      <span class="section-label">Rejoindre une partie</span>
+      <h2>Vous avez un code ?</h2>
+
+      <form [formGroup]="joinForm" (ngSubmit)="joinSession()" class="home__join-form">
+        <cocro-input
+          label="Code de partage"
+          placeholder="ABC123"
+          formControlName="shareCode"
+          [hasError]="joinForm.controls.shareCode.invalid && joinForm.controls.shareCode.touched"
+          errorMessage="Code requis"
+        />
+        @if (joinError()) {
+          <p class="home__error">{{ joinError() }}</p>
+        }
+        <cocro-button type="submit" [loading]="joinLoading()">
+          Rejoindre →
+        </cocro-button>
+      </form>
+    </section>
+
+    <!-- Right: create (dark panel) -->
+    <section class="home__panel home__panel--dark">
+      <span class="section-label" style="color: rgba(255,255,255,0.6)">Créer</span>
+      <h2>Votre atelier</h2>
+      <p>Concevez une grille et invitez des amis à la résoudre ensemble.</p>
+      <div class="home__create-actions">
+        <cocro-button variant="secondary" routerLink="/grids/editor">
+          Éditeur de grille
+        </cocro-button>
+        <cocro-button variant="secondary" routerLink="/lobby/create">
+          Nouvelle session
+        </cocro-button>
+      </div>
+    </section>
+
+  </main>
+
+</div>

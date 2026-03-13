@@ -1,0 +1,107 @@
+.game {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  outline: none;
+
+  // — Navbar —
+  &__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-xl);
+    background-color: var(--color-surface);
+  }
+
+  &__brand {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+  }
+
+  &__nav-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  &__code {
+    font-size: var(--text-lg);
+    letter-spacing: 0.1em;
+  }
+
+  &__revision {
+    font-size: var(--text-sm);
+  }
+
+  &__offline {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    color: var(--color-red);
+    font-weight: 600;
+    animation: fade-in 300ms ease-in-out;
+  }
+
+  // — Board —
+  &__board {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl);
+    overflow: auto;
+  }
+
+  &__grid {
+    display: inline-flex;
+    flex-direction: column;
+    border: var(--border-ink);
+    box-shadow: var(--shadow-panel);
+  }
+
+  &__row {
+    display: flex;
+  }
+
+  &__cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border: var(--border-ink);
+    margin: -0.5px; // collapse double borders
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: var(--color-surface);
+    transition: background-color var(--transition-snap);
+    position: relative;
+
+    &:hover {
+      background-color: var(--color-surface-alt);
+    }
+
+    &--selected {
+      background-color: rgba(122, 184, 154, 0.25);
+      border-color: var(--color-forest-light);
+      z-index: 1;
+    }
+
+    // My letter: ink black
+    &--filled-me .game__letter {
+      color: var(--color-ink);
+    }
+
+    // Other player's letter: ink blue
+    &--filled-other .game__letter {
+      color: var(--color-ink-blue);
+    }
+  }
+
+  &__letter {
+    font-family: var(--font-grid);
+    font-size: var(--cell-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    animation: ink-appear 120ms ease-out;
+    user-select: none;
+  }
+}

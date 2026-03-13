@@ -1,0 +1,35 @@
+<div class="create-session">
+  <nav class="create-session__nav">
+    <a routerLink="/home" class="text-display">← CoCro</a>
+  </nav>
+  <hr class="divider" />
+
+  <div class="create-session__content">
+    <span class="section-label">Nouvelle session</span>
+    <h1>Créer une partie</h1>
+
+    <div class="create-session__card">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="create-session__form">
+        <cocro-input
+          label="Identifiant de grille"
+          placeholder="ex: GRID01"
+          formControlName="gridId"
+          [hasError]="form.controls.gridId.invalid && form.controls.gridId.touched"
+          errorMessage="Identifiant requis"
+        />
+        <p class="text-muted">
+          Entrez l'identifiant d'une grille existante. Créez d'abord votre grille dans
+          <a routerLink="/grids/editor">l'éditeur</a>.
+        </p>
+
+        @if (error()) {
+          <p class="create-session__error">{{ error() }}</p>
+        }
+
+        <cocro-button type="submit" [loading]="loading()">
+          Créer la session →
+        </cocro-button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+<div class="lobby">
+  <nav class="lobby__nav">
+    <a routerLink="/home" class="text-display">← CoCro</a>
+  </nav>
+  <hr class="divider" />
+
+  <div class="lobby__content">
+    <span class="section-label">Salle d'attente</span>
+    <h1>Prêts à jouer ?</h1>
+
+    <!-- Share code -->
+    <div class="lobby__share">
+      <span class="section-label">Code de partage</span>
+      <div class="lobby__code-row">
+        <span class="lobby__code text-mono">{{ shareCode() }}</span>
+        <button class="lobby__copy-btn" (click)="copyCode()" type="button">
+          Copier
+        </button>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Participants -->
+    <div class="lobby__participants">
+      <span class="section-label">Joueurs ({{ participantCount() }}/4)</span>
+      <ul class="lobby__player-list">
+        @for (slot of participantSlots(); track $index) {
+          <li class="lobby__player" [class.lobby__player--empty]="!slot.filled">
+            <div class="lobby__avatar" [class.lobby__avatar--filled]="slot.filled">
+              {{ slot.filled ? slot.label[0].toUpperCase() : '?' }}
+            </div>
+            <span class="lobby__player-name">
+              {{ slot.filled ? slot.label : 'En attente...' }}
+            </span>
+            @if ($index === 0 && slot.filled) {
+              <span class="lobby__creator-badge">créateur</span>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+
+    <hr class="divider" />
+
+    @if (error()) {
+      <p class="lobby__error">{{ error() }}</p>
+    }
+
+    @if (isCreator()) {
+      <cocro-button (click)="startGame()" [loading]="starting()">
+        ▶ Démarrer la partie
+      </cocro-button>
+    } @else {
+      <p class="text-muted">En attente que le créateur démarre la partie…</p>
+    }
+  </div>
+</div>

@@ -1,0 +1,60 @@
+@use '../login/login.component' as login;
+
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+
+  &__brand {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+
+    h1 { font-size: var(--text-5xl); line-height: 1; }
+    p { margin-top: var(--space-xs); }
+  }
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--color-surface);
+    border: var(--border-ink);
+    box-shadow: var(--shadow-panel);
+    padding: var(--space-xl);
+  }
+
+  &__header { margin-bottom: var(--space-lg); }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  &__error {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-red);
+    font-style: italic;
+  }
+
+  &__footer {
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+
+    a { font-weight: 600; color: var(--color-forest); }
+  }
+
+  cocro-button {
+    display: block;
+    width: 100%;
+
+    ::ng-deep .cocro-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

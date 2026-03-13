@@ -1,0 +1,127 @@
+<div class="editor">
+
+  <!-- Top bar -->
+  <header class="editor__topbar">
+    <a routerLink="/home" class="editor__back text-display">← CoCro</a>
+    <h2 class="editor__title">Éditeur de grille</h2>
+    <div class="editor__topbar-actions">
+      @if (saveSuccess()) {
+        <span class="editor__success">✓ Sauvegardé</span>
+      }
+      @if (saveError()) {
+        <span class="editor__error">{{ saveError() }}</span>
+      }
+      <cocro-button (click)="save()" [loading]="saving()">
+        Sauvegarder
+      </cocro-button>
+    </div>
+  </header>
+  <hr class="divider" />
+
+  <div class="editor__layout">
+
+    <!-- Left panel: metadata + tools -->
+    <aside class="editor__sidebar">
+
+      <!-- Grid metadata -->
+      <div class="editor__section">
+        <span class="section-label">Métadonnées</span>
+        <form [formGroup]="metaForm" class="editor__meta-form">
+          <cocro-input
+            label="Titre"
+            placeholder="Ex: Grille du dimanche"
+            formControlName="title"
+            [hasError]="metaForm.controls.title.invalid && metaForm.controls.title.touched"
+            errorMessage="Titre requis"
+          />
+
+          <div class="editor__field-row">
+            <div class="editor__field">
+              <label class="editor__label">Largeur</label>
+              <input type="number" class="editor__num-input" formControlName="width" min="3" max="20" />
+            </div>
+            <div class="editor__field">
+              <label class="editor__label">Hauteur</label>
+              <input type="number" class="editor__num-input" formControlName="height" min="3" max="20" />
+            </div>
+          </div>
+
+          <div class="editor__field">
+            <label class="editor__label">Difficulté</label>
+            <select class="editor__select" formControlName="difficulty">
+              @for (d of difficulties; track d) {
+                <option [value]="d">{{ d }}</option>
+              }
+            </select>
+          </div>
+
+          <cocro-input
+            label="Description (facultatif)"
+            placeholder="Thème, auteur…"
+            formControlName="description"
+          />
+        </form>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Tool palette -->
+      <div class="editor__section">
+        <span class="section-label">Outil actif</span>
+        <div class="editor__tools">
+          @for (tool of tools; track tool.value) {
+            <button
+              type="button"
+              class="editor__tool-btn"
+              [class.editor__tool-btn--active]="activeTool() === tool.value"
+              [title]="tool.title"
+              (click)="activeTool.set(tool.value)"
+            >
+              <span class="editor__tool-icon">{{ tool.label }}</span>
+              <span class="editor__tool-name">{{ tool.title }}</span>
+            </button>
+          }
+        </div>
+        <p class="text-muted editor__hint">
+          @switch (activeTool()) {
+            @case ('SELECT') { Cliquer sur une case pour la sélectionner et l'éditer. }
+            @case ('LETTER') { Cliquer pour transformer en case lettre. }
+            @case ('BLACK') { Cliquer pour noircir une case. }
+            @case ('CLUE_SINGLE') { Cliquer pour ajouter une définition simple. }
+            @case ('CLUE_DOUBLE') { Cliquer pour ajouter une définition double. }
+          }
+        </p>
+      </div>
+
+    </aside>
+
+    <!-- Center: the grid -->
+    <main class="editor__canvas">
+      <div class="editor__grid-wrap">
+        <div class="editor__grid">
+          @for (row of rows(); track $index) {
+            <div class="editor__row">
+              @for (cell of row; track cell.x) {
+                <app-editor-cell
+                  [cell]="cell"
+                  [selected]="selectedCell()?.x === cell.x && selectedCell()?.y === cell.y"
+                  [tool]="activeTool()"
+                  (click)="onCellClick(cell)"
+                />
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </main>
+
+    <!-- Right panel: cell editor -->
+    <aside class="editor__cell-panel">
+      <app-cell-editor-panel
+        [cell]="selectedCell()"
+        (cellUpdated)="onCellUpdated($event)"
+      />
+    </aside>
+
+  </div>
+</div>

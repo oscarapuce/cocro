@@ -1,0 +1,54 @@
+// Lexend       — textes principaux & grilles (lisibilité optimale)
+// Plus Jakarta Sans — menus & éléments d'interface modernes
+// Space Grotesk — titres de sections affirmés
+// Spline Sans  — petits labels & détails sobres
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Patrick+Hand:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Spline+Sans:wght@300;400;500;600&display=swap');
+
+h1, h2, h3 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  color: var(--color-ink);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: var(--text-5xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); font-weight: 500; }
+
+p, li {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-ink);
+}
+
+label, span {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+
+.text-muted {
+  color: var(--color-ink-muted);
+}
+
+// Marque CoCro (titres display, ex. nav brand)
+.text-display {
+  font-family: var(--font-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+// Code de partage, valeurs techniques
+.text-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+.section-rule {
+  border: none;
+  border-top: var(--border-ink);
+  margin: var(--space-lg) 0;
+}

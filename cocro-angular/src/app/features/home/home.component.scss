@@ -1,0 +1,151 @@
+.home {
+  // — Banner —
+  &__banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-xl);
+    background-color: var(--color-forest);
+    color: #fff;
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+  }
+
+  &__banner-close {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: var(--text-md);
+    padding: 0;
+    opacity: 0.7;
+
+    &:hover { opacity: 1; }
+  }
+
+  min-height: 100vh;
+  padding: 0 var(--space-xl) var(--space-2xl);
+  max-width: 1100px;
+  margin: 0 auto;
+
+  // — Navbar —
+  &__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg) 0;
+  }
+
+  &__nav-brand {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  &__nav-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  &__nav-user {
+    font-size: var(--text-sm);
+  }
+
+  // — Hero —
+  &__hero {
+    padding: var(--space-2xl) 0 var(--space-xl);
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      line-height: 1;
+      margin-bottom: var(--space-md);
+    }
+
+    p {
+      font-size: var(--text-lg);
+      max-width: 480px;
+    }
+  }
+
+  // — Two columns —
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: var(--border-ink);
+    box-shadow: var(--shadow-panel);
+  }
+
+  &__panel {
+    padding: var(--space-xl);
+
+    .section-label {
+      display: block;
+      margin-bottom: var(--space-sm);
+    }
+
+    h2 {
+      margin-bottom: var(--space-md);
+    }
+
+    p {
+      margin-bottom: var(--space-lg);
+      color: var(--color-ink-muted);
+    }
+
+    // Left panel: white
+    background-color: var(--color-surface);
+
+    // Right panel: forest green
+    &--dark {
+      background-color: var(--color-forest);
+      border-left: var(--border-ink);
+
+      h2, p {
+        color: #fff;
+      }
+
+      cocro-button ::ng-deep .cocro-btn--secondary {
+        background-color: transparent;
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.5);
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-color: #fff;
+        }
+      }
+    }
+  }
+
+  &__join-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  &__error {
+    font-size: var(--text-sm);
+    color: var(--color-red);
+    font-style: italic;
+    font-family: var(--font-body);
+  }
+
+  &__create-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  @media (max-width: 640px) {
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__panel--dark {
+      border-left: none;
+      border-top: var(--border-ink);
+    }
+  }
+}

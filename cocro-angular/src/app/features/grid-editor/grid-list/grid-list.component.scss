@@ -1,0 +1,30 @@
+.grid-list {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl) var(--space-2xl);
+
+  &__nav {
+    padding: var(--space-lg) 0;
+    font-size: var(--text-lg);
+  }
+
+  &__content {
+    padding-top: var(--space-xl);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-2xl) 0;
+    text-align: center;
+  }
+}

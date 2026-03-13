@@ -1,0 +1,90 @@
+@use 'styles/tokens';
+@use 'styles/typography';
+@use 'styles/animations';
+
+// — Reset & Base —
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-paper);
+  // Grain texture + Séyes ruling (lignes bleues 24px, style cahier)
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      transparent,
+      transparent 23px,
+      rgba(191, 207, 232, 0.45) 23px,
+      rgba(191, 207, 232, 0.45) 24px
+    );
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+// Ligne de marge rouge (style cahier Séyès)
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 72px;
+  width: 1px;
+  height: 100%;
+  background: var(--color-margin-line);
+  z-index: 0;
+  pointer-events: none;
+}
+
+a {
+  color: var(--color-forest);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// — Layout helpers —
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container--narrow {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+// — Utility —
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.divider {
+  border: none;
+  border-top: var(--border-ink);
+  margin: var(--space-lg) 0;
+}
+
+.section-label {
+  font-family: var(--font-label);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}

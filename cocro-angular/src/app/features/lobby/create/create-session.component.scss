@@ -1,0 +1,36 @@
+.create-session {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl) var(--space-2xl);
+
+  &__nav {
+    padding: var(--space-lg) 0;
+    font-size: var(--text-lg);
+  }
+
+  &__content {
+    padding-top: var(--space-xl);
+
+    .section-label { display: block; margin-bottom: var(--space-sm); }
+    h1 { margin-bottom: var(--space-xl); }
+  }
+
+  &__card {
+    background-color: var(--color-surface);
+    border: var(--border-ink);
+    box-shadow: var(--shadow-panel);
+    padding: var(--space-xl);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  &__error {
+    font-size: var(--text-sm);
+    color: var(--color-red);
+    font-style: italic;
+  }
+}

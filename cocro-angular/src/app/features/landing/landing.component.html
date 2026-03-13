@@ -1,0 +1,69 @@
+<div class="landing">
+
+  <!-- En-tête -->
+  <nav class="landing__nav">
+    <span class="landing__nav-brand text-display">CoCro</span>
+    <div class="landing__nav-actions">
+      @if (auth.isAnonymous()) {
+        <span class="landing__nav-user text-muted">{{ auth.currentUser()?.username }}</span>
+      }
+      <cocro-button variant="ghost" routerLink="/auth/login">Se connecter</cocro-button>
+      <cocro-button variant="ghost" routerLink="/auth/register">S'inscrire</cocro-button>
+    </div>
+  </nav>
+  <hr class="divider" />
+
+  <!-- Hero -->
+  <header class="landing__hero">
+    <h1>Mots fléchés<br />collaboratifs</h1>
+    <p class="text-muted">Rejoignez une session avec un code — jusqu'à 4 joueurs en temps réel.</p>
+  </header>
+
+  <hr class="divider" />
+
+  <!-- Panneau central : rejoindre -->
+  <main class="landing__main">
+    <section class="landing__panel">
+      <span class="section-label">Rejoindre une partie</span>
+      <h2>Vous avez un code ?</h2>
+
+      @if (auth.isAnonymous()) {
+        <p class="landing__guest-info text-muted">
+          Vous jouez en tant qu'invité · <strong>{{ auth.currentUser()?.username }}</strong>
+        </p>
+      }
+
+      <form [formGroup]="joinForm" (ngSubmit)="joinSession()" class="landing__join-form">
+        <cocro-input
+          label="Code de partage"
+          placeholder="ABC123"
+          formControlName="shareCode"
+          [hasError]="joinForm.controls.shareCode.invalid && joinForm.controls.shareCode.touched"
+          errorMessage="Code requis (4 caractères min.)"
+        />
+        @if (joinError()) {
+          <p class="landing__error">{{ joinError() }}</p>
+        }
+        <cocro-button type="submit" [loading]="joinLoading()">
+          Rejoindre →
+        </cocro-button>
+      </form>
+    </section>
+
+    <!-- Panneau droit : invitation à créer un compte -->
+    <section class="landing__panel landing__panel--dark">
+      <span class="section-label" style="color: rgba(255,255,255,0.6)">Créer</span>
+      <h2>Votre atelier</h2>
+      <p>Concevez vos grilles et invitez des amis à les résoudre ensemble.</p>
+      <div class="landing__auth-actions">
+        <cocro-button variant="secondary" routerLink="/auth/register">
+          Créer un compte
+        </cocro-button>
+        <cocro-button variant="secondary" routerLink="/auth/login">
+          Déjà un compte ? Se connecter
+        </cocro-button>
+      </div>
+    </section>
+  </main>
+
+</div>

@@ -1,0 +1,49 @@
+<div class="login-page">
+  <div class="login-page__brand">
+    <h1>CoCro</h1>
+    <p class="text-muted">Mots fléchés collaboratifs</p>
+  </div>
+
+  <div class="login-page__card">
+    <div class="login-page__header">
+      <span class="section-label">Connexion</span>
+      <hr class="divider" />
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="login-page__form">
+      <cocro-input
+        label="Pseudo"
+        placeholder="votre pseudo"
+        formControlName="username"
+        [hasError]="form.controls.username.invalid && form.controls.username.touched"
+        errorMessage="Pseudo requis"
+      />
+
+      <cocro-input
+        label="Mot de passe"
+        type="password"
+        placeholder="••••••••"
+        formControlName="password"
+        [hasError]="form.controls.password.invalid && form.controls.password.touched"
+        errorMessage="Mot de passe requis"
+      />
+
+      @if (error()) {
+        <p class="login-page__error">{{ error() }}</p>
+      }
+
+      <cocro-button type="submit" [loading]="loading()">
+        Connexion
+      </cocro-button>
+    </form>
+
+    <hr class="divider" />
+    <p class="login-page__footer">
+      Pas encore de compte ?
+      <a routerLink="/auth/register">S'inscrire</a>
+    </p>
+    <p class="login-page__footer">
+      <a routerLink="/">← Revenir à l'accueil</a>
+    </p>
+  </div>
+</div>

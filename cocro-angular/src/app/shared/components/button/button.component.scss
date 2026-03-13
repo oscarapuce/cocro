@@ -1,0 +1,111 @@
+.cocro-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: var(--space-sm) var(--space-lg);
+  border: var(--border-ink);
+  border-radius: 0;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-snap),
+    color var(--transition-snap),
+    transform var(--transition-snap),
+    box-shadow var(--transition-snap);
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  // — Primary: forest green, Patrick Hand, offset shadow —
+  &--primary {
+    font-family: var(--font-hand);
+    font-size: 1.05rem;
+    background-color: var(--color-forest);
+    color: #fff;
+    box-shadow: 3px 3px 0 #1a3d26;
+
+    &:hover:not(:disabled) {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 #1a3d26;
+    }
+
+    &:active:not(:disabled) {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 #1a3d26;
+    }
+  }
+
+  // — Secondary: white ink-bordered, Patrick Hand, offset shadow —
+  &--secondary {
+    font-family: var(--font-hand);
+    font-size: 1.05rem;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: 3px 3px 0 var(--color-ink);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-forest);
+      color: #fff;
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 #1a3d26;
+    }
+
+    &:active:not(:disabled) {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 var(--color-ink);
+    }
+  }
+
+  // — Ghost: transparent, Plus Jakarta Sans (inchangé) —
+  &--ghost {
+    font-family: var(--font-ui);
+    background-color: transparent;
+    color: var(--color-ink);
+    border-color: transparent;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-surface-alt);
+    }
+  }
+
+  // — Danger: Patrick Hand, offset shadow —
+  &--danger {
+    font-family: var(--font-hand);
+    font-size: 1.05rem;
+    background-color: transparent;
+    color: var(--color-red);
+    border-color: var(--color-red);
+    box-shadow: 3px 3px 0 var(--color-red);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-red);
+      color: #fff;
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0 var(--color-red);
+    }
+
+    &:active:not(:disabled) {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 var(--color-red);
+    }
+  }
+
+  // — Spinner —
+  &__spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
