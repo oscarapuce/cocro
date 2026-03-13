@@ -4,6 +4,7 @@ import com.cocro.application.session.dto.CreateSessionDto
 import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.LeaveSessionDto
 import com.cocro.application.session.dto.StartSessionDto
+import com.cocro.application.session.usecase.CheckGridUseCase
 import com.cocro.application.session.usecase.CreateSessionUseCase
 import com.cocro.application.session.usecase.GetSessionStateUseCase
 import com.cocro.application.session.usecase.JoinSessionUseCase
@@ -28,6 +29,7 @@ class SessionController(
     private val leaveSessionUseCase: LeaveSessionUseCase,
     private val startSessionUseCase: StartSessionUseCase,
     private val getSessionStateUseCase: GetSessionStateUseCase,
+    private val checkGridUseCase: CheckGridUseCase,
 ) {
     @PostMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
@@ -39,7 +41,7 @@ class SessionController(
             .toResponseEntity(HttpStatus.CREATED)
 
     @PostMapping("/join")
-    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN', 'ANONYMOUS')")
     fun joinSession(
         @RequestBody dto: JoinSessionDto,
     ): ResponseEntity<*> =
@@ -48,7 +50,7 @@ class SessionController(
             .toResponseEntity(HttpStatus.OK)
 
     @PostMapping("/leave")
-    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN', 'ANONYMOUS')")
     fun leaveSession(
         @RequestBody dto: LeaveSessionDto,
     ): ResponseEntity<*> =
@@ -65,13 +67,27 @@ class SessionController(
             .execute(dto)
             .toResponseEntity(HttpStatus.OK)
 
-    /** Resync endpoint: returns the current grid state from cache. */
+    /** Resync endpoint: returns the current grid state from cache or MongoDB. */
     @GetMapping("/{shareCode}/state")
-    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN', 'ANONYMOUS')")
     fun getSessionState(
         @PathVariable shareCode: String,
     ): ResponseEntity<*> =
         getSessionStateUseCase
+            .execute(shareCode)
+            .toResponseEntity(HttpStatus.OK)
+
+    /**
+     * Validates the current session grid state against the reference grid in MongoDB.
+     * Read-only — no state transition is triggered.
+     * Returns [GridCheckSuccess] with isComplete, isCorrect, filledCount, totalCount.
+     */
+    @PostMapping("/{shareCode}/check")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN', 'ANONYMOUS')")
+    fun checkGrid(
+        @PathVariable shareCode: String,
+    ): ResponseEntity<*> =
+        checkGridUseCase
             .execute(shareCode)
             .toResponseEntity(HttpStatus.OK)
 }

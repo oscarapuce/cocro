@@ -1,0 +1,92 @@
+package com.cocro.application.session.usecase
+
+import com.cocro.application.auth.port.CurrentUserProvider
+import com.cocro.application.grid.port.GridRepository
+import com.cocro.application.session.dto.GridCheckSuccess
+import com.cocro.application.session.port.SessionGridStateCache
+import com.cocro.application.session.port.SessionRepository
+import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.session.enum.InviteStatus
+import com.cocro.kernel.session.enum.SessionStatus
+import com.cocro.kernel.session.error.SessionError
+import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+
+@Service
+class CheckGridUseCase(
+    private val currentUserProvider: CurrentUserProvider,
+    private val sessionRepository: SessionRepository,
+    private val sessionGridStateCache: SessionGridStateCache,
+    private val gridRepository: GridRepository,
+) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    fun execute(shareCode: String): CocroResult<GridCheckSuccess, SessionError> {
+        // 1. Auth
+        val user =
+            currentUserProvider.currentUserOrNull()
+                ?: run {
+                    logger.warn("Grid check rejected: user not authenticated")
+                    return CocroResult.Error(listOf(SessionError.Unauthorized))
+                }
+
+        // 2. Validate shareCode format
+        val sessionShareCode =
+            runCatching { SessionShareCode(shareCode) }.getOrElse {
+                return CocroResult.Error(listOf(SessionError.InvalidShareCode(shareCode)))
+            }
+
+        // 3. Load session
+        val session =
+            sessionRepository.findByShareCode(sessionShareCode)
+                ?: run {
+                    logger.warn("Grid check rejected: session not found shareCode={}", shareCode)
+                    return CocroResult.Error(listOf(SessionError.SessionNotFound(shareCode)))
+                }
+
+        // 4. Verify participant
+        if (!session.participants.any { it.userId == user.userId && it.status == InviteStatus.JOINED }) {
+            logger.warn("Grid check rejected: user={} is not a participant of session={}", user.userId(), shareCode)
+            return CocroResult.Error(listOf(SessionError.UserNotParticipant(user.userId(), shareCode)))
+        }
+
+        // 5. Verify session is PLAYING
+        if (session.status != SessionStatus.PLAYING) {
+            logger.warn("Grid check rejected: session={} status={} (expected PLAYING)", shareCode, session.status)
+            return CocroResult.Error(listOf(SessionError.InvalidStatusForAction(session.status, "check-grid")))
+        }
+
+        // 6. Load current grid state — cache first, fallback to embedded state
+        val gridState = sessionGridStateCache.get(session.id) ?: session.sessionGridState
+
+        // 7. Load reference grid
+        val referenceGrid =
+            gridRepository.findByShortId(gridState.gridShareCode)
+                ?: run {
+                    logger.error(
+                        "Grid check failed: reference grid not found shareCode={} gridCode={}",
+                        shareCode, gridState.gridShareCode.value,
+                    )
+                    return CocroResult.Error(listOf(SessionError.ReferenceGridNotFound(gridState.gridShareCode.value)))
+                }
+
+        // 8. Domain check — pure comparison, no side effects
+        val result = gridState.checkAgainst(referenceGrid)
+
+        logger.info(
+            "Grid check session={} complete={} correct={} filled={}/{}",
+            shareCode, result.isComplete, result.isCorrect, result.filledCount, result.totalCount,
+        )
+
+        return CocroResult.Success(
+            GridCheckSuccess(
+                shareCode = shareCode,
+                isComplete = result.isComplete,
+                isCorrect = result.isCorrect,
+                filledCount = result.filledCount,
+                totalCount = result.totalCount,
+            ),
+        )
+    }
+}
