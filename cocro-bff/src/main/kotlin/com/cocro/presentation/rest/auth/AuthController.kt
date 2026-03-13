@@ -2,6 +2,7 @@ package com.cocro.presentation.rest.auth
 
 import com.cocro.application.auth.dto.LoginUserCommandDto
 import com.cocro.application.auth.dto.RegisterUserCommandDto
+import com.cocro.application.auth.usecase.GuestLoginUseCase
 import com.cocro.application.auth.usecase.LoginUserUseCase
 import com.cocro.application.auth.usecase.RegisterUserUseCase
 import com.cocro.presentation.rest.error.toResponseEntity
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class AuthController(
     private val registerUserUseCase: RegisterUserUseCase,
     private val loginUserUseCase: LoginUserUseCase,
+    private val guestLoginUseCase: GuestLoginUseCase,
 ) {
     @PostMapping("/register")
     fun register(
@@ -33,4 +35,8 @@ class AuthController(
         loginUserUseCase
             .execute(request)
             .toResponseEntity(HttpStatus.OK)
+
+    @PostMapping("/guest")
+    fun guest(): ResponseEntity<*> =
+        ResponseEntity.ok(guestLoginUseCase.execute())
 }
