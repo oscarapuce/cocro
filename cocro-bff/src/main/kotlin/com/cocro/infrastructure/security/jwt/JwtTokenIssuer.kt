@@ -3,6 +3,8 @@ package com.cocro.infrastructure.security.jwt
 import com.cocro.application.auth.port.TokenIssuer
 import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.valueobject.UserId
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm
+import org.springframework.security.oauth2.jwt.JwsHeader
 import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.security.oauth2.jwt.JwtEncoder
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters
@@ -30,6 +32,7 @@ class JwtTokenIssuer(
                 .claim("roles", roles.map { it.name })
                 .build()
 
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).tokenValue
+        val header = JwsHeader.with(MacAlgorithm.HS256).build()
+        return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).tokenValue
     }
 }
