@@ -4,16 +4,6 @@ data class CreateSessionDto(
     val gridId: String,
 )
 
-// data class SelectGridDto(
-//    val sessionId: String,
-//    val gridId: String,
-// )
-
-// data class InviteUserDto(
-//    val sessionId: String,
-//    val invitedUserId: String,
-// )
-
 data class JoinSessionDto(
     val shareCode: String,
 )
