@@ -6,6 +6,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     androidTarget {
         compilations.all {
             kotlinOptions { jvmTarget = "17" }
@@ -72,7 +74,19 @@ kotlin {
         val iosX64Main by getting { dependsOn(iosMain) }
         val iosArm64Main by getting { dependsOn(iosMain) }
         val iosSimulatorArm64Main by getting { dependsOn(iosMain) }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.junit.jupiter:junit-jupiter:5.10.1")
+                implementation("org.assertj:assertj-core:3.25.1")
+                runtimeOnly("org.junit.platform:junit-platform-launcher")
+            }
+        }
     }
+}
+
+tasks.named<Test>("jvmTest") {
+    useJUnitPlatform()
 }
 
 android {
