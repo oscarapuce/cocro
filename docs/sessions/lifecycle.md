@@ -7,7 +7,7 @@ This file focuses on the session state machine and operational flows.
 ## State Machine
 
 ```
-CREATING ──[start]──► PLAYING ──[check correct]──► SCORING ──► ENDED
+CREATING ──[start]──► PLAYING
                          │
                       [all leave]
                          │
@@ -22,8 +22,6 @@ States:
 | `CREATING` | Session created, waiting for participants; grid not started |
 | `PLAYING` | Session started by creator; grid updates via WebSocket are accepted |
 | `INTERRUPTED` | All participants left; game paused (may be resumable in future) |
-| `SCORING` | Grid completed correctly (future state — not yet fully implemented) |
-| `ENDED` | Terminal state |
 
 ## Transitions
 
@@ -33,8 +31,6 @@ States:
 | `CREATING` | `Start` | creator only | `PLAYING` | `SessionStarted` broadcast |
 | `PLAYING` | `Leave` (last participant) | any participant | `INTERRUPTED` | `ParticipantLeft` broadcast |
 | `PLAYING` | `Leave` (not last) | any participant | `PLAYING` | `ParticipantLeft` broadcast |
-| `PLAYING` | `CheckGrid` (all correct) | any participant | `SCORING` (future) | — |
-
 Domain commands are defined as `SessionLifecycleCommand` in `cocro-shared`. The `Session.apply(command)` function is a pure function returning `CocroResult<Session, SessionError>`.
 
 ## REST Endpoints Summary
@@ -62,6 +58,8 @@ Flow:
 
 No state transition is triggered. Clients may call this at any time during `PLAYING`.
 
+> **Note:** `CheckGridUseCase` is read-only and does not trigger any state transition. The `GridCheckResult` is returned to the caller for display purposes only.
+
 ## WebSocket Events
 
 Events are defined as sealed `SessionEvent` in the BFF application layer, serialized as JSON with `@JsonTypeInfo` / `@JsonSubTypes`.
@@ -73,7 +71,7 @@ Events are defined as sealed `SessionEvent` in the BFF application layer, serial
 | `ParticipantLeft` | broadcast | `/topic/session/{code}` | `LeaveSessionUseCase` (manual or timeout) |
 | `SessionStarted` | broadcast | `/topic/session/{code}` | `StartSessionUseCase` |
 | `GridUpdated` | broadcast | `/topic/session/{code}` | Grid cell update via WebSocket command |
-| `SyncRequired` | private | `/user/queue/session` | CAS conflict on grid update (client must resync) |
+| `SyncRequired` | private | `/user/queue/session` | CAS conflict on grid update — **defined but not yet sent** |
 
 ### SessionWelcome Pattern
 
@@ -122,3 +120,30 @@ If a user reconnects (new STOMP CONNECT + join) within the 30s grace period:
 5. Returns `JoinSessionSuccess` with current state (client rehydrates)
 
 If the grace period has expired and the user was already evicted, `JoinSessionUseCase` treats them as a new join and performs the full `Join` command + broadcast.
+
+## Planned Features (not yet implemented)
+
+### SCORING state
+
+A future `SCORING` state will be added to the session lifecycle. The intended flow:
+
+```
+PLAYING ──[check correct]──► SCORING ──► ENDED
+```
+
+- When `CheckGridUseCase` detects `isComplete && isCorrect`, it would trigger a `PLAYING → SCORING` transition on the `Session` aggregate
+- A new `SessionLifecycleCommand.Score` command would be added to `cocro-shared`
+- A `SessionCompleted` event would be broadcast to all participants
+- This is a **nice-to-have for MVP** — currently `CheckGridUseCase` is read-only
+
+### SyncRequired event
+
+The `SyncRequired` event type is defined in `SessionEvent` but is not yet sent by `UpdateSessionGridUseCases`. Currently, a CAS conflict on `compareAndSet()` throws an exception that bubbles up unhandled. The intended behavior:
+
+- Catch the CAS conflict exception in `UpdateSessionGridUseCases`
+- Send `SyncRequired(currentRevision)` privately to the conflicting user
+- Client calls `GET /api/sessions/{code}/state` to resync
+
+### End session endpoint
+
+`Session.end()` exists in the domain model but no use case or controller exposes it. A future `POST /api/sessions/{code}/end` endpoint would allow the creator to manually end a session.
