@@ -1,5 +1,6 @@
 package com.cocro.integration
 
+import com.cocro.application.auth.dto.AuthSuccess
 import com.cocro.application.session.dto.CreateSessionDto
 import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.LeaveSessionDto
@@ -7,7 +8,6 @@ import com.cocro.application.session.dto.SessionCreationSuccess
 import com.cocro.application.session.dto.SessionJoinSuccess
 import com.cocro.application.session.dto.SessionStateDto
 import com.cocro.application.session.dto.StartSessionDto
-import com.cocro.application.session.dto.UpdateSessionGridDto
 import com.cocro.infrastructure.security.jwt.JwtTokenIssuer
 import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.valueobject.UserId
@@ -102,21 +102,12 @@ class SessionLifecycleIT {
         val startResp = post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
         assertThat(startResp.statusCode).isEqualTo(HttpStatus.OK)
 
-        // --- UPDATE GRID (REST fallback) — STOMP path covered in SessionWebSocketIT ---
-        val updateResp = post(
-            "/api/sessions/grid",
-            UpdateSessionGridDto(shareCode = shareCode, posX = 0, posY = 0, commandType = "PLACE_LETTER", letter = 'A'),
-            creatorToken,
-            Any::class.java,
-        )
-        assertThat(updateResp.statusCode).isEqualTo(HttpStatus.OK)
-
-        // --- RESYNC ---
+        // --- RESYNC (grid updates happen via STOMP — see SessionWebSocketIT) ---
         val stateResp = get("/api/sessions/$shareCode/state", joinerToken, SessionStateDto::class.java)
         assertThat(stateResp.statusCode).isEqualTo(HttpStatus.OK)
         val state = stateResp.body!!
-        assertThat(state.revision).isEqualTo(1L)
-        assertThat(state.cells).anyMatch { it.x == 0 && it.y == 0 && it.letter == 'A' }
+        assertThat(state.revision).isEqualTo(0L)
+        assertThat(state.cells).isEmpty()
     }
 
     @Test
@@ -163,6 +154,77 @@ class SessionLifecycleIT {
         // TODO: update this test if re-join is allowed in the future
         val rejoin = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
         assertThat(rejoin.statusCode).isEqualTo(HttpStatus.CONFLICT)
+    }
+
+    // -------------------------------------------------------------------------
+    // Guest login + session participation
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `guest can login and join a session`() {
+        // Guest login (no auth required)
+        val guestResp = restTemplate.postForEntity("/auth/guest", null, AuthSuccess::class.java)
+        assertThat(guestResp.statusCode).isEqualTo(HttpStatus.OK)
+        val guest = guestResp.body!!
+        assertThat(guest.token).isNotBlank()
+        assertThat(guest.roles).contains("ANONYMOUS")
+        assertThat(guest.username).isNotBlank()
+
+        // Creator creates a session
+        val creatorToken = tokenFor()
+        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
+            .body!!.shareCode
+
+        // Guest joins with the token from /auth/guest
+        val joinResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), guest.token, SessionJoinSuccess::class.java)
+        assertThat(joinResp.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(joinResp.body!!.participantCount).isEqualTo(2)
+    }
+
+    // -------------------------------------------------------------------------
+    // State endpoint — authorization errors
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `get state returns 403 when user is not a participant`() {
+        val creatorToken = tokenFor()
+        val outsiderToken = tokenFor()
+        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
+            .body!!.shareCode
+        post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
+
+        val stateResp = get("/api/sessions/$shareCode/state", outsiderToken, Any::class.java)
+        assertThat(stateResp.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+    }
+
+    @Test
+    fun `get state returns 403 for non-existent session`() {
+        val token = tokenFor()
+        val stateResp = get("/api/sessions/ZZZZ/state", token, Any::class.java)
+        assertThat(stateResp.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+    }
+
+    // -------------------------------------------------------------------------
+    // Check grid endpoint — error scenarios
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `check grid returns 403 for non-existent session`() {
+        val token = tokenFor()
+        val resp = post("/api/sessions/ZZZZ/check", emptyMap<String, String>(), token, Any::class.java)
+        assertThat(resp.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+    }
+
+    @Test
+    fun `check grid returns 404 when reference grid not found`() {
+        // Create and start a session (gridId GRID01 doesn't exist in DB)
+        val creatorToken = tokenFor()
+        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
+            .body!!.shareCode
+        post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
+
+        val resp = post("/api/sessions/$shareCode/check", emptyMap<String, String>(), creatorToken, Any::class.java)
+        assertThat(resp.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
 }
 
