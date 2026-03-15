@@ -3,12 +3,15 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: redispass
+      password: ${REDIS_PASSWORD}
 
 cocro:
+  cors:
+    allowed-origins:
+      - ${COCRO_CORS_ORIGIN}
   jwt:
     issuer: "cocro-api"
-    secret: "xdF/mP/gUVw+P7G3Quks1TuyxyYUf/A04fxMGxqKJjIAEzab3wDSxPnr/KaukNfRsR8wlpZ6sTvZhLr6uw90Hw=="
+    secret: ${COCRO_JWT_SECRET}
     expirationSeconds: 86400
   session:
     heartbeat:

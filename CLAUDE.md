@@ -67,3 +67,20 @@ Business operations return `CocroResult<T, E>` (a sealed `Success`/`Error` type 
 - **JWT (JJWT)**: Stateless auth. Claims include userId, username, role.
 - **Spring Security**: JWT resource server + channel interceptor for WebSocket auth.
 - **Dev credentials** (`.env`): `MONGO_USER=admin`, `MONGO_PASSWORD=admin`, `REDIS_PASSWORD=redispass`
+
+### Angular Frontend (cocro-angular)
+
+Angular 20 standalone + Signals app with DDD 4-folder architecture:
+
+```
+cocro-angular/src/app/
+├── domain/         — models, rules, services (pure functions, no Angular deps)
+├── application/    — services (GridSelectorService), ports
+├── infrastructure/ — adapters (HTTP services), auth, guards, DTOs
+└── presentation/   — features (pages), shared components
+```
+
+- TSConfig path aliases: `@domain/*`, `@application/*`, `@infrastructure/*`, `@presentation/*`
+- Build: `cd cocro-angular && npx ng build`
+- Dev: `cd cocro-angular && npx ng serve` (port 4200)
+- Design: "L'Atelier du Cruciverbiste" — beige/paper + forest green, Séyès notebook style

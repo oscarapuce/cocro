@@ -1,0 +1,110 @@
+@if (cell) {
+  <div class="cep">
+    <div class="cep__header">
+      <span class="section-label">Case ({{ cell.x }}, {{ cell.y }})</span>
+      <span class="cep__type-badge">{{ typeLabel }}</span>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="apply()" class="cep__form">
+
+      @if (cell.type === 'LETTER') {
+        <div class="cep__field">
+          <label class="cep__label">Lettre (facultatif)</label>
+          <input
+            type="text"
+            maxlength="1"
+            class="cep__input cep__input--letter"
+            formControlName="letter"
+            placeholder="A"
+          />
+        </div>
+        <div class="cep__field">
+          <label class="cep__label">Numéro</label>
+          <input
+            type="number"
+            class="cep__input"
+            formControlName="number"
+            placeholder="ex: 1"
+            min="1"
+          />
+        </div>
+      }
+
+      @if (cell.type === 'BLACK') {
+        <p class="cep__empty">Case noire — aucune propriété.</p>
+      }
+
+      @if (cell.type === 'CLUE_SINGLE') {
+        <div class="cep__field">
+          <label class="cep__label">Direction</label>
+          <select class="cep__input" formControlName="clue0direction">
+            @for (dir of singleDirs; track dir) {
+              <option [value]="dir">{{ dirLabels[dir] }}</option>
+            }
+          </select>
+        </div>
+        <div class="cep__field">
+          <label class="cep__label">Définition</label>
+          <textarea
+            class="cep__textarea"
+            formControlName="clue0text"
+            placeholder="Ex: Animal nocturne à plumes"
+            rows="3"
+          ></textarea>
+        </div>
+        <div class="cep__field">
+          <label class="cep__label">Numéro</label>
+          <input type="number" class="cep__input" formControlName="number" min="1" />
+        </div>
+      }
+
+      @if (cell.type === 'CLUE_DOUBLE') {
+        <div class="cep__double-section">
+          <span class="cep__slot-label">Horizontal</span>
+          <div class="cep__field">
+            <label class="cep__label">Direction</label>
+            <select class="cep__input" formControlName="clue0direction">
+              @for (dir of horizontalDirs; track dir) {
+                <option [value]="dir">{{ dirLabels[dir] }}</option>
+              }
+            </select>
+          </div>
+          <div class="cep__field">
+            <label class="cep__label">Définition</label>
+            <textarea class="cep__textarea" formControlName="clue0text" rows="2"
+              placeholder="Définition horizontale"></textarea>
+          </div>
+        </div>
+        <div class="cep__double-section">
+          <span class="cep__slot-label">Vertical</span>
+          <div class="cep__field">
+            <label class="cep__label">Direction</label>
+            <select class="cep__input" formControlName="clue1direction">
+              @for (dir of verticalDirs; track dir) {
+                <option [value]="dir">{{ dirLabels[dir] }}</option>
+              }
+            </select>
+          </div>
+          <div class="cep__field">
+            <label class="cep__label">Définition</label>
+            <textarea class="cep__textarea" formControlName="clue1text" rows="2"
+              placeholder="Définition verticale"></textarea>
+          </div>
+        </div>
+        <div class="cep__field">
+          <label class="cep__label">Numéro</label>
+          <input type="number" class="cep__input" formControlName="number" min="1" />
+        </div>
+      }
+
+      @if (cell.type !== 'BLACK') {
+        <cocro-button type="submit" variant="secondary">Appliquer</cocro-button>
+      }
+
+    </form>
+  </div>
+} @else {
+  <div class="cep cep--empty">
+    <p class="text-muted">Sélectionne une case pour l'éditer.</p>
+  </div>
+}

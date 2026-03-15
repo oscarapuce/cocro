@@ -3,8 +3,15 @@ spring:
     name: cocro-bff
   data:
     mongodb:
-      uri: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/cocro?authSource=admin
+      uri: mongodb://admin:admin@localhost:27017/cocro?authSource=admin
     redis:
       host: localhost
       port: 6379
-      password: ${REDIS_PASSWORD}
+      password: redispass
+
+cocro:
+  cors:
+    allowed-origins:
+      - http://localhost:4200
+  jwt:
+    secret: "xdF/mP/gUVw+P7G3Quks1TuyxyYUf/A04fxMGxqKJjIAEzab3wDSxPnr/KaukNfRsR8wlpZ6sTvZhLr6uw90Hw=="
