@@ -2,7 +2,8 @@
 // Plus Jakarta Sans — menus & éléments d'interface modernes
 // Space Grotesk — titres de sections affirmés
 // Spline Sans  — petits labels & détails sobres
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Patrick+Hand:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Spline+Sans:wght@300;400;500;600&display=swap');
+// Comic Neue   — cellules de grille (--font-grid)
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Lexend:wght@300;400;500;600;700&family=Patrick+Hand:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Spline+Sans:wght@300;400;500;600&display=swap');
 
 h1, h2, h3 {
   font-family: var(--font-title);
@@ -45,6 +46,15 @@ label, span {
 .text-mono {
   font-family: var(--font-mono);
   letter-spacing: 0.1em;
+}
+
+.section-label {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
 }
 
 .section-rule {

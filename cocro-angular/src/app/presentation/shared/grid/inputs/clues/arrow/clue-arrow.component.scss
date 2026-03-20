@@ -1,0 +1,55 @@
+.arrow {
+  position: absolute;
+  font-size: 1.2rem;
+  color: var(--color-ink);
+  z-index: 2;
+
+  svg,
+  path {
+    fill: currentColor;
+  }
+
+  &.right {
+    top: 50%;
+    right: -1rem;
+    transform: translateY(-50%) rotate(-90deg);
+  }
+
+  &.down {
+    bottom: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &.from-side {
+    top: 50%;
+    right: -1rem;
+    transform: translateX(-15%) translateY(-50%);
+  }
+
+  &.from-below {
+    bottom: -1rem;
+    left: 50%;
+    transform: translateX(-175%) translateY(-15%) rotate(-90deg) scaleX(-1);
+  }
+
+  /* ----- Mode inline: remove position offsets ----- */
+  &.inline {
+    position: static;
+    inset: auto;
+
+    &.right      { transform: rotate(-90deg); }
+    &.down       { transform: none; }
+    &.from-side  { transform: none; }
+    &.from-below { transform: rotate(-90deg) scaleX(-1); }
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 0.8rem;
+      height: 0.8rem;
+    }
+  }
+}

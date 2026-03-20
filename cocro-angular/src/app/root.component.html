@@ -1,0 +1,31 @@
+@if (hasTopHeader()) {
+  <cocro-header />
+}
+
+@if (hasToolSidebar()) {
+  <button
+    type="button"
+    class="app-shell__burger"
+    (click)="toggleSidebar()"
+    [attr.aria-expanded]="!sidebarCollapsed()"
+    aria-label="Ouvrir ou fermer la navigation"
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <div class="app-shell" [class.app-shell--sidebar-collapsed]="sidebarCollapsed()">
+    <cocro-auth-sidebar
+      [collapsed]="sidebarCollapsed()"
+      (toggle)="toggleSidebar()"
+      (navigate)="collapseSidebar()"
+    />
+    <main class="app-shell__content" (click)="collapseSidebarFromContent()">
+      <router-outlet />
+    </main>
+  </div>
+} @else {
+  <router-outlet />
+}
+
+<cocro-toast-container />

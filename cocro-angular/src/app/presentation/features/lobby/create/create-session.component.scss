@@ -2,6 +2,7 @@
   max-width: 640px;
   margin: 0 auto;
   padding: 0 var(--space-xl) var(--space-2xl);
+  animation: enter-up 350ms ease-out both;
 
   &__nav {
     padding: var(--space-lg) 0;
@@ -17,7 +18,8 @@
 
   &__card {
     background-color: var(--color-surface);
-    border: var(--border-ink);
+    border: var(--border-dashed);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-panel);
     padding: var(--space-xl);
   }

@@ -1,0 +1,19 @@
+<div class="clue-editor-card">
+  @for (clue of cell.clues; let i = $index; track i) {
+    <div class="clue-item">
+      <div class="direction-toggle">
+        @for (dir of getAllowedDirections(i, cell.clues!.length); track dir) {
+          <button
+            class="toggle-btn"
+            [class.active]="isActiveDirection(clue.direction, dir)"
+            (click)="clue.direction = dir"
+          >
+            <cocro-clue-arrow [direction]="dir" [inline]="true"></cocro-clue-arrow>
+          </button>
+        }
+      </div>
+
+      <input type="text" [(ngModel)]="clue.text" placeholder="Texte de l'indice" />
+    </div>
+  }
+</div>

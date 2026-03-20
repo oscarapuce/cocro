@@ -1,0 +1,16 @@
+<div class="cell"
+     [class.selected]="selected()"
+     [class.isOnDirection]="isOnDirection()"
+     [class.leftSeparator]="hasLeftSeparator()"
+     [class.upSeparator]="hasUpSeparator()"
+     (click)="onClick()"
+>
+  @if (isLetter()) {
+    <cocro-letter-input [letter]="cell.letter" [active]="selected()"/>
+  } @else if (isClue()) {
+    <cocro-clue-input [clues]="getClues()"/>
+  } @else {
+    <div class="black">
+    </div>
+  }
+</div>

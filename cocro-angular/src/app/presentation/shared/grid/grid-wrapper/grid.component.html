@@ -1,0 +1,5 @@
+<div class="grid" [ngStyle]="{ 'grid-template-columns': 'repeat(' + selector.grid().width + ', 1fr)' }">
+  @for (cell of selector.grid().cells; track (cell.x* selector.grid().width + cell.y)) {
+    <cocro-grid-cell [cell]="cell" />
+  }
+</div>

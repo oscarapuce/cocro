@@ -1,14 +1,9 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { SessionService } from '@infrastructure/adapters/session.service';
+import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
 import { AuthService } from '@infrastructure/auth/auth.service';
+import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
-
-interface Participant {
-  userId: string;
-  label: string;
-  online: boolean;
-}
 
 @Component({
   selector: 'app-lobby-room',
@@ -34,7 +29,7 @@ export class LobbyRoomComponent implements OnInit {
   isCreator = signal(true); // assume creator if landing here after create
 
   private route = inject(ActivatedRoute);
-  private sessionService = inject(SessionService);
+  private sessionPort = inject(GAME_SESSION_PORT);
   private auth = inject(AuthService);
   private router = inject(Router);
 
@@ -49,10 +44,10 @@ export class LobbyRoomComponent implements OnInit {
 
   startGame(): void {
     this.starting.set(true);
-    this.sessionService.startSession({ shareCode: this.shareCode() }).subscribe({
+    this.sessionPort.startSession({ shareCode: this.shareCode() }).subscribe({
       next: () => this.router.navigate(['/game', this.shareCode()]),
-      error: (err) => {
-        this.error.set(err.status === 400 ? 'Déjà démarré ou non autorisé.' : 'Erreur.');
+      error: (err: unknown) => {
+        this.error.set(getNetworkErrorMessage(err, 'Erreur.'));
         this.starting.set(false);
       },
     });

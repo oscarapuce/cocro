@@ -15,21 +15,19 @@ html, body {
 
 body {
   background-color: var(--color-paper);
-  // Grain texture + Séyes ruling (lignes bleues 24px, style cahier)
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
     repeating-linear-gradient(
       transparent,
       transparent 23px,
-      rgba(191, 207, 232, 0.45) 23px,
-      rgba(191, 207, 232, 0.45) 24px
+      rgba(191, 207, 232, 0.5) 23px,
+      rgba(191, 207, 232, 0.5) 24px
     );
   font-family: var(--font-body);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
 }
 
-// Ligne de marge rouge (style cahier Séyès)
 body::before {
   content: '';
   position: fixed;
@@ -45,9 +43,24 @@ body::before {
 a {
   color: var(--color-forest);
   text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
 
-  &:hover {
-    text-decoration: underline;
+// Dark card projected-content override (ViewEncapsulation can't reach ng-content children)
+.cocro-card--dark {
+  h1, h2, h3, h4, h5, h6,
+  p, span, label, strong, em,
+  .text-muted, .section-label, .text-display {
+    color: #fff;
+  }
+
+  .section-label {
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.85);
+    &:hover { color: #fff; }
   }
 }
 
@@ -78,13 +91,4 @@ a {
   border: none;
   border-top: var(--border-ink);
   margin: var(--space-lg) 0;
-}
-
-.section-label {
-  font-family: var(--font-label);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-ink-muted);
 }

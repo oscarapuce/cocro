@@ -1,0 +1,10 @@
+<input
+  type="text"
+  maxlength="1"
+  pattern="[A-Za-z]"
+  class="letter-input"
+  [value]="letter.value"
+  [disabled]="!active"
+  [readonly]="!active"
+  (input)="onInput($event)"
+  inputmode="latin" />

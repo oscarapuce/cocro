@@ -1,0 +1,47 @@
+<aside class="auth-sidebar" [class.auth-sidebar--collapsed]="collapsed()">
+  <div class="auth-sidebar__top">
+    <a routerLink="/" class="auth-sidebar__brand">
+      <span class="auth-sidebar__brand-mark text-display">CoCro</span>
+      <span class="auth-sidebar__brand-text">Atelier collaboratif</span>
+    </a>
+  </div>
+
+  <nav class="auth-sidebar__nav" aria-label="Navigation principale">
+    <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }" class="auth-sidebar__link" (click)="onNavigate()">
+      <span class="auth-sidebar__link-icon">01</span>
+      <span>Accueil</span>
+    </a>
+    @if (auth.isAuthenticated()) {
+      <a routerLink="/grid/create" routerLinkActive="is-active" class="auth-sidebar__link" (click)="onNavigate()">
+        <span class="auth-sidebar__link-icon">02</span>
+        <span>Éditeur</span>
+      </a>
+      <a routerLink="/lobby/create" routerLinkActive="is-active" class="auth-sidebar__link" (click)="onNavigate()">
+        <span class="auth-sidebar__link-icon">03</span>
+        <span>Session</span>
+      </a>
+    } @else {
+      <a routerLink="/auth/login" routerLinkActive="is-active" class="auth-sidebar__link" (click)="onNavigate()">
+        <span class="auth-sidebar__link-icon">02</span>
+        <span>Connexion</span>
+      </a>
+      <a routerLink="/auth/register" routerLinkActive="is-active" class="auth-sidebar__link" (click)="onNavigate()">
+        <span class="auth-sidebar__link-icon">03</span>
+        <span>Inscription</span>
+      </a>
+    }
+  </nav>
+
+  @if (auth.isAuthenticated()) {
+    <div class="auth-sidebar__footer">
+      <div class="auth-sidebar__user">
+        <span class="auth-sidebar__user-label">Connecté en tant que</span>
+        <strong>{{ auth.currentUser()?.username }}</strong>
+      </div>
+      <button type="button" class="auth-sidebar__logout" (click)="logout()">
+        <span class="auth-sidebar__link-icon">⇠</span>
+        <span>Déconnexion</span>
+      </button>
+    </div>
+  }
+</aside>

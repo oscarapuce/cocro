@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@infrastructure/auth/auth.service';
+import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
 import { InputComponent } from '@presentation/shared/components/input/input.component';
 
@@ -35,11 +36,11 @@ export class LoginComponent {
 
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () =>
-        this.router.navigate(['/home'], {
+        this.router.navigate(['/'], {
           state: { fromAnonymous: this.cameFromAnonymous },
         }),
-      error: (err) => {
-        this.error.set(err.status === 401 ? 'Identifiants incorrects.' : 'Erreur serveur.');
+      error: (err: unknown) => {
+        this.error.set(getNetworkErrorMessage(err, 'Erreur serveur.'));
         this.loading.set(false);
       },
     });

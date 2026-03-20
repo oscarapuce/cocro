@@ -1,0 +1,21 @@
+<div class="letter-editor-card">
+  <div class="letter-item">
+    <div class="separator-type-toggle">
+      <button
+        class="toggle-btn"
+        [class.active]="isSepActive('left')"
+        (click)="toggleSep('left')"
+      >Gauche</button>
+      <button
+        class="toggle-btn"
+        [class.active]="isSepActive('up')"
+        (click)="toggleSep('up')"
+      >Haut</button>
+    </div>
+
+    <input type="text"
+           maxlength="2"
+           placeholder="1"
+    >
+  </div>
+</div>

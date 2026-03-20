@@ -6,9 +6,10 @@
   font-size: var(--text-base);
   font-weight: 600;
   letter-spacing: 0.02em;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 10px var(--space-lg);
   border: var(--border-ink);
-  border-radius: 0;
+  border-radius: var(--radius-sm);
+  min-height: 42px;
   cursor: pointer;
   transition:
     background-color var(--transition-snap),
@@ -27,7 +28,7 @@
     font-size: 1.05rem;
     background-color: var(--color-forest);
     color: #fff;
-    box-shadow: 3px 3px 0 #1a3d26;
+    box-shadow: var(--shadow-sm);
 
     &:hover:not(:disabled) {
       transform: translate(-2px, -2px);
@@ -40,13 +41,14 @@
     }
   }
 
-  // — Secondary: white ink-bordered, Patrick Hand, offset shadow —
+  // — Secondary: white bg, dashed green border, forest text, Patrick Hand —
   &--secondary {
     font-family: var(--font-hand);
     font-size: 1.05rem;
-    background-color: var(--color-surface);
-    color: var(--color-ink);
-    box-shadow: 3px 3px 0 var(--color-ink);
+    background-color: #fff;
+    color: var(--color-forest);
+    border: var(--border-dashed);
+    box-shadow: 3px 3px 0 var(--color-forest);
 
     &:hover:not(:disabled) {
       background-color: var(--color-forest);
@@ -57,11 +59,11 @@
 
     &:active:not(:disabled) {
       transform: translate(1px, 1px);
-      box-shadow: 1px 1px 0 var(--color-ink);
+      box-shadow: 1px 1px 0 var(--color-forest);
     }
   }
 
-  // — Ghost: transparent, Plus Jakarta Sans (inchangé) —
+  // — Ghost: transparent (inchangé) —
   &--ghost {
     font-family: var(--font-ui);
     background-color: transparent;

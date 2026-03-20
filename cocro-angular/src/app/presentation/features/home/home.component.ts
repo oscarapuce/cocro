@@ -2,21 +2,23 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@infrastructure/auth/auth.service';
-import { SessionService } from '@infrastructure/adapters/session.service';
+import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
+import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
 import { InputComponent } from '@presentation/shared/components/input/input.component';
+import { LandingHomeShellComponent } from '@presentation/shared/shell/landing-home-shell.component';
 
 @Component({
-  selector: 'app-home',
+  selector: 'cocro-home',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent],
+  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent, LandingHomeShellComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
-  private sessionService = inject(SessionService);
+  private sessionPort = inject(GAME_SESSION_PORT);
   private router = inject(Router);
 
   joinForm = this.fb.nonNullable.group({
@@ -46,16 +48,10 @@ export class HomeComponent implements OnInit {
     this.joinError.set('');
 
     const { shareCode } = this.joinForm.getRawValue();
-    this.sessionService.joinSession({ shareCode }).subscribe({
+    this.sessionPort.joinSession({ shareCode }).subscribe({
       next: () => this.router.navigate(['/lobby/room', shareCode]),
-      error: (err) => {
-        const msg =
-          err.status === 409
-            ? 'Session pleine ou déjà rejoint.'
-            : err.status === 404
-              ? 'Code invalide.'
-              : 'Erreur serveur.';
-        this.joinError.set(msg);
+      error: (err: unknown) => {
+        this.joinError.set(getNetworkErrorMessage(err, 'Erreur serveur.'));
         this.joinLoading.set(false);
       },
     });

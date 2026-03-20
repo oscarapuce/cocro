@@ -1,23 +1,25 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
 import { AuthService } from '@infrastructure/auth/auth.service';
-import { SessionService } from '@infrastructure/adapters/session.service';
+import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
+import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
 import { InputComponent } from '@presentation/shared/components/input/input.component';
+import { LandingHomeShellComponent } from '@presentation/shared/shell/landing-home-shell.component';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent],
+  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent, LandingHomeShellComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })
-export class LandingComponent implements OnInit {
+export class LandingComponent {
   private fb = inject(FormBuilder);
   readonly auth = inject(AuthService);
-  private sessionService = inject(SessionService);
+  private sessionPort = inject(GAME_SESSION_PORT);
   private router = inject(Router);
 
   joinForm = this.fb.nonNullable.group({
@@ -27,12 +29,10 @@ export class LandingComponent implements OnInit {
   joinLoading = signal(false);
   joinError = signal('');
 
-  ngOnInit(): void {
-    // Utilisateur déjà connecté en tant que PLAYER/ADMIN → dashboard
-    if (this.auth.isPlayer()) {
-      this.router.navigate(['/home']);
-    }
-  }
+  readonly heroSubtitle = (): string =>
+    this.auth.isPlayer()
+      ? 'Créez ou rejoignez une session — jusqu’à 4 joueurs en temps réel.'
+      : 'Rejoignez une session avec un code — jusqu’à 4 joueurs en temps réel.';
 
   joinSession(): void {
     if (this.joinForm.invalid) return;
@@ -42,18 +42,12 @@ export class LandingComponent implements OnInit {
     const { shareCode } = this.joinForm.getRawValue();
 
     const doJoin = () =>
-      this.sessionService.joinSession({ shareCode });
+      this.sessionPort.joinSession({ shareCode });
 
     const afterJoin = {
       next: () => this.router.navigate(['/lobby/room', shareCode]),
-      error: (err: { status: number }) => {
-        const msg =
-          err.status === 409
-            ? 'Session pleine ou déjà rejoint.'
-            : err.status === 404
-              ? 'Code invalide.'
-              : 'Erreur serveur.';
-        this.joinError.set(msg);
+      error: (err: unknown) => {
+        this.joinError.set(getNetworkErrorMessage(err, 'Erreur serveur.'));
         this.joinLoading.set(false);
       },
     };

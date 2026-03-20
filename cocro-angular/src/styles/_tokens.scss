@@ -1,6 +1,6 @@
 :root {
   // — Colors —
-  --color-paper:        #F5F0E8;
+  --color-paper:        #F0EDE5;
   --color-paper-dark:   #EDE8D0;
   --color-surface:      #FFFFFF;
   --color-surface-alt:  #F7F4ED;
@@ -9,16 +9,27 @@
   --color-ink-muted:    #6B5E4E;
   --color-ink-blue:     #2C4A8A;
 
-  --color-forest:       #2D5A3D;
-  --color-forest-light: #7AB89A;
+  --color-forest:       #255736;
+  --color-forest-light: #008000;
+  --color-croco:        #8BC462;
+  --color-croco-strong: #849E00;
+  --color-croco-tint:   rgba(139, 196, 98, 0.24);
+  --color-croco-wash:   rgba(139, 196, 98, 0.18);
+  --color-croco-border: rgba(132, 158, 0, 0.38);
   --color-gold:         #C4952A;
   --color-red:          #B83225;
   --color-red-light:    #E8756A;
 
   --color-border:       #1A1A1A;
   --color-border-soft:  #C8C0A8;
-  --color-margin-line:  rgba(232, 160, 144, 0.7);
+  --color-border-dashed: #b5c3ad;
+  --color-margin-line:  rgba(232, 160, 144, 0.6);
   --color-shadow:       rgba(26, 26, 26, 0.08);
+
+  --color-input-bg:     #fffde7;
+  --color-cell-selected: #fffde7;
+  --color-toggle-active-start: #8BC462;
+  --color-toggle-active-end:   rgba(139, 196, 98, 0.18);
 
   // — Spacing —
   --space-xs:   4px;
@@ -41,32 +52,50 @@
   --text-5xl:  3.5rem;
 
   // — Fonts —
-  // Lexend       → corps de texte & grille (lisibilité)
-  // Plus Jakarta → UI, menus, boutons ghost (modernité)
-  // Space Grotesk→ titres affirmés
-  // Spline Sans  → labels sobres, section-label
-  // Patrick Hand → boutons CTA (action, cahier)
   --font-title:   'Space Grotesk', sans-serif;
-  --font-display: 'Space Grotesk', sans-serif;      // alias pour compatibilité .text-display
+  --font-display: 'Space Grotesk', sans-serif;
   --font-body:    'Lexend', sans-serif;
-  --font-grid:    'Lexend', sans-serif;
-  --font-ui:      'Plus Jakarta Sans', sans-serif;  // boutons ghost, menus, labels d'input
-  --font-hand:    'Patrick Hand', cursive;           // boutons CTA (primary, secondary, danger)
-  --font-label:   'Spline Sans', sans-serif;        // section-label, détails sobres
-  --font-mono:    'Plus Jakarta Sans', monospace;   // codes de partage
+  --font-grid:    'Comic Neue', cursive;
+  --font-ui:      'Plus Jakarta Sans', sans-serif;
+  --font-hand:    'Patrick Hand', cursive;
+  --font-label:   'Spline Sans', sans-serif;
+  --font-mono:    'Plus Jakarta Sans', monospace;
 
   // — Grid cells —
   --cell-size:        48px;
   --cell-size-editor: 56px;
   --cell-font-size:   1.25rem;
 
-  // — Borders —
-  --border-ink:  1px solid var(--color-border);
-  --border-soft: 1px solid var(--color-border-soft);
+  // — Grid lines —
+  --grid-inner-width: 0.5px;
+  --grid-inner-color: var(--color-border);        // lignes inter-cellules
+  --grid-outer-width: 2px;
+  --grid-outer-color: var(--color-border);        // contour extérieur
+  --grid-sep-width:   2px;
+  --grid-sep-color:   #5a6057;                    // séparateurs de mot (UP / LEFT)
 
-  // — Shadows (offset hard shadow, style cahier) —
-  --shadow-card:  4px 4px 0 var(--color-ink);
-  --shadow-panel: 4px 4px 0 var(--color-ink);
+  // — Cell states —
+  --color-cell-black:       #5a6057;              // cellule noire
+  --color-cell-select-ring: var(--color-red);     // outline cellule sélectionnée
+  --color-cell-select-fill: rgba(180, 43, 29, 0.12);
+  --color-cell-dir-ring:    var(--color-red-light);
+  --color-cell-dir-fill:    rgba(232, 117, 106, 0.10);
+
+  // — Borders —
+  --border-ink:    1px solid var(--color-border);
+  --border-soft:   1px solid var(--color-border-soft);
+  --border-dashed: 1px dashed var(--color-border-dashed);
+
+  // — Radius —
+  --radius-sm:    10px;
+  --radius-md:    14px;
+  --radius-lg:    18px;
+  --radius-panel: 22px;
+
+  // — Shadows (hard offset, cahier style) —
+  --shadow-card:  2px 2px 0 rgba(26, 26, 26, 0.18);
+  --shadow-panel: 3px 3px 0 rgba(26, 26, 26, 0.14);
+  --shadow-sm:    2px 2px 0 rgba(26, 26, 26, 0.22);
 
   // — Transitions —
   --transition-snap:   100ms ease-out;

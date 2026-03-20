@@ -1,35 +1,16 @@
-<div class="home">
-  <!-- Banner post-connexion anonyme -->
+<cocro-landing-home-shell
+  [showTopNav]="false"
+  heroTitle="Mots fléchés<br />collaboratifs"
+  heroSubtitle="Créez ou rejoignez une session — jusqu'à 4 joueurs en temps réel."
+>
   @if (fromAnonymousBanner()) {
-    <div class="home__banner">
+    <div shell-banner class="home__banner">
       Votre session invitée a été quittée — rejoignez à nouveau avec votre compte.
-      <button class="home__banner-close" (click)="fromAnonymousBanner.set(false)">✕</button>
+      <button class="home__banner-close" (click)="fromAnonymousBanner.set(false)" aria-label="Fermer">×</button>
     </div>
   }
 
-  <!-- Navbar magazine -->
-  <nav class="home__nav">
-    <span class="home__nav-brand text-display">CoCro</span>
-    <div class="home__nav-actions">
-      <span class="home__nav-user text-muted">{{ username() }}</span>
-      <cocro-button variant="ghost" (click)="logout()">Déconnexion</cocro-button>
-    </div>
-  </nav>
-  <hr class="divider" />
-
-  <!-- Hero -->
-  <header class="home__hero">
-    <h1>Mots fléchés<br />collaboratifs</h1>
-    <p class="text-muted">Créez ou rejoignez une session — jusqu'à 4 joueurs en temps réel.</p>
-  </header>
-
-  <hr class="divider" />
-
-  <!-- Two-column layout -->
-  <main class="home__grid">
-
-    <!-- Left: join -->
-    <section class="home__panel">
+  <div shell-left-panel>
       <span class="section-label">Rejoindre une partie</span>
       <h2>Vous avez un code ?</h2>
 
@@ -45,26 +26,22 @@
           <p class="home__error">{{ joinError() }}</p>
         }
         <cocro-button type="submit" [loading]="joinLoading()">
-          Rejoindre →
+          Rejoindre
         </cocro-button>
       </form>
-    </section>
+  </div>
 
-    <!-- Right: create (dark panel) -->
-    <section class="home__panel home__panel--dark">
-      <span class="section-label" style="color: rgba(255,255,255,0.6)">Créer</span>
+  <div shell-right-panel>
+      <span class="section-label">Créer</span>
       <h2>Votre atelier</h2>
       <p>Concevez une grille et invitez des amis à la résoudre ensemble.</p>
       <div class="home__create-actions">
-        <cocro-button variant="secondary" routerLink="/grids/editor">
+        <cocro-button variant="secondary" routerLink="/grid/create">
           Éditeur de grille
         </cocro-button>
         <cocro-button variant="secondary" routerLink="/lobby/create">
           Nouvelle session
         </cocro-button>
       </div>
-    </section>
-
-  </main>
-
-</div>
+  </div>
+</cocro-landing-home-shell>

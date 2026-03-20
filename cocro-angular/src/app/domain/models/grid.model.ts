@@ -18,9 +18,9 @@ export interface Letter {
 export interface Cell {
   x: number;
   y: number;
-  type: CellType;
   letter?: Letter;
   clues?: Clue[];
+  type: CellType;
 }
 
 export interface Grid {
@@ -29,6 +29,7 @@ export interface Grid {
   width: number;
   height: number;
   cells: Cell[];
+  author?: string;
   difficulty?: GridDifficulty;
   description?: string;
 }

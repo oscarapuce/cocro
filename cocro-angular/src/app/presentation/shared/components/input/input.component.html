@@ -1,0 +1,15 @@
+<div class="cocro-field">
+  <label *ngIf="label" [for]="inputId" class="cocro-field__label">{{ label }}</label>
+  <input
+    [id]="inputId"
+    [type]="type"
+    [placeholder]="placeholder"
+    [disabled]="isDisabled"
+    [value]="value"
+    (input)="onInput($event)"
+    (blur)="onTouched()"
+    class="cocro-field__input"
+    [class.cocro-field__input--error]="hasError"
+  />
+  <span *ngIf="hasError && errorMessage" class="cocro-field__error">{{ errorMessage }}</span>
+</div>

@@ -3,35 +3,9 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "cocro-angular": {
+    "cocro-front": {
       "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss",
-          "skipTests": true
-        },
-        "@schematics/angular:class": {
-          "skipTests": true
-        },
-        "@schematics/angular:directive": {
-          "skipTests": true
-        },
-        "@schematics/angular:guard": {
-          "skipTests": true
-        },
-        "@schematics/angular:interceptor": {
-          "skipTests": true
-        },
-        "@schematics/angular:pipe": {
-          "skipTests": true
-        },
-        "@schematics/angular:resolver": {
-          "skipTests": true
-        },
-        "@schematics/angular:service": {
-          "skipTests": true
-        }
-      },
+      "schematics": {},
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -44,20 +18,16 @@
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
+              "src/assets"
             ],
             "styles": [
               "src/styles.scss"
             ],
-            "allowedCommonJsDependencies": [
-              "@stomp/stompjs",
-              "sockjs-client"
-            ]
+            "stylePreprocessorOptions": {
+              "includePaths": ["src/styles"]
+            },
+            "allowedCommonJsDependencies": ["@stomp/stompjs", "sockjs-client"]
           },
           "configurations": {
             "production": {
@@ -87,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "cocro-angular:build:production"
+              "buildTarget": "cocro-front:build:production"
             },
             "development": {
-              "buildTarget": "cocro-angular:build:development"
+              "buildTarget": "cocro-front:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -106,22 +76,35 @@
               "zone.js/testing"
             ],
             "tsConfig": "tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
+              "src/assets"
             ],
             "styles": [
               "src/styles.scss"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
             ]
           }
         }
       }
     }
   },
+  "schematics": {
+    "@schematics/angular:component": {
+      "style": "scss"
+    }
+  },
   "cli": {
-    "analytics": "a7a5d282-68fc-45dd-bea2-5b1e852e880e"
+    "analytics": false,
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   }
 }

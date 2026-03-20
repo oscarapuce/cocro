@@ -2,14 +2,15 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '@infrastructure/environment';
 import { AuthResponse, LoginRequest, RegisterRequest } from '@domain/models/auth.model';
+import { AuthPort } from '@application/ports/auth/auth.port';
 
 const TOKEN_KEY = 'cocro_token';
 const USER_KEY = 'cocro_user';
 
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class AuthService implements AuthPort {
   private readonly _currentUser = signal<AuthResponse | null>(this.loadStoredUser());
   readonly currentUser = this._currentUser.asReadonly();
   readonly isAuthenticated = computed(() => this._currentUser() !== null);

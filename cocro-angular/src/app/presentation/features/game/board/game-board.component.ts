@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@infrastructure/auth/auth.service';
-import { SessionService } from '@infrastructure/adapters/session.service';
-import { StompService } from '@infrastructure/adapters/stomp.service';
+import { SESSION_SOCKET_PORT } from '@application/ports/session/session-socket.port';
+import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
 import {
   GridUpdatedEvent,
   ParticipantJoinedEvent,
@@ -35,6 +35,8 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   status = signal<SessionStatus>('CREATING');
   participantCount = signal(0);
   revision = signal(0);
+  connected = signal(false);
+
   // Grid state: map key = "x,y"
   private cellMap = signal(new Map<string, GridCell>());
 
@@ -62,12 +64,11 @@ export class GameBoardComponent implements OnInit, OnDestroy {
 
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
-  private sessionService = inject(SessionService);
-  private stomp = inject(StompService);
+  private sessionSocket = inject(SESSION_SOCKET_PORT);
+  private gameSession = inject(GAME_SESSION_PORT);
   private router = inject(Router);
 
   myUserId = computed(() => this.auth.currentUser()?.userId ?? '');
-  connected = this.stomp.connected;
 
   ngOnInit(): void {
     const code = this.route.snapshot.paramMap.get('shareCode') ?? '';
@@ -79,11 +80,15 @@ export class GameBoardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.stomp.connect(token, code, (event) => this.handleEvent(event));
+    this.connected.set(false);
+    this.sessionSocket.connect(token, code, (event) => {
+      this.connected.set(true);
+      this.handleEvent(event);
+    });
   }
 
   ngOnDestroy(): void {
-    this.stomp.disconnect();
+    this.sessionSocket.disconnect();
   }
 
   selectCell(x: number, y: number): void {
@@ -103,7 +108,7 @@ export class GameBoardComponent implements OnInit, OnDestroy {
     if (event.key.length === 1 && /[a-zA-ZÀ-ÿ]/.test(event.key)) {
       const letter = event.key.toUpperCase();
       this.placeLocalLetter(x, y, letter);
-      this.stomp.sendGridUpdate(this.shareCode(), {
+      this.sessionSocket.sendGridUpdate(this.shareCode(), {
         posX: x,
         posY: y,
         commandType: 'PLACE_LETTER',
@@ -113,7 +118,7 @@ export class GameBoardComponent implements OnInit, OnDestroy {
       if (x + 1 < this.gridWidth()) this.selectedX.set(x + 1);
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       this.placeLocalLetter(x, y, '');
-      this.stomp.sendGridUpdate(this.shareCode(), {
+      this.sessionSocket.sendGridUpdate(this.shareCode(), {
         posX: x,
         posY: y,
         commandType: 'CLEAR_CELL',
@@ -125,9 +130,9 @@ export class GameBoardComponent implements OnInit, OnDestroy {
   }
 
   leave(): void {
-    this.sessionService.leaveSession({ shareCode: this.shareCode() }).subscribe();
-    this.stomp.disconnect();
-    this.router.navigate(['/home']);
+    this.gameSession.leaveSession({ shareCode: this.shareCode() }).subscribe();
+    this.sessionSocket.disconnect();
+    this.router.navigate(['/']);
   }
 
   // — Event handlers —
@@ -170,8 +175,8 @@ export class GameBoardComponent implements OnInit, OnDestroy {
     this.placeLocalLetter(event.posX, event.posY, event.letter ?? '', event.actorId);
   }
 
-  private resync(targetRevision: number): void {
-    this.sessionService.getState(this.shareCode()).subscribe((state) => {
+  private resync(_targetRevision: number): void {
+    this.gameSession.getState(this.shareCode()).subscribe((state) => {
       this.revision.set(state.revision);
       const map = new Map<string, GridCell>();
       state.cells.forEach((c: CellStateDto) => {

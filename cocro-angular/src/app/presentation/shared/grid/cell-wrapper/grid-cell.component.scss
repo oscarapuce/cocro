@@ -1,0 +1,44 @@
+.cell {
+  width: var(--cell-size-editor);
+  height: var(--cell-size-editor);
+  /* right + bottom seulement → pas de double bordure entre cellules adjacentes */
+  border-right:  var(--grid-inner-width) solid var(--grid-inner-color);
+  border-bottom: var(--grid-inner-width) solid var(--grid-inner-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+  cursor: pointer;
+
+  &.selected {
+    outline: 1.5px solid var(--color-cell-select-ring);
+    z-index: 2;
+    background-color: var(--color-cell-select-fill);
+    border-radius: 0.2rem;
+  }
+
+  &.isOnDirection {
+    //outline: 1px solid var(--color-cell-dir-ring);
+    z-index: 1;
+    background-color: var(--color-cell-dir-fill);
+  }
+
+  &.upSeparator {
+    border-top: var(--grid-sep-width) solid var(--grid-sep-color);
+  }
+
+  &.leftSeparator {
+    border-left: var(--grid-sep-width) solid var(--grid-sep-color);
+  }
+
+  cocro-clue-input {
+    display: contents;
+  }
+
+  .black {
+    background-color: var(--color-cell-black);
+    width: 100%;
+    height: 100%;
+  }
+}

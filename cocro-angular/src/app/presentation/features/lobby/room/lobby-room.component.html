@@ -1,6 +1,6 @@
 <div class="lobby">
   <nav class="lobby__nav">
-    <a routerLink="/home" class="text-display">← CoCro</a>
+    <a routerLink="/" class="text-display">← CoCro</a>
   </nav>
   <hr class="divider" />
 
@@ -49,7 +49,7 @@
 
     @if (isCreator()) {
       <cocro-button (click)="startGame()" [loading]="starting()">
-        ▶ Démarrer la partie
+        Démarrer la partie
       </cocro-button>
     } @else {
       <p class="text-muted">En attente que le créateur démarre la partie…</p>

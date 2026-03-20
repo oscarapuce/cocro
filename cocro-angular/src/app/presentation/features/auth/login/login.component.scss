@@ -5,17 +5,51 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-xl);
+  background-color: var(--color-paper);
+  position: relative;
+  overflow: hidden;
+
+  // Decorative crossword grids in corners
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='white' stroke='%231A1A1A' stroke-width='1.5'/%3E%3Cline x1='24' y1='0' x2='24' y2='120' stroke='%231A1A1A' stroke-width='0.75'/%3E%3Cline x1='48' y1='0' x2='48' y2='120' stroke='%231A1A1A' stroke-width='0.75'/%3E%3Cline x1='72' y1='0' x2='72' y2='120' stroke='%231A1A1A' stroke-width='0.75'/%3E%3Cline x1='96' y1='0' x2='96' y2='120' stroke='%231A1A1A' stroke-width='0.75'/%3E%3Cline x1='0' y1='24' x2='120' y2='24' stroke='%231A1A1A' stroke-width='0.75'/%3E%3Cline x1='0' y1='48' x2='120' y2='48' stroke='%231A1A1A' stroke-width='0.75'/%3E%3Cline x1='0' y1='72' x2='120' y2='72' stroke='%231A1A1A' stroke-width='0.75'/%3E%3Cline x1='0' y1='96' x2='120' y2='96' stroke='%231A1A1A' stroke-width='0.75'/%3E%3Crect x='0' y='0' width='24' height='24' fill='%231A1A1A'/%3E%3Crect x='96' y='0' width='24' height='24' fill='%231A1A1A'/%3E%3Crect x='48' y='24' width='24' height='24' fill='%231A1A1A'/%3E%3Crect x='0' y='48' width='24' height='24' fill='%231A1A1A'/%3E%3Crect x='96' y='48' width='24' height='24' fill='%231A1A1A'/%3E%3Crect x='48' y='72' width='24' height='24' fill='%231A1A1A'/%3E%3Crect x='0' y='96' width='24' height='24' fill='%231A1A1A'/%3E%3Crect x='96' y='96' width='24' height='24' fill='%231A1A1A'/%3E%3C/svg%3E");
+    background-size: cover;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    opacity: 0.1;
+  }
+
+  &::before {
+    top: 2rem;
+    left: 2rem;
+    width: 88px;
+    height: 88px;
+    transform: rotate(-8deg);
+  }
+
+  &::after {
+    bottom: 2rem;
+    right: 2rem;
+    width: 72px;
+    height: 72px;
+    transform: rotate(10deg);
+  }
 
   &__brand {
     text-align: center;
     margin-bottom: var(--space-xl);
+    animation: enter-up 350ms ease-out both;
 
     h1 {
+      font-family: var(--font-title);
       font-size: var(--text-5xl);
       line-height: 1;
     }
 
     p {
+      font-family: var(--font-body);
       margin-top: var(--space-xs);
     }
   }
@@ -24,9 +58,11 @@
     width: 100%;
     max-width: 420px;
     background-color: var(--color-surface);
-    border: var(--border-ink);
+    border: var(--border-dashed);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-panel);
     padding: var(--space-xl);
+    animation: enter-up 400ms ease-out 80ms both;
   }
 
   &__header {
@@ -48,6 +84,7 @@
 
   &__footer {
     text-align: center;
+    font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-ink-muted);
 

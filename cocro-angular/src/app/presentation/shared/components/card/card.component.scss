@@ -1,35 +1,17 @@
 .cocro-card {
   position: relative;
-  background-color: var(--color-paper-dark);
-  border: 2px dashed var(--color-border);
-  box-shadow: var(--shadow-card);
+  background-color: #fefefe;
+  border: var(--border-dashed);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
   padding: var(--space-xl);
   transition:
     transform var(--transition-snap),
     box-shadow var(--transition-snap);
 
-  // Bord pré-découpé (style carnet à spirale)
-  &::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    height: 6px;
-    border-top: 2px dashed var(--color-border);
-    background: repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 6px,
-      var(--color-paper-dark) 6px,
-      var(--color-paper-dark) 8px
-    );
-    pointer-events: none;
-  }
-
   &:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--color-ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.16);
   }
 
   &--dark {
@@ -37,12 +19,27 @@
     color: #fff;
     border-color: var(--color-forest);
 
-    h1, h2, h3, p, label, span {
+    h1, h2, h3, h4, p, label, span, strong, small, li {
       color: #fff;
     }
 
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    ::placeholder {
+      color: #fff;
+    }
+
+    input,
+    textarea,
+    select {
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
     &:hover {
-      box-shadow: 6px 6px 0 #1a3d26;
+      box-shadow: 4px 4px 0 rgba(16, 42, 26, 0.25);
     }
   }
 }

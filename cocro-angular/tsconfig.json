@@ -14,12 +14,12 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve",
-    "baseUrl": ".",
+    "baseUrl": "./src/app",
     "paths": {
-      "@domain/*": ["src/app/domain/*"],
-      "@application/*": ["src/app/application/*"],
-      "@infrastructure/*": ["src/app/infrastructure/*"],
-      "@presentation/*": ["src/app/presentation/*"]
+      "@domain/*": ["domain/*"],
+      "@application/*": ["application/*"],
+      "@infrastructure/*": ["infrastructure/*"],
+      "@presentation/*": ["presentation/*"]
     }
   },
   "angularCompilerOptions": {
@@ -33,6 +33,9 @@
   "references": [
     {
       "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
     }
   ]
 }

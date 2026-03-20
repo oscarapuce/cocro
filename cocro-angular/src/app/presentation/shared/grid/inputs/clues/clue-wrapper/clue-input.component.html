@@ -1,0 +1,11 @@
+<div class="clue-wrapper">
+  @for (clue of clues; let e = $even; let i = $index; track i) {
+    <div class="clue" #clueBlock [ngClass]="clue.direction | kebabCase">
+      <div class="text">{{ clue.text }}</div>
+      <cocro-clue-arrow [direction]="clue.direction" />
+    </div>
+    @if (isMultiClues && e) {
+      <div class="separator"></div>
+    }
+  }
+</div>

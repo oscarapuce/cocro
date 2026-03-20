@@ -1,0 +1,8 @@
+<button
+  [type]="type"
+  [disabled]="disabled || loading"
+  [class]="'cocro-btn cocro-btn--' + variant"
+>
+  <span *ngIf="loading" class="cocro-btn__spinner" aria-hidden="true"></span>
+  <ng-content />
+</button>

@@ -1,8 +1,14 @@
+:host {
+  --cell-size: 48px;
+  --cell-font-size: 1.25rem;
+}
+
 .game {
   display: flex;
   flex-direction: column;
   height: 100vh;
   outline: none;
+  background-color: var(--color-paper);
 
   // — Navbar —
   &__nav {
@@ -55,7 +61,8 @@
     display: inline-flex;
     flex-direction: column;
     border: var(--border-ink);
-    box-shadow: var(--shadow-panel);
+    box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.18);
+    animation: enter-up 400ms ease-out both;
   }
 
   &__row {
@@ -80,8 +87,9 @@
     }
 
     &--selected {
-      background-color: rgba(122, 184, 154, 0.25);
+      background-color: var(--color-cell-selected);
       border-color: var(--color-forest-light);
+      border-style: solid;
       z-index: 1;
     }
 
@@ -90,9 +98,9 @@
       color: var(--color-ink);
     }
 
-    // Other player's letter: ink blue
+    // Other player's letter: a distinct accent color
     &--filled-other .game__letter {
-      color: var(--color-ink-blue);
+      color: var(--color-forest);
     }
   }
 

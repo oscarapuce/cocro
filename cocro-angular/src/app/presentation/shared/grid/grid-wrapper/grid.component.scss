@@ -1,0 +1,9 @@
+.grid {
+  display: grid;
+  gap: 0;
+  font-size: 1rem;
+  overflow: visible;
+  grid-template-columns: repeat(var(--grid-columns), 1fr);
+  border: var(--grid-outer-width) solid var(--grid-outer-color);
+  background-color: var(--color-surface);
+}
