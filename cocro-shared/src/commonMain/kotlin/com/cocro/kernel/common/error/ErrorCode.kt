@@ -14,7 +14,6 @@ enum class ErrorCode(
     // --- grid domain ---
     GRID_TITLE_MISSING("Grid title is required", 400),
     GRID_INVALID_TITLE("Invalid grid title", 400),
-    GRID_DIFFICULTY_MISSING("Grid difficulty is required", 400),
     GRID_NOT_FOUND("Grid not found", 404),
     GRID_UNAUTHORIZED_MODIFICATION("Unauthorized grid modification", 403),
     GRID_INVALID_CELL_COUNT("Grid size does not match cells count", 400),

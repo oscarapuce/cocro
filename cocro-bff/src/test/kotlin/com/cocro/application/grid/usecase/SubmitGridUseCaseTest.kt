@@ -10,7 +10,6 @@ import com.cocro.kernel.auth.model.AuthenticatedUser
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.enums.CellType
-import com.cocro.kernel.grid.enums.GridDifficulty
 import com.cocro.kernel.grid.error.GridError
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import org.assertj.core.api.Assertions.assertThat
@@ -49,7 +48,7 @@ class SubmitGridUseCaseTest {
         }
         return SubmitGridDto(
             title = "Test Grid Title",
-            difficulty = GridDifficulty.EASY,
+            difficulty = "NONE",
             reference = null,
             description = null,
             width = w,

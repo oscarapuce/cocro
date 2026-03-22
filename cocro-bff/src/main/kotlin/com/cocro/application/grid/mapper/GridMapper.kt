@@ -29,36 +29,30 @@ internal fun SubmitGridDto.toDomain(
         id = UUID.randomUUID(),
         shortId = shortId,
         title = GridTitle(this.title),
-        metadata =
-            GridMetadata(
-                difficulty = this.difficulty,
-                author = userId,
-                reference = this.reference,
-                description = this.description,
-            ),
+        metadata = GridMetadata(
+            difficulty = this.difficulty,
+            author = userId,
+            reference = this.reference,
+            description = this.description,
+            globalClueLabel = this.globalClueLabel,
+            globalClueWords = this.globalClueWords,
+        ),
         width = GridWidth(this.width),
         height = GridHeight(this.height),
         cells = this.cells.map { it.toDomain() },
     )
 
 internal fun PatchGridDto.applyPatchTo(grid: Grid): Grid {
-    // --- metadata ---
-    val patchedMetadata =
-        grid.metadata.copy(
-            difficulty = this.difficulty ?: grid.metadata.difficulty,
-            reference = this.reference ?: grid.metadata.reference,
-            description = this.description ?: grid.metadata.description,
-        )
-
-    // --- dimensions ---
+    val patchedMetadata = grid.metadata.copy(
+        difficulty = this.difficulty ?: grid.metadata.difficulty,
+        reference = this.reference ?: grid.metadata.reference,
+        description = this.description ?: grid.metadata.description,
+        globalClueLabel = if (this.globalClueLabel != null) this.globalClueLabel else grid.metadata.globalClueLabel,
+        globalClueWords = if (this.globalClueWords != null) this.globalClueWords else grid.metadata.globalClueWords,
+    )
     val patchedWidth = this.width?.let { GridWidth(it) } ?: grid.width
     val patchedHeight = this.height?.let { GridHeight(it) } ?: grid.height
-
-    // --- cells ---
-    val patchedCells =
-        this.cells
-            ?.map { it.toDomain() }
-            ?: grid.cells
+    val patchedCells = this.cells?.map { it.toDomain() } ?: grid.cells
 
     return grid.copy(
         title = this.title?.let { GridTitle(it) } ?: grid.title,
@@ -71,7 +65,6 @@ internal fun PatchGridDto.applyPatchTo(grid: Grid): Grid {
 
 private fun CellDto.toDomain(): Cell {
     val pos = CellPos(this.x, this.y)
-
     return when (this.type) {
         CellType.LETTER ->
             Cell.LetterCell(
@@ -82,24 +75,17 @@ private fun CellDto.toDomain(): Cell {
                     number = this.number,
                 ),
             )
-
         CellType.CLUE_SINGLE ->
             Cell.ClueCell.SingleClueCell(pos, this.clues!![0].toDomain())
-
         CellType.CLUE_DOUBLE ->
             Cell.ClueCell.DoubleClueCell(
                 pos,
                 this.clues!![0].toDomain(),
                 this.clues[1].toDomain(),
             )
-
-        CellType.BLACK ->
-            Cell.BlackCell(pos)
+        CellType.BLACK -> Cell.BlackCell(pos)
     }
 }
 
 private fun ClueDto.toDomain(): Clue =
-    Clue(
-        direction = this.direction,
-        text = ClueText(this.text),
-    )
+    Clue(direction = this.direction, text = ClueText(this.text))

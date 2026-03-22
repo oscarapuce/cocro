@@ -9,7 +9,6 @@ import com.cocro.kernel.auth.model.AuthenticatedUser
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.enums.CellType
-import com.cocro.kernel.grid.enums.GridDifficulty
 import com.cocro.kernel.grid.error.GridError
 import com.cocro.kernel.grid.model.Grid
 import com.cocro.kernel.grid.model.GridMetadata
@@ -35,7 +34,7 @@ class PatchGridUseCaseTest {
         id = java.util.UUID.randomUUID(),
         shortId = GridShareCode("GRPAT1"),
         title = GridTitle("Old Title"),
-        metadata = GridMetadata(author = authorId, reference = null, description = null, difficulty = GridDifficulty.EASY),
+        metadata = GridMetadata(author = authorId, reference = null, description = null, difficulty = "NONE"),
         width = GridWidth(5),
         height = GridHeight(5),
         cells = emptyList(),

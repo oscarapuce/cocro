@@ -6,7 +6,6 @@ import com.cocro.infrastructure.persistence.mongo.grid.document.GridMetadataDocu
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.grid.enums.CellType
 import com.cocro.kernel.grid.enums.ClueDirection
-import com.cocro.kernel.grid.enums.GridDifficulty
 import com.cocro.kernel.grid.enums.SeparatorType
 import com.cocro.kernel.grid.model.Cell
 import com.cocro.kernel.grid.model.CellPos
@@ -21,18 +20,24 @@ import com.cocro.kernel.grid.model.valueobject.GridTitle
 import com.cocro.kernel.grid.model.valueobject.GridWidth
 import com.cocro.kernel.grid.model.valueobject.LetterValue
 
+private val VALID_DIFFICULTIES = setOf("NONE","0","1","2","3","4","5","0-1","1-2","2-3","3-4","4-5")
+
+private fun normalizeDifficulty(raw: String?): String =
+    if (raw != null && raw in VALID_DIFFICULTIES) raw else "NONE"
+
 fun Grid.toDocument(): GridDocument =
     GridDocument(
         id = id,
         shortId = shortId.value,
         title = title.value,
-        metadata =
-            GridMetadataDocument(
-                author = metadata.author.toString(),
-                reference = metadata.reference,
-                description = metadata.description,
-                difficulty = metadata.difficulty.name,
-            ),
+        metadata = GridMetadataDocument(
+            author = metadata.author.toString(),
+            reference = metadata.reference,
+            description = metadata.description,
+            difficulty = metadata.difficulty,
+            globalClueLabel = metadata.globalClueLabel,
+            globalClueWords = metadata.globalClueWords,
+        ),
         hashLetters = hashLetters,
         width = width.value,
         height = height.value,
@@ -52,7 +57,6 @@ fun Cell.toDocument(): CellDocument =
                 separator = letter.separator.name,
                 number = letter.number,
             )
-
         is Cell.ClueCell.SingleClueCell ->
             CellDocument(
                 x = pos.x,
@@ -61,7 +65,6 @@ fun Cell.toDocument(): CellDocument =
                 clueDirection = clue.direction.name,
                 clueText = clue.text.value,
             )
-
         is Cell.ClueCell.DoubleClueCell ->
             CellDocument(
                 x = pos.x,
@@ -72,13 +75,8 @@ fun Cell.toDocument(): CellDocument =
                 secondClueDirection = second.direction.name,
                 secondClueText = second.text.value,
             )
-
         is Cell.BlackCell ->
-            CellDocument(
-                x = pos.x,
-                y = pos.y,
-                type = "BLACK",
-            )
+            CellDocument(x = pos.x, y = pos.y, type = "BLACK")
     }
 
 fun GridDocument.toDomain(): Grid =
@@ -86,13 +84,14 @@ fun GridDocument.toDomain(): Grid =
         id = id,
         shortId = GridShareCode(shortId),
         title = GridTitle(title),
-        metadata =
-            GridMetadata(
-                author = UserId.from(metadata.author),
-                reference = metadata.reference,
-                description = metadata.description,
-                difficulty = GridDifficulty.valueOf(metadata.difficulty),
-            ),
+        metadata = GridMetadata(
+            author = UserId.from(metadata.author),
+            reference = metadata.reference,
+            description = metadata.description,
+            difficulty = normalizeDifficulty(metadata.difficulty),
+            globalClueLabel = metadata.globalClueLabel,
+            globalClueWords = metadata.globalClueWords,
+        ),
         hashLetters = hashLetters,
         width = GridWidth(width),
         height = GridHeight(height),
@@ -103,47 +102,28 @@ fun GridDocument.toDomain(): Grid =
 
 fun CellDocument.toDomain(): Cell {
     val pos = CellPos(x, y)
-
     return when (type) {
         CellType.LETTER.name ->
             Cell.LetterCell(
-                pos = pos,
-                letter =
-                    Letter(
-                        value = LetterValue(letter!!),
-                        separator = SeparatorType.valueOf(separator!!),
-                        number = number,
-                    ),
+                pos,
+                Letter(
+                    value = LetterValue(letter!!),
+                    separator = SeparatorType.valueOf(separator!!),
+                    number = number,
+                ),
             )
-
         CellType.CLUE_SINGLE.name ->
             Cell.ClueCell.SingleClueCell(
-                pos = pos,
-                clue =
-                    Clue(
-                        direction = ClueDirection.valueOf(clueDirection!!),
-                        text = ClueText(clueText!!),
-                    ),
+                pos,
+                Clue(direction = ClueDirection.valueOf(clueDirection!!), text = ClueText(clueText!!)),
             )
-
         CellType.CLUE_DOUBLE.name ->
             Cell.ClueCell.DoubleClueCell(
-                pos = pos,
-                first =
-                    Clue(
-                        direction = ClueDirection.valueOf(clueDirection!!),
-                        text = ClueText(clueText!!),
-                    ),
-                second =
-                    Clue(
-                        direction = ClueDirection.valueOf(secondClueDirection!!),
-                        text = ClueText(secondClueText!!),
-                    ),
+                pos,
+                Clue(direction = ClueDirection.valueOf(clueDirection!!), text = ClueText(clueText!!)),
+                Clue(direction = ClueDirection.valueOf(secondClueDirection!!), text = ClueText(secondClueText!!)),
             )
-
-        CellType.BLACK.name ->
-            Cell.BlackCell(pos)
-
+        CellType.BLACK.name -> Cell.BlackCell(pos)
         else -> error("Unknown cell type: $type")
     }
 }

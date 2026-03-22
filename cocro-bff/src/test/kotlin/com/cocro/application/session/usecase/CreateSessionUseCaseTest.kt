@@ -1,6 +1,7 @@
 package com.cocro.application.session.usecase
 
 import com.cocro.application.auth.port.CurrentUserProvider
+import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.session.dto.CreateSessionDto
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
@@ -25,12 +26,14 @@ class CreateSessionUseCaseTest {
 
     private val currentUserProvider: CurrentUserProvider = mock()
     private val sessionRepository: SessionRepository = mock()
+    private val gridRepository: GridRepository = mock()
     private val sessionGridStateCache: SessionGridStateCache = mock()
     private val shareCodeGenerator: SessionCodeGenerator = mock()
 
     private val useCase = CreateSessionUseCase(
         currentUserProvider,
         sessionRepository,
+        gridRepository,
         sessionGridStateCache,
         shareCodeGenerator,
     )
@@ -48,6 +51,7 @@ class CreateSessionUseCaseTest {
             gridId = GridShareCode("GRID01"),
         )
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
+        whenever(gridRepository.existsByShortId(GridShareCode("GRID01"))).thenReturn(true)
         whenever(shareCodeGenerator.generateId()).thenReturn(shareCode)
         whenever(sessionRepository.save(any())).thenReturn(session)
 

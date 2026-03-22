@@ -15,7 +15,6 @@ import com.cocro.kernel.session.model.Session
 import com.cocro.kernel.session.model.state.GridCheckResult
 import com.cocro.kernel.session.model.state.SessionGridState
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
-import com.cocro.kernel.grid.enums.GridDifficulty
 import com.cocro.kernel.grid.model.Grid
 import com.cocro.kernel.grid.model.GridMetadata
 import com.cocro.kernel.grid.model.valueobject.GridHeight
@@ -65,7 +64,7 @@ class CheckGridUseCaseTest {
             author = creatorId,
             reference = null,
             description = null,
-            difficulty = GridDifficulty.NONE,
+            difficulty = "NONE",
         ),
         width = GridWidth(5),
         height = GridHeight(5),
