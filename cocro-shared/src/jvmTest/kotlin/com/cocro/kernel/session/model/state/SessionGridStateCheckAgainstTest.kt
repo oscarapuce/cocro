@@ -1,7 +1,6 @@
 package com.cocro.kernel.session.model.state
 
 import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.grid.enums.GridDifficulty
 import com.cocro.kernel.grid.model.Cell
 import com.cocro.kernel.grid.model.CellPos
 import com.cocro.kernel.grid.model.Grid
@@ -34,7 +33,7 @@ class SessionGridStateCheckAgainstTest {
             author = UserId.new(),
             reference = null,
             description = null,
-            difficulty = GridDifficulty.NONE,
+            difficulty = "NONE",
         ),
         width = GridWidth(5),
         height = GridHeight(5),
