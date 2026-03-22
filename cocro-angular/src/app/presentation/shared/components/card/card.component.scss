@@ -1,6 +1,6 @@
 .cocro-card {
   position: relative;
-  background-color: #fefefe;
+  background-color: var(--color-surface);
   border: var(--border-dashed);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-panel);
@@ -9,18 +9,47 @@
     transform var(--transition-snap),
     box-shadow var(--transition-snap);
 
+  &--labeled {
+    padding-top: var(--space-lg);
+  }
+
+  &__label {
+    position: absolute;
+    top: -0.7em;
+    left: var(--space-md);
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background-color: var(--color-forest);
+    color: var(--color-paper);
+    font-family: var(--font-label);
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+    border-radius: 3px;
+    box-shadow: 1px 1px 0 rgba(26, 26, 26, 0.2);
+  }
+
   &:hover {
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.16);
+    box-shadow: var(--shadow-card-hover);
   }
 
   &--dark {
     background-color: var(--color-forest);
-    color: #fff;
+    color: var(--color-white);
     border-color: var(--color-forest);
 
+    .cocro-card__label {
+      background-color: var(--color-paper);
+      color: var(--color-forest);
+    }
+
     h1, h2, h3, h4, p, label, span, strong, small, li {
-      color: #fff;
+      color: var(--color-white);
     }
 
     a,
@@ -29,7 +58,7 @@
     textarea,
     select,
     ::placeholder {
-      color: #fff;
+      color: var(--color-white);
     }
 
     input,

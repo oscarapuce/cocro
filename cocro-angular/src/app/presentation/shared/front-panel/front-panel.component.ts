@@ -1,24 +1,26 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@infrastructure/auth/auth.service';
 import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
-import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
+import { JoinSessionUseCase } from '@application/use-cases/join-session.use-case';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
 import { InputComponent } from '@presentation/shared/components/input/input.component';
-import { LandingHomeShellComponent } from '@presentation/shared/shell/landing-home-shell.component';
 
 @Component({
-  selector: 'cocro-home',
+  selector: 'cocro-front-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent, LandingHomeShellComponent],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss',
+  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent],
+  templateUrl: './front-panel.component.html',
+  styleUrl: './front-panel.component.scss',
 })
-export class HomeComponent implements OnInit {
+export class FrontPanelComponent {
+  /** 'join' = panneau gauche clair, 'create' = panneau droit sombre */
+  readonly side = input<'join' | 'create'>('join');
+
+  readonly auth = inject(AuthService);
   private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
-  private sessionPort = inject(GAME_SESSION_PORT);
+  private joinSessionUseCase = inject(JoinSessionUseCase);
   private router = inject(Router);
 
   joinForm = this.fb.nonNullable.group({
@@ -27,20 +29,6 @@ export class HomeComponent implements OnInit {
 
   joinLoading = signal(false);
   joinError = signal('');
-  fromAnonymousBanner = signal(false);
-
-  readonly username = () => this.auth.currentUser()?.username ?? '';
-
-  ngOnInit(): void {
-    if (window.history.state?.['fromAnonymous']) {
-      this.fromAnonymousBanner.set(true);
-    }
-  }
-
-  logout(): void {
-    this.auth.logout();
-    this.router.navigate(['/']);
-  }
 
   joinSession(): void {
     if (this.joinForm.invalid) return;
@@ -48,7 +36,7 @@ export class HomeComponent implements OnInit {
     this.joinError.set('');
 
     const { shareCode } = this.joinForm.getRawValue();
-    this.sessionPort.joinSession({ shareCode }).subscribe({
+    this.joinSessionUseCase.execute(shareCode).subscribe({
       next: () => this.router.navigate(['/lobby/room', shareCode]),
       error: (err: unknown) => {
         this.joinError.set(getNetworkErrorMessage(err, 'Erreur serveur.'));

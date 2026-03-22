@@ -6,9 +6,9 @@
   <button
     type="button"
     class="app-shell__burger"
+    [class.app-shell__burger--hidden]="!sidebarCollapsed()"
     (click)="toggleSidebar()"
-    [attr.aria-expanded]="!sidebarCollapsed()"
-    aria-label="Ouvrir ou fermer la navigation"
+    aria-label="Ouvrir la navigation"
   >
     <span></span>
     <span></span>
@@ -18,9 +18,8 @@
     <cocro-auth-sidebar
       [collapsed]="sidebarCollapsed()"
       (toggle)="toggleSidebar()"
-      (navigate)="collapseSidebar()"
     />
-    <main class="app-shell__content" (click)="collapseSidebarFromContent()">
+    <main class="app-shell__content">
       <router-outlet />
     </main>
   </div>

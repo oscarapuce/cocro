@@ -5,6 +5,7 @@ import { playerGuard } from '@infrastructure/guards/player.guard';
 export const routes: Routes = [
   {
     path: '',
+    data: { showSidebar: true },
     loadComponent: () => import('@presentation/features/landing/landing.component').then(m => m.LandingComponent),
     title: 'CoCro',
   },
@@ -19,16 +20,19 @@ export const routes: Routes = [
   },
   {
     path: 'grid',
+    data: { showSidebar: true },
     canActivate: [playerGuard],
     loadChildren: () => import('@presentation/features/grid/editor/editor.routes').then(m => m.EDITOR_ROUTES),
   },
   {
     path: 'lobby',
+    data: { showSidebar: true },
     canActivate: [authGuard],
     loadChildren: () => import('@presentation/features/lobby/lobby.routes').then(m => m.LOBBY_ROUTES),
   },
   {
     path: 'game',
+    data: { showSidebar: true },
     canActivate: [authGuard],
     loadChildren: () => import('@presentation/features/game/game.routes').then(m => m.GAME_ROUTES),
   },

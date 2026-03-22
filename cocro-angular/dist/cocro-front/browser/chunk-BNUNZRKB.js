@@ -1,1 +1,0 @@
-import{a as t}from"./chunk-PMIYE3QD.js";import"./chunk-3P36T522.js";import"./chunk-7BQ6EXYO.js";import"./chunk-RTJITMO5.js";import"./chunk-FDERIQAA.js";var r=[{path:"create",title:"Grid edition",canActivate:[t],loadComponent:()=>import("./chunk-ML4TVWXG.js").then(o=>o.GridEditorComponent)},{path:"",redirectTo:"create",pathMatch:"full"}];export{r as EDITOR_ROUTES};

@@ -1,0 +1,32 @@
+<div class="grid-params">
+  <div class="grid-params__title-field">
+    <label for="grid-title">Nom</label>
+    <input
+      id="grid-title"
+      type="text"
+      [ngModel]="selectorService.grid().title"
+      (ngModelChange)="selectorService.grid().title = $event"
+      placeholder="Ma super grille"
+    />
+  </div>
+
+  <div class="grid-params__separator"></div>
+
+  <div class="grid-params__size-control">
+    <label>Lignes</label>
+    <div class="resize-controls">
+      <cocro-button variant="ghost" (click)="onRemoveRow()">−</cocro-button>
+      <span>{{ selectorService.grid().height }}</span>
+      <cocro-button variant="ghost" (click)="onAddRow()">+</cocro-button>
+    </div>
+  </div>
+
+  <div class="grid-params__size-control">
+    <label>Colonnes</label>
+    <div class="resize-controls">
+      <cocro-button variant="ghost" (click)="onRemoveColumn()">−</cocro-button>
+      <span>{{ selectorService.grid().width }}</span>
+      <cocro-button variant="ghost" (click)="onAddColumn()">+</cocro-button>
+    </div>
+  </div>
+</div>

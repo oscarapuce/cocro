@@ -1,16 +1,23 @@
+// — Breakpoints (SCSS variables — ne peuvent pas être utilisées comme custom properties dans @media) —
+$bp-sm: 640px;
+$bp-md: 960px;
+
 :root {
   // — Colors —
   --color-paper:        #F0EDE5;
   --color-paper-dark:   #EDE8D0;
   --color-surface:      #FFFFFF;
   --color-surface-alt:  #F7F4ED;
+  --color-white:        #ffffff;
 
-  --color-ink:          #1A1A1A;
+  --color-ink: #131313;
   --color-ink-muted:    #6B5E4E;
   --color-ink-blue:     #2C4A8A;
 
   --color-forest:       #255736;
+  --color-forest-deep:  #1a3d26;         // vert foncé — ombres portées des boutons
   --color-forest-light: #008000;
+  --color-forest-tint:  rgba(45, 90, 61, 0.08); // fond vert pâle — badges, tags actifs
   --color-croco:        #8BC462;
   --color-croco-strong: #849E00;
   --color-croco-tint:   rgba(139, 196, 98, 0.24);
@@ -23,7 +30,8 @@
   --color-border:       #1A1A1A;
   --color-border-soft:  #C8C0A8;
   --color-border-dashed: #b5c3ad;
-  --color-margin-line:  rgba(232, 160, 144, 0.6);
+  --color-margin-line:  rgba(232, 160, 144, 0.6); // trait rouge vertical Séyès
+  --color-rule-line:    rgba(191, 207, 232, 0.5);  // lignes horizontales Séyès
   --color-shadow:       rgba(26, 26, 26, 0.08);
 
   --color-input-bg:     #fffde7;
@@ -31,7 +39,11 @@
   --color-toggle-active-start: #8BC462;
   --color-toggle-active-end:   rgba(139, 196, 98, 0.18);
 
+  --color-toast-success-bg: #e8f5e9;
+  --color-toast-error-bg:   #ffebee;
+
   // — Spacing —
+  --space-2xs:  2px;
   --space-xs:   4px;
   --space-sm:   8px;
   --space-md:   16px;
@@ -62,9 +74,12 @@
   --font-mono:    'Plus Jakarta Sans', monospace;
 
   // — Grid cells —
-  --cell-size:        48px;
-  --cell-size-editor: 56px;
-  --cell-font-size:   1.25rem;
+  --cell-size:              48px;
+  --cell-size-editor:       56px;
+  --cell-font-size:         1.25rem;
+  --cell-letter-font-size:  1.8rem;
+  --cell-letter-color:      var(--color-ink);
+  --cell-letter-font:       var(--font-grid);
 
   // — Grid lines —
   --grid-inner-width: 0.5px;
@@ -93,9 +108,27 @@
   --radius-panel: 22px;
 
   // — Shadows (hard offset, cahier style) —
-  --shadow-card:  2px 2px 0 rgba(26, 26, 26, 0.18);
-  --shadow-panel: 3px 3px 0 rgba(26, 26, 26, 0.14);
-  --shadow-sm:    2px 2px 0 rgba(26, 26, 26, 0.22);
+  --shadow-card:        2px 2px 0 rgba(26, 26, 26, 0.18);
+  --shadow-card-hover:  4px 4px 0 rgba(26, 26, 26, 0.16);
+  --shadow-panel:       3px 3px 0 rgba(26, 26, 26, 0.14);
+  --shadow-sm:          2px 2px 0 rgba(26, 26, 26, 0.22);
+  --shadow-btn-raised:  5px 5px 0 var(--color-forest-deep); // hover des boutons primaire/secondaire
+  --shadow-btn-pressed: 1px 1px 0 var(--color-forest-deep); // active des boutons primaire/secondaire
+
+  // — Z-index —
+  --z-below:   -1;   // pseudo-éléments décoratifs en arrière-plan
+  --z-base:     1;   // éléments grille (direction highlight)
+  --z-raised:   2;   // cellule sélectionnée
+  --z-overlay:  3;   // séparateurs, flèches
+  --z-sidebar:  20;  // sidebar mobile (position fixed)
+  --z-burger:   30;  // bouton burger (au-dessus de la sidebar)
+  --z-toast:  1000;  // notifications toast
+
+  // — Layout —
+  --margin-line-offset: 72px; // décalage horizontal du trait rouge Séyès
+
+  // — Typography (tailles spécifiques) —
+  --text-btn: 1.05rem; // taille Patrick Hand pour variants primary/secondary/danger
 
   // — Transitions —
   --transition-snap:   100ms ease-out;

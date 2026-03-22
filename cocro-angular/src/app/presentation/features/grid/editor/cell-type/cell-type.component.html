@@ -1,0 +1,28 @@
+<cocro-card title="Type de cellule">
+  <div class="cell-type-toggle">
+    <button
+      class="toggle-btn"
+      [class.active]="selectedCellType() === 'LETTER'"
+      [disabled]="isCellLetterType()"
+      (click)="onCellTypeChange('LETTER')"
+    >Lettre</button>
+    <button
+      class="toggle-btn"
+      [class.active]="selectedCellType() === 'CLUE_SINGLE'"
+      [disabled]="isCellClueSingleType()"
+      (click)="onCellTypeChange('CLUE_SINGLE')"
+    >Indice simple</button>
+    <button
+      class="toggle-btn"
+      [class.active]="selectedCellType() === 'CLUE_DOUBLE'"
+      [disabled]="isCellClueDoubleType()"
+      (click)="onCellTypeChange('CLUE_DOUBLE')"
+    >Indice double</button>
+    <button
+      class="toggle-btn"
+      [class.active]="selectedCellType() === 'BLACK'"
+      [disabled]="isCellBlackType()"
+      (click)="onCellTypeChange('BLACK')"
+    >Case noire</button>
+  </div>
+</cocro-card>

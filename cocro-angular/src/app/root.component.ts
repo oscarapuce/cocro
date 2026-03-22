@@ -18,21 +18,25 @@ export class RootComponent {
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly currentUrl = signal(this.router.url);
   readonly sidebarCollapsed = signal(false);
+  private readonly showSidebar = signal(false);
 
   constructor() {
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe((event) => {
-        this.currentUrl.set(event.urlAfterRedirects);
+      .subscribe(() => {
+        let route = this.router.routerState.snapshot.root;
+        let hasSidebar = !!route.data['showSidebar'];
+        while (route.firstChild) {
+          route = route.firstChild;
+          hasSidebar = hasSidebar || !!route.data['showSidebar'];
+        }
+        this.showSidebar.set(hasSidebar);
       });
   }
 
   readonly hasToolSidebar = (): boolean =>
-    this.currentUrl() === '/' ||
-    (this.auth.isAuthenticated() &&
-      (/^\/home(\/|$)|^\/grid(\/|$)|^\/lobby(\/|$)|^\/game(\/|$)/).test(this.currentUrl()));
+    this.auth.isAuthenticated() && this.showSidebar();
 
   readonly hasTopHeader = (): boolean =>
     this.auth.isAuthenticated() && !this.hasToolSidebar();
@@ -43,11 +47,5 @@ export class RootComponent {
 
   collapseSidebar(): void {
     this.sidebarCollapsed.set(true);
-  }
-
-  collapseSidebarFromContent(): void {
-    if (!this.sidebarCollapsed()) {
-      this.collapseSidebar();
-    }
   }
 }

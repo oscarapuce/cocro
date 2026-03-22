@@ -1,0 +1,94 @@
+.grid-params {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.grid-params__title-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+
+  label {
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    white-space: nowrap;
+  }
+
+  input {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-base);
+    font-family: var(--font-hand);
+    border: var(--border-dashed);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-input-bg);
+    outline: none;
+    width: 14rem;
+    transition:
+      border-color var(--transition-smooth),
+      background-color var(--transition-smooth);
+
+    &:focus {
+      border-color: var(--color-forest);
+      background-color: var(--color-surface);
+    }
+  }
+}
+
+.grid-params__separator {
+  width: 1px;
+  height: 1.5rem;
+  background-color: var(--color-border-dashed);
+  flex-shrink: 0;
+}
+
+.grid-params__size-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+
+  label {
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    white-space: nowrap;
+  }
+
+  .resize-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    span {
+      min-width: 1.5rem;
+      text-align: center;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: var(--text-sm);
+    }
+
+    cocro-button ::ng-deep .cocro-btn--ghost {
+      border: var(--border-ink);
+      min-width: 26px;
+      min-height: 26px;
+      padding: 0 var(--space-xs);
+      font-size: var(--text-base);
+      font-family: var(--font-display);
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 1px 1px 0 rgba(26, 26, 26, 0.18);
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-forest);
+        color: #fff;
+      }
+    }
+  }
+}

@@ -1,84 +1,25 @@
 <div class="grid-editor">
-  <div class="grid-and-tools">
-    <div class="editor-tools">
-      <cocro-card>
-        <h3>Parametres de la grille</h3>
-        <div class="custom-title-field">
-          <label for="grid-title">Nom de la grille</label>
-          <input
-            id="grid-title"
-            type="text"
-            [ngModel]="selectorService.grid().title"
-            (ngModelChange)="selectorService.grid().title = $event"
-            placeholder="Ma super grille"
-          />
-        </div>
+  <cocro-card class="grid-params-bar" title="Paramètres de la grille">
+    <cocro-grid-params />
+    <cocro-button variant="primary" size="sm" (click)="onSubmit()" [disabled]="saving()">
+      Créer la grille
+    </cocro-button>
+  </cocro-card>
 
-        <div class="grid-size-row">
-          <label>Lignes :</label>
-          <div class="resize-controls">
-            <cocro-button variant="ghost" (click)="onRemoveRow()">-</cocro-button>
-            <span>{{ selectorService.grid().height }}</span>
-            <cocro-button variant="ghost" (click)="onAddRow()">+</cocro-button>
-          </div>
-        </div>
-
-        <div class="grid-size-row">
-          <label>Colonnes :</label>
-          <div class="resize-controls">
-            <cocro-button variant="ghost" (click)="onRemoveColumn()">-</cocro-button>
-            <span>{{ selectorService.grid().width }}</span>
-            <cocro-button variant="ghost" (click)="onAddColumn()">+</cocro-button>
-          </div>
-        </div>
-      </cocro-card>
-
-      <cocro-card>
-        <h3>Type de cellule</h3>
-        <div class="cell-type-toggle">
-          <button
-            class="toggle-btn"
-            [class.active]="selectedCellType() === 'LETTER'"
-            [disabled]="isCellLetterType()"
-            (click)="onCellTypeChange('LETTER')"
-          >Lettre</button>
-          <button
-            class="toggle-btn"
-            [class.active]="selectedCellType() === 'CLUE_SINGLE'"
-            [disabled]="isCellClueSingleType()"
-            (click)="onCellTypeChange('CLUE_SINGLE')"
-          >Indice simple</button>
-          <button
-            class="toggle-btn"
-            [class.active]="selectedCellType() === 'CLUE_DOUBLE'"
-            [disabled]="isCellClueDoubleType()"
-            (click)="onCellTypeChange('CLUE_DOUBLE')"
-          >Indice double</button>
-          <button
-            class="toggle-btn"
-            [class.active]="selectedCellType() === 'BLACK'"
-            [disabled]="isCellBlackType()"
-            (click)="onCellTypeChange('BLACK')"
-          >Case noire</button>
-        </div>
-      </cocro-card>
+  <div class="grid-workspace">
+    <aside class="editor-side">
+      <cocro-cell-type />
 
       @if (isClueSelected()) {
-        <cocro-card>
-          <h3>Contenu de l'indice</h3>
-          <cocro-clue-editor [cell]="selectorService.selectedCell()!"/>
+        <cocro-card title="Contenu de l'indice">
+          <cocro-clue-editor [cell]="selectorService.selectedCell()!" />
         </cocro-card>
       } @else if (isLetterSelected()) {
-        <cocro-card>
-          <h3>Contenu de la lettre</h3>
-          <cocro-letter-editor [cell]="selectorService.selectedCell()!"/>
+        <cocro-card title="Contenu de la lettre">
+          <cocro-letter-editor [cell]="selectorService.selectedCell()!" />
         </cocro-card>
       }
-
-      <cocro-button variant="primary" (click)="onSubmit()" [disabled]="saving()">
-        Creer la grille
-      </cocro-button>
-    </div>
+    </aside>
 
     <div class="grid-wrapper">
       <cocro-grid />

@@ -1,4 +1,4 @@
-import { Cell, Letter, SeparatorType, Clue } from '@domain/models/grid.model';
+import { Cell, ClueDirection, Letter, SeparatorType, Clue } from '@domain/models/grid.model';
 
 export const DEFAULT_LETTER: Letter = { value: '', separator: 'NONE' };
 
@@ -52,6 +52,34 @@ export function setDoubleClueInCell(cell: Cell): Cell {
 
 export function setBlackInCell(cell: Cell): Cell {
   return { ...cell, type: 'BLACK', letter: undefined, clues: undefined };
+}
+
+export function getAllowedClueDirections(index: number, total: number): ClueDirection[] {
+  if (total === 1) return ['RIGHT', 'DOWN', 'FROM_SIDE', 'FROM_BELOW'];
+  if (total === 2) {
+    if (index === 0) return ['RIGHT', 'FROM_SIDE'];
+    if (index === 1) return ['DOWN', 'FROM_BELOW'];
+  }
+  return [];
+}
+
+export type SepKey = 'left' | 'up';
+
+export function getSepKeysFromSeparator(sep: SeparatorType): SepKey[] {
+  switch (sep) {
+    case 'LEFT': return ['left'];
+    case 'UP':   return ['up'];
+    case 'BOTH': return ['left', 'up'];
+    default:     return [];
+  }
+}
+
+export function toggleSeparatorKey(current: SeparatorType, key: SepKey): SeparatorType {
+  const keys = new Set(getSepKeysFromSeparator(current));
+  if (keys.has(key)) keys.delete(key); else keys.add(key);
+  return keys.has('left') && keys.has('up') ? 'BOTH' :
+         keys.has('left') ? 'LEFT' :
+         keys.has('up')   ? 'UP' : 'NONE';
 }
 
 export function setSeparatorInCell(cell: Cell, separator: SeparatorType): Cell {

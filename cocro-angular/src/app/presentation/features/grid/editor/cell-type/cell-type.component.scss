@@ -1,0 +1,11 @@
+.cell-type-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+// Cell-type buttons are slightly taller than the base toggle
+.toggle-btn {
+  min-height: 2.75rem;
+}

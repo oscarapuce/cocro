@@ -12,7 +12,7 @@
   cursor: pointer;
 
   &.selected {
-    outline: 1.5px solid var(--color-cell-select-ring);
+    outline: 0.15rem solid var(--color-cell-select-ring);
     z-index: 2;
     background-color: var(--color-cell-select-fill);
     border-radius: 0.2rem;

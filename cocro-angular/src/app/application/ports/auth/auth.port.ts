@@ -6,6 +6,7 @@ export interface AuthPort {
   login(request: LoginRequest): Observable<AuthResponse>;
   register(request: RegisterRequest): Observable<AuthResponse>;
   createGuest(): Observable<AuthResponse>;
+  isAuthenticated(): boolean;
 }
 
 export const AUTH_PORT = new InjectionToken<AuthPort>('AUTH_PORT');

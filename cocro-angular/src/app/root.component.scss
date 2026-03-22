@@ -1,3 +1,5 @@
+@use 'tokens' as t;
+
 .app-shell {
   --sidebar-width: 248px;
   display: grid;
@@ -11,13 +13,17 @@
 
   &__content {
     min-width: 0;
+    // Quand la sidebar se réduit, le contenu ne doit jamais déborder à gauche de la marge rouge.
+    // max(0, margin + espacement - largeur_sidebar) : retombe à 0 quand la sidebar est assez large.
+    padding-left: max(0px, calc(var(--margin-line-offset) + var(--space-2xs) - var(--sidebar-width)));
+    transition: padding-left 260ms ease;
   }
 
   &__burger {
     position: fixed;
     top: 16px;
     left: 16px;
-    z-index: 30;
+    z-index: var(--z-burger);
     display: inline-flex;
     flex-direction: column;
     gap: 5px;
@@ -28,6 +34,8 @@
     background: rgba(255, 255, 255, 0.92);
     box-shadow: var(--shadow-sm);
     cursor: pointer;
+    opacity: 1;
+    transition: opacity 260ms ease;
 
     span {
       display: block;
@@ -36,15 +44,10 @@
       background: var(--color-ink);
       border-radius: 999px;
     }
-  }
-}
-
-@media (max-width: 960px) {
-  .app-shell {
-    display: block;
-
-    &__content {
-      min-height: 100vh;
+    &--hidden {
+      opacity: 0;
+      pointer-events: none;
     }
   }
 }
+

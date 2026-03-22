@@ -1,6 +1,7 @@
 .cocro-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-sm);
   font-family: var(--font-ui);
   font-size: var(--text-base);
@@ -25,36 +26,36 @@
   // — Primary: forest green, Patrick Hand, offset shadow —
   &--primary {
     font-family: var(--font-hand);
-    font-size: 1.05rem;
+    font-size: var(--text-btn);
     background-color: var(--color-forest);
-    color: #fff;
+    color: var(--color-white);
     box-shadow: var(--shadow-sm);
 
     &:hover:not(:disabled) {
       transform: translate(-2px, -2px);
-      box-shadow: 5px 5px 0 #1a3d26;
+      box-shadow: var(--shadow-btn-raised);
     }
 
     &:active:not(:disabled) {
       transform: translate(1px, 1px);
-      box-shadow: 1px 1px 0 #1a3d26;
+      box-shadow: var(--shadow-btn-pressed);
     }
   }
 
   // — Secondary: white bg, dashed green border, forest text, Patrick Hand —
   &--secondary {
     font-family: var(--font-hand);
-    font-size: 1.05rem;
-    background-color: #fff;
+    font-size: var(--text-btn);
+    background-color: var(--color-white);
     color: var(--color-forest);
     border: var(--border-dashed);
     box-shadow: 3px 3px 0 var(--color-forest);
 
     &:hover:not(:disabled) {
       background-color: var(--color-forest);
-      color: #fff;
+      color: var(--color-white);
       transform: translate(-2px, -2px);
-      box-shadow: 5px 5px 0 #1a3d26;
+      box-shadow: var(--shadow-btn-raised);
     }
 
     &:active:not(:disabled) {
@@ -78,7 +79,7 @@
   // — Danger: Patrick Hand, offset shadow —
   &--danger {
     font-family: var(--font-hand);
-    font-size: 1.05rem;
+    font-size: var(--text-btn);
     background-color: transparent;
     color: var(--color-red);
     border-color: var(--color-red);
@@ -86,7 +87,7 @@
 
     &:hover:not(:disabled) {
       background-color: var(--color-red);
-      color: #fff;
+      color: var(--color-white);
       transform: translate(-2px, -2px);
       box-shadow: 5px 5px 0 var(--color-red);
     }
@@ -95,6 +96,13 @@
       transform: translate(1px, 1px);
       box-shadow: 1px 1px 0 var(--color-red);
     }
+  }
+
+  // — Small size —
+  &--sm {
+    min-height: 32px;
+    padding: 5px var(--space-md);
+    font-size: var(--text-sm);
   }
 
   // — Spinner —

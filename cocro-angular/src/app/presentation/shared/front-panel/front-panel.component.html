@@ -1,0 +1,59 @@
+@if (side() === 'join') {
+
+  <span class="section-label">Rejoindre une partie</span>
+  <h2>Vous avez un code ?</h2>
+
+  @if (auth.isAnonymous()) {
+    <p class="front-panel__guest-info text-muted">
+      Vous jouez en tant qu'invité · <strong>{{ auth.currentUser()?.username }}</strong>
+    </p>
+  }
+
+  <form [formGroup]="joinForm" (ngSubmit)="joinSession()" class="front-panel__form">
+    <cocro-input
+      label="Code de partage"
+      placeholder="ABC123"
+      formControlName="shareCode"
+      [hasError]="joinForm.controls.shareCode.invalid && joinForm.controls.shareCode.touched"
+      errorMessage="Code requis (4 caractères min.)"
+    />
+    @if (joinError()) {
+      <p class="front-panel__error">{{ joinError() }}</p>
+    }
+    <cocro-button type="submit" [loading]="joinLoading()">
+      Rejoindre
+    </cocro-button>
+  </form>
+
+} @else {
+
+  <span class="section-label">
+    @if (auth.isPlayer()) { Créer } @else { Commencer }
+  </span>
+  <h2>Votre atelier</h2>
+  <p>
+    @if (auth.isPlayer()) {
+      Concevez une grille et invitez des amis à la résoudre ensemble.
+    } @else {
+      Connectez-vous pour créer vos grilles et lancer vos propres sessions.
+    }
+  </p>
+  <div class="front-panel__actions">
+    @if (auth.isPlayer()) {
+      <cocro-button variant="secondary" routerLink="/grid/create">
+        Éditeur de grille
+      </cocro-button>
+      <cocro-button variant="secondary" routerLink="/lobby/create">
+        Nouvelle session
+      </cocro-button>
+    } @else {
+      <cocro-button variant="secondary" routerLink="/auth/login">
+        Se connecter
+      </cocro-button>
+      <cocro-button variant="secondary" routerLink="/auth/register">
+        S'inscrire
+      </cocro-button>
+    }
+  </div>
+
+}

@@ -3,7 +3,7 @@
   bottom: var(--space-lg);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -12,7 +12,7 @@
 .toast {
   padding: var(--space-sm) var(--space-lg);
   border: var(--border-dashed);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
   font-family: var(--font-body);
   font-size: var(--text-sm);
@@ -22,13 +22,13 @@
   text-align: center;
 
   &.success {
-    background: #e8f5e9;
+    background: var(--color-toast-success-bg);
     color: var(--color-forest);
     border-color: var(--color-forest-light);
   }
 
   &.error {
-    background: #ffebee;
+    background: var(--color-toast-error-bg);
     color: var(--color-red);
     border-color: var(--color-red-light);
   }

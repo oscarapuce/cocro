@@ -4,10 +4,10 @@
   border: none;
   width: 100%;
   height: 100%;
-  font-size: 1.8rem;
+  font-size: var(--cell-letter-font-size);
   background: transparent;
-  color: #121212;
-  font-family: Arial, sans-serif;
+  color: var(--cell-letter-color);
+  font-family: var(--cell-letter-font);
   font-weight: 400;
   letter-spacing: 0;
   text-shadow: none;
