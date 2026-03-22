@@ -1,0 +1,105 @@
+.global-clue-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+
+  &__label-field {
+    input {
+      width: 100%;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-sm);
+      font-family: var(--font-ui);
+      border: var(--border-dashed);
+      background-color: var(--color-input-bg);
+      outline: none;
+
+      &:focus {
+        border-color: var(--color-forest);
+        background-color: var(--color-surface);
+      }
+    }
+  }
+
+  &__words {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  &__word-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+
+    input {
+      width: 100%;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-sm);
+      font-family: var(--font-ui);
+      border: var(--border-dashed);
+      background-color: var(--color-input-bg);
+      outline: none;
+
+      &:focus {
+        border-color: var(--color-forest);
+        background-color: var(--color-surface);
+      }
+    }
+  }
+
+  &__preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+}
+
+.remove-btn {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  font-size: var(--text-base);
+  padding: 0 var(--space-xs);
+
+  &:hover {
+    color: var(--color-ink);
+  }
+}
+
+.add-word-btn {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--color-border);
+  color: var(--color-forest);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  padding: var(--space-2xs) var(--space-sm);
+
+  &:hover {
+    background-color: var(--color-croco-wash);
+  }
+}
+
+.preview-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--color-border);
+  font-family: var(--font-grid);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+
+  &--unresolved {
+    color: var(--color-red-light);
+    border-color: var(--color-red-light);
+  }
+}

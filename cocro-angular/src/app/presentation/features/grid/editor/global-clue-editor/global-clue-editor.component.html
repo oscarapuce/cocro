@@ -1,0 +1,38 @@
+<div class="global-clue-editor">
+  <div class="global-clue-editor__label-field">
+    <input
+      type="text"
+      maxlength="200"
+      placeholder="ex. Auteur de l'Étranger :"
+      [ngModel]="globalClue?.label ?? ''"
+      (ngModelChange)="updateLabel($event)"
+    />
+  </div>
+
+  @if (globalClue) {
+    <div class="global-clue-editor__words">
+      @for (word of globalClue.words; track $index) {
+        <div class="global-clue-editor__word-row">
+          <input
+            type="text"
+            placeholder="1, 2, 3"
+            [ngModel]="wordToRaw(word)"
+            (ngModelChange)="updateWord($index, $event)"
+          />
+          <button type="button" class="remove-btn" (click)="removeWord($index)">×</button>
+
+          <div class="global-clue-editor__preview">
+            @for (n of word; track $index) {
+              <span
+                class="preview-cell"
+                [class.preview-cell--unresolved]="isUnresolved(n)"
+              >{{ getLetterForNumber(n) }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <button type="button" class="add-word-btn" (click)="addWord()">+ Ajouter un mot</button>
+</div>
