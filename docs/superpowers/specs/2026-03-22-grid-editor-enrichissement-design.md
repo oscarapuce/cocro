@@ -107,21 +107,14 @@ val difficulty: String = "NONE"  // non-nullable : le default couvre l'absence d
 @Size(max = 10)  val globalClueWords: List<@Size(max = 20) List<Int>>? = null
 ```
 
-#### Migration des données existantes (MongoDB)
+#### Migration des données existantes
 
-Les grilles existantes stockent `difficulty` avec les valeurs `"EASY"`, `"MEDIUM"`, `"HARD"`. Le mapper BFF applique un **fallback sur lecture** :
+Aucune donnée existante en base — pas de migration nécessaire. Toute valeur `difficulty` invalide lue depuis MongoDB est ramenée à `"NONE"` par le mapper (cas défensif uniquement) :
 
 ```kotlin
-fun mapDifficulty(raw: String?): String =
-    when (raw) {
-        "EASY"   -> "1-2"
-        "MEDIUM" -> "2-3"
-        "HARD"   -> "3-4"
-        else     -> raw?.takeIf { it.matches(Regex("NONE|[0-5]|0-1|1-2|2-3|3-4|4-5")) } ?: "NONE"
-    }
+fun normalizeDifficulty(raw: String?): String =
+    raw?.takeIf { it.matches(Regex("NONE|[0-5]|0-1|1-2|2-3|3-4|4-5")) } ?: "NONE"
 ```
-
-Ce mapping est appliqué dans `GridMapper` à la lecture (`GridDocument → GridDto`). Les documents MongoDB ne sont **pas migrés** — la transformation est transparente à chaque lecture. Les nouvelles écritures utilisent toujours la nouvelle échelle.
 
 #### `GridMapper` — nouveaux champs
 
@@ -358,9 +351,23 @@ Les mots sont séparés par un espace visuel. Le label précède les mini-grille
 
 ---
 
-## 8. Hors scope
+## 8. Sémantique de `GlobalClue.words`
+
+`words: number[][]` encode simultanément :
+- **Le nombre de mots** → longueur du tableau externe
+- **La taille de chaque mot** → longueur de chaque sous-tableau
+- **Le mapping case→lettre** → chaque entier est la valeur de `letter.number` de la case dans la grille qui fournit la lettre à cette position
+
+Exemple : `{ label: "Auteur de l'Étranger :", words: [[1,2,3,4,5,6], [7,8,9,10,11]] }`
+→ 2 mots : "ALBERT" (6 lettres, cases n°1 à 6) et "CAMUS" (5 lettres, cases n°7 à 11).
+
+La mini-grille de prévisualisation affiche autant de cases que d'entiers par sous-tableau, chaque case cherchant dans la grille la cellule dont `letter.number` correspond.
+
+---
+
+## 9. Hors scope
 
 - Navigation sur la mini-grille de l'indice global
-- Migration MongoDB des documents existants (remplacée par un fallback transparent à la lecture)
+- Migration MongoDB (pas de données existantes)
 - Réorganisation visuelle majeure de l'éditeur
 - Tout changement sur le modèle de `Session` ou de `GameBoard`
