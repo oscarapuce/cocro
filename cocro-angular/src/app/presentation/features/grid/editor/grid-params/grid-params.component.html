@@ -29,4 +29,19 @@
       <cocro-button variant="ghost" (click)="onAddColumn()">+</cocro-button>
     </div>
   </div>
+
+  <div class="grid-params__separator"></div>
+
+  <div class="grid-params__difficulty">
+    <label for="grid-difficulty">Difficulté</label>
+    <select
+      id="grid-difficulty"
+      [ngModel]="selectorService.grid().difficulty ?? 'NONE'"
+      (ngModelChange)="updateDifficulty($event)"
+    >
+      @for (d of DIFFICULTIES; track d.value) {
+        <option [value]="d.value">{{ d.label }}</option>
+      }
+    </select>
+  </div>
 </div>
