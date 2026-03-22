@@ -13,9 +13,11 @@
       >Haut</button>
     </div>
 
-    <input type="text"
-           maxlength="2"
-           placeholder="1"
-    >
+    <div class="number-field">
+      <input type="number" min="1" max="99"
+             [ngModel]="cell.letter?.number"
+             (ngModelChange)="onNumberChange($event)" />
+      <button type="button" class="clear-btn" (click)="clearNumber()">×</button>
+    </div>
   </div>
 </div>

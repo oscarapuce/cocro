@@ -29,6 +29,17 @@ export class LetterEditorComponent {
     );
   }
 
+  onNumberChange(value: string): void {
+    const n = parseInt(value, 10);
+    this.ensureLetter();
+    this.cell.letter!.number = isNaN(n) || n < 1 ? undefined : n;
+  }
+
+  clearNumber(): void {
+    this.ensureLetter();
+    this.cell.letter!.number = undefined;
+  }
+
   private ensureLetter(): void {
     if (!this.cell.letter) {
       const fallback: Letter = { value: '', separator: 'NONE' };
