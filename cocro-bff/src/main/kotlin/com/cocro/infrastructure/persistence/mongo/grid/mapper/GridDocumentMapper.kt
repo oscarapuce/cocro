@@ -20,11 +20,6 @@ import com.cocro.kernel.grid.model.valueobject.GridTitle
 import com.cocro.kernel.grid.model.valueobject.GridWidth
 import com.cocro.kernel.grid.model.valueobject.LetterValue
 
-private val VALID_DIFFICULTIES = setOf("NONE","0","1","2","3","4","5","0-1","1-2","2-3","3-4","4-5")
-
-private fun normalizeDifficulty(raw: String?): String =
-    if (raw != null && raw in VALID_DIFFICULTIES) raw else "NONE"
-
 fun Grid.toDocument(): GridDocument =
     GridDocument(
         id = id,
@@ -88,7 +83,7 @@ fun GridDocument.toDomain(): Grid =
             author = UserId.from(metadata.author),
             reference = metadata.reference,
             description = metadata.description,
-            difficulty = normalizeDifficulty(metadata.difficulty),
+            difficulty = metadata.difficulty,
             globalClueLabel = metadata.globalClueLabel,
             globalClueWords = metadata.globalClueWords,
         ),

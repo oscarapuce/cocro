@@ -5,7 +5,7 @@
       id="grid-title"
       type="text"
       [ngModel]="selectorService.grid().title"
-      (ngModelChange)="selectorService.grid().title = $event"
+      (ngModelChange)="selectorService.updateTitle($event)"
       placeholder="Ma super grille"
     />
   </div>

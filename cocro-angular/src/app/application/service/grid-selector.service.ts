@@ -174,6 +174,10 @@ export class GridSelectorService {
     this.grid.update(g => ({ ...g, globalClue }));
   }
 
+  updateTitle(title: string): void {
+    this.grid.update(g => ({ ...g, title }));
+  }
+
   private eraseLetter(): void {
     const cell = this.selectedCell();
     if (!cell || !isCellLetter(cell)) return;

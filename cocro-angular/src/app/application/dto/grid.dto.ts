@@ -37,6 +37,8 @@ export interface PatchGridRequest {
   width?: number;
   height?: number;
   cells?: CellDto[];
+  globalClueLabel?: string;
+  globalClueWords?: number[][];
 }
 
 export interface GridSubmitResponse {
