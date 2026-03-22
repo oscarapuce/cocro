@@ -49,7 +49,7 @@ export function cellToDto(cell: Cell): CellDto {
     y: cell.y,
     type: cell.type,
     letter: cell.letter?.value || undefined,
-    separator: cell.letter?.separator,
+    separator: cell.letter?.separator === 'NONE' ? undefined : cell.letter?.separator,
     number: cell.letter?.number,
     clues: cell.clues?.length ? cell.clues : undefined,
   };
