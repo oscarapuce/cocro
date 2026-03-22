@@ -101,7 +101,7 @@ Dans `SubmitGridDto`, `PatchGridDto` et `GridDto` : remplacer `difficulty: GridD
 Validation sur le DTO de requête :
 ```kotlin
 @Pattern(regexp = "^(NONE|0|1|2|3|4|5|0-1|1-2|2-3|3-4|4-5)$")
-val difficulty: String? = "NONE"
+val difficulty: String = "NONE"  // non-nullable : le default couvre l'absence du champ
 
 @Size(max = 200) val globalClueLabel: String? = null
 @Size(max = 10)  val globalClueWords: List<@Size(max = 20) List<Int>>? = null
@@ -117,7 +117,7 @@ fun mapDifficulty(raw: String?): String =
         "EASY"   -> "1-2"
         "MEDIUM" -> "2-3"
         "HARD"   -> "3-4"
-        else     -> raw?.takeIf { it.matches(Regex("NONE|[0-5]|[0-4]-[1-5]")) } ?: "NONE"
+        else     -> raw?.takeIf { it.matches(Regex("NONE|[0-5]|0-1|1-2|2-3|3-4|4-5")) } ?: "NONE"
     }
 ```
 
