@@ -2,7 +2,15 @@ export type CellType = 'LETTER' | 'CLUE_SINGLE' | 'CLUE_DOUBLE' | 'BLACK';
 export type ClueDirection = 'RIGHT' | 'DOWN' | 'FROM_BELOW' | 'FROM_SIDE';
 export type Direction = 'DOWNWARDS' | 'RIGHTWARDS' | 'NONE';
 export type SeparatorType = 'LEFT' | 'UP' | 'BOTH' | 'NONE';
-export type GridDifficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'NONE';
+export type GridDifficulty =
+  | 'NONE'
+  | '0' | '1' | '2' | '3' | '4' | '5'
+  | '0-1' | '1-2' | '2-3' | '3-4' | '4-5';
+
+export interface GlobalClue {
+  label: string;
+  words: number[][];
+}
 
 export interface Clue {
   direction: ClueDirection;
@@ -32,4 +40,5 @@ export interface Grid {
   author?: string;
   difficulty?: GridDifficulty;
   description?: string;
+  globalClue?: GlobalClue;
 }

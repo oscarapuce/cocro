@@ -1,5 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { Cell, CellType, Direction, Grid } from '@domain/models/grid.model';
+import { Cell, CellType, Direction, GlobalClue, Grid, GridDifficulty } from '@domain/models/grid.model';
 import {
   isCellLetter,
   setBlackInCell,
@@ -164,6 +164,14 @@ export class GridSelectorService {
       x = nx;
       y = ny;
     }
+  }
+
+  updateDifficulty(difficulty: GridDifficulty): void {
+    this.grid.update(g => ({ ...g, difficulty }));
+  }
+
+  updateGlobalClue(globalClue: GlobalClue | undefined): void {
+    this.grid.update(g => ({ ...g, globalClue }));
   }
 
   private eraseLetter(): void {

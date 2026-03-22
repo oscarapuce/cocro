@@ -1,4 +1,4 @@
-import { Cell, CellType, ClueDirection, GridDifficulty } from '@domain/models/grid.model';
+import { Cell, CellType, ClueDirection, GridDifficulty, SeparatorType } from '@domain/models/grid.model';
 
 export interface ClueDto {
   direction: ClueDirection;
@@ -10,6 +10,7 @@ export interface CellDto {
   y: number;
   type: CellType;
   letter?: string;
+  separator?: SeparatorType;
   number?: number;
   clues?: ClueDto[];
 }
@@ -23,6 +24,8 @@ export interface SubmitGridRequest {
   width: number;
   height: number;
   cells: CellDto[];
+  globalClueLabel?: string;
+  globalClueWords?: number[][];
 }
 
 export interface PatchGridRequest {
@@ -46,6 +49,7 @@ export function cellToDto(cell: Cell): CellDto {
     y: cell.y,
     type: cell.type,
     letter: cell.letter?.value || undefined,
+    separator: cell.letter?.separator,
     number: cell.letter?.number,
     clues: cell.clues?.length ? cell.clues : undefined,
   };
