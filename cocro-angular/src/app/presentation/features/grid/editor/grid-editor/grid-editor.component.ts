@@ -11,6 +11,7 @@ import { ClueEditorComponent } from '@presentation/features/grid/editor/clue-edi
 import { LetterEditorComponent } from '@presentation/features/grid/editor/letter-editor/letter-editor.component';
 import { GridParamsComponent } from '@presentation/features/grid/editor/grid-params/grid-params.component';
 import { CellTypeComponent } from '@presentation/features/grid/editor/cell-type/cell-type.component';
+import { GlobalClueEditorComponent } from '@presentation/features/grid/editor/global-clue-editor/global-clue-editor.component';
 import { CreateGridUseCase } from '@application/use-cases/create-grid.use-case';
 import { cellToDto, SubmitGridRequest } from '@application/dto/grid.dto';
 
@@ -25,6 +26,7 @@ import { cellToDto, SubmitGridRequest } from '@application/dto/grid.dto';
     LetterEditorComponent,
     GridParamsComponent,
     CellTypeComponent,
+    GlobalClueEditorComponent,
   ],
   templateUrl: './grid-editor.component.html',
   styleUrls: ['./grid-editor.component.scss'],
@@ -67,6 +69,8 @@ export class GridEditorComponent {
         width: grid.width,
         height: grid.height,
         cells: grid.cells.map(cellToDto),
+        globalClueLabel: grid.globalClue?.label,
+        globalClueWords: grid.globalClue?.words,
       };
       const id = await this.createGridUseCase.execute(request);
       this.toast.success(`Grille creee avec succes (ID: ${id})`);
