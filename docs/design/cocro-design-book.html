@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoCro Design Book</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Lexend:wght@300;400;500;600;700&family=Patrick+Hand:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Spline+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #F0EDE5;
+      --paper-dark: #EDE8D0;
+      --surface: #FFFFFF;
+      --surface-alt: #F7F4ED;
+      --ink: #131313;
+      --ink-muted: #6B5E4E;
+      --ink-blue: #2C4A8A;
+      --forest: #255736;
+      --forest-light: #7AB89A;
+      --gold: #C4952A;
+      --red: #B83225;
+      --red-light: #E8756A;
+      --border: #1A1A1A;
+      --border-soft: #C8C0A8;
+      --border-dashed: #B5C3AD;
+      --margin-line: rgba(232, 160, 144, 0.6);
+      --shadow: rgba(26, 26, 26, 0.08);
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 40px;
+      --space-2xl: 64px;
+
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+      --text-3xl: 2rem;
+      --text-4xl: 2.75rem;
+      --text-5xl: 3.5rem;
+
+      --font-title: 'Space Grotesk', sans-serif;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Lexend', sans-serif;
+      --font-ui: 'Plus Jakarta Sans', sans-serif;
+      --font-hand: 'Patrick Hand', cursive;
+      --font-label: 'Spline Sans', sans-serif;
+      --font-grid: 'Comic Neue', cursive;
+
+      --border-ink: 1px solid var(--border);
+      --border-soft-rule: 1px solid var(--border-soft);
+      --border-dashed-rule: 1px dashed var(--border-dashed);
+      --shadow-card: 2px 2px 0 rgba(26, 26, 26, 0.18);
+      --shadow-sm: 2px 2px 0 rgba(26, 26, 26, 0.22);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--font-body);
+      background-color: var(--paper);
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"),
+        repeating-linear-gradient(
+          transparent,
+          transparent 23px,
+          rgba(191, 207, 232, 0.35) 23px,
+          rgba(191, 207, 232, 0.35) 24px
+        );
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 72px;
+      width: 1px;
+      height: 100%;
+      background: var(--margin-line);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(8px);
+      border-right: var(--border-ink);
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    .brand {
+      padding-bottom: var(--space-lg);
+      border-bottom: var(--border-soft-rule);
+      margin-bottom: var(--space-lg);
+    }
+
+    .brand__eyebrow,
+    .eyebrow {
+      font-family: var(--font-label);
+      font-size: var(--text-xs);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .brand__name {
+      margin-top: var(--space-sm);
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .brand__text {
+      margin-top: var(--space-sm);
+      font-size: var(--text-sm);
+      color: var(--ink-muted);
+      line-height: 1.6;
+    }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav a {
+      display: block;
+      padding: 10px 12px;
+      border-left: 2px solid transparent;
+      font-family: var(--font-ui);
+      font-size: var(--text-sm);
+      color: var(--ink-muted);
+      transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+    }
+
+    .nav a:hover {
+      background: rgba(255, 255, 255, 0.65);
+      color: var(--ink);
+      border-left-color: var(--forest);
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .hero {
+      padding: var(--space-2xl);
+      border-bottom: var(--border-ink);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .hero h1 {
+      margin-top: var(--space-sm);
+      max-width: 12ch;
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 5vw, 5rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin-top: var(--space-lg);
+      max-width: 60ch;
+      color: var(--ink-muted);
+      font-size: var(--text-lg);
+      line-height: 1.7;
+    }
+
+    .hero-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+      padding-top: var(--space-lg);
+      border-top: var(--border-soft-rule);
+    }
+
+    .hero-meta strong {
+      display: block;
+      font-family: var(--font-ui);
+      font-size: var(--text-base);
+      margin-top: 6px;
+    }
+
+    .section {
+      padding: var(--space-2xl);
+      border-bottom: var(--border-soft-rule);
+    }
+
+    .section h2 {
+      margin-top: var(--space-sm);
+      font-family: var(--font-title);
+      font-size: var(--text-3xl);
+      letter-spacing: -0.02em;
+    }
+
+    .section-intro {
+      margin-top: var(--space-md);
+      max-width: 70ch;
+      color: var(--ink-muted);
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+    }
+
+    .grid--two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: var(--border-dashed-rule);
+      border-radius: 18px;
+      box-shadow: var(--shadow-card);
+      padding: var(--space-xl);
+    }
+
+    .card--dark {
+      background: var(--forest);
+      color: #fff;
+      border-color: var(--border-dashed);
+    }
+
+    .card h3 {
+      font-family: var(--font-title);
+      font-size: var(--text-xl);
+      line-height: 1.15;
+    }
+
+    .card p,
+    .card li {
+      margin-top: var(--space-sm);
+      color: var(--ink-muted);
+      line-height: 1.7;
+    }
+
+    .card--dark p,
+    .card--dark li {
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .list {
+      list-style: none;
+      display: grid;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .list li {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 8px;
+      height: 8px;
+      background: var(--forest);
+    }
+
+    .list--danger li::before {
+      background: var(--red);
+    }
+
+    .token-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: var(--space-xl);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow-card);
+    }
+
+    .token-table th,
+    .token-table td {
+      padding: 14px 16px;
+      border: var(--border-soft-rule);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .token-table th {
+      font-family: var(--font-ui);
+      font-size: var(--text-sm);
+      background: var(--surface-alt);
+    }
+
+    .swatch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-ui);
+      font-size: var(--text-sm);
+    }
+
+    .swatch__chip {
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .review {
+      display: grid;
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+    }
+
+    .review-item {
+      padding: var(--space-lg);
+      background: rgba(255, 255, 255, 0.9);
+      border-left: 4px solid var(--red);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .review-item--good {
+      border-left-color: var(--forest);
+    }
+
+    .review-item h3 {
+      font-family: var(--font-title);
+      font-size: var(--text-xl);
+    }
+
+    .review-item p {
+      margin-top: var(--space-sm);
+      color: var(--ink-muted);
+      line-height: 1.7;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .chip {
+      padding: 8px 12px;
+      border: var(--border-dashed-rule);
+      background: rgba(255, 255, 255, 0.8);
+      font-family: var(--font-ui);
+      font-size: var(--text-sm);
+    }
+
+    .spec-panels {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+    }
+
+    .spec-panel {
+      padding: var(--space-xl);
+      background: rgba(255, 255, 255, 0.92);
+      border: var(--border-dashed-rule);
+      border-radius: 22px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .spec-panel--dark {
+      background: var(--forest);
+      color: #fff;
+    }
+
+    .spec-panel--dark p {
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .mini-hero {
+      font-family: var(--font-title);
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin: 12px 0;
+    }
+
+    .field {
+      margin-top: var(--space-lg);
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-family: var(--font-label);
+      font-size: var(--text-xs);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .field input {
+      width: 100%;
+      padding: 10px 8px;
+      border: var(--border-dashed-rule);
+      border-radius: 6px;
+      background: #fffde7;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      margin-top: var(--space-lg);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border: var(--border-ink);
+      font-family: var(--font-ui);
+      font-size: var(--text-base);
+      font-weight: 600;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .btn--primary,
+    .btn--secondary,
+    .btn--danger {
+      font-family: var(--font-hand);
+      font-size: 1.05rem;
+    }
+
+    .btn--primary {
+      color: #fff;
+      background: var(--forest);
+      box-shadow: 3px 3px 0 #1a3d26;
+    }
+
+    .btn--secondary {
+      color: var(--forest);
+      background: #fff;
+      border: var(--border-dashed-rule);
+      box-shadow: 3px 3px 0 var(--forest);
+    }
+
+    .btn--ghost {
+      color: var(--ink);
+    }
+
+    .btn--danger {
+      color: var(--red);
+      border-color: var(--red);
+      box-shadow: 3px 3px 0 var(--red);
+    }
+
+    .tool-stack {
+      display: grid;
+      gap: var(--space-md);
+      margin-top: 16px;
+    }
+
+    .tool-card {
+      padding: var(--space-lg);
+      background: rgba(255, 255, 255, 0.98);
+      color: var(--ink);
+      border: var(--border-dashed-rule);
+      border-radius: 16px;
+    }
+
+    .tool-card h3 {
+      font-family: var(--font-title);
+      font-size: var(--text-lg);
+      color: var(--forest);
+    }
+
+    .tool-field {
+      margin-top: var(--space-md);
+    }
+
+    .tool-field label {
+      display: block;
+      margin-bottom: 6px;
+      font-family: var(--font-label);
+      font-size: var(--text-xs);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .tool-field input,
+    .tool-field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: var(--border-dashed-rule);
+      border-radius: 6px;
+      background: #fffde7;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--ink);
+    }
+
+    .tool-field textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .counter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: var(--space-md);
+      gap: var(--space-md);
+    }
+
+    .counter-row__label {
+      font-family: var(--font-ui);
+      font-weight: 600;
+      font-size: var(--text-sm);
+      color: var(--ink);
+    }
+
+    .counter-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .counter-chip {
+      min-width: 32px;
+      text-align: center;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: var(--text-sm);
+    }
+
+    .counter-btn {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: var(--surface-alt);
+      color: var(--ink);
+      font-family: var(--font-ui);
+      font-size: var(--text-lg);
+    }
+
+    .toggle-list {
+      display: grid;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .toggle-item {
+      position: relative;
+      overflow: hidden;
+      padding: 11px 14px;
+      background: var(--surface-alt);
+      border: var(--border-dashed-rule);
+      font-family: var(--font-ui);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .toggle-item--active {
+      border-color: var(--forest-light);
+      background:
+        radial-gradient(circle at center, #aed581 0%, #c5e1a5 60%, transparent 61%),
+        var(--surface-alt);
+    }
+
+    .toggle-caption {
+      margin-top: 6px;
+      font-size: var(--text-xs);
+      color: var(--ink-muted);
+      line-height: 1.5;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .mini-tile {
+      padding: 12px;
+      border: var(--border-soft-rule);
+      background: rgba(247, 244, 237, 0.85);
+    }
+
+    .mini-tile strong {
+      display: block;
+      font-family: var(--font-ui);
+      font-size: var(--text-sm);
+      margin-bottom: 4px;
+    }
+
+    .mini-tile span {
+      font-size: var(--text-sm);
+      color: var(--ink-muted);
+      line-height: 1.5;
+    }
+
+    .footer {
+      padding: var(--space-xl) var(--space-2xl) var(--space-2xl);
+      color: var(--ink-muted);
+      font-size: var(--text-sm);
+    }
+
+    @media (max-width: 1100px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: var(--border-ink);
+      }
+
+      .grid--two,
+      .hero-meta,
+      .spec-panels {
+        grid-template-columns: 1fr;
+      }
+
+      .spec-panel--dark {
+        border-left: none;
+        border-top: var(--border-dashed-rule);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .hero,
+      .section,
+      .footer {
+        padding: var(--space-xl);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand__eyebrow">CoCro</div>
+        <div class="brand__name">Design Book</div>
+        <p class="brand__text">Etat du design réellement implémenté dans `cocro-angular`, avec review critique, rendu de référence, et consignes de continuité.</p>
+      </div>
+      <nav class="nav">
+        <a href="#direction">Direction</a>
+        <a href="#review">Review</a>
+        <a href="#tokens">Tokens</a>
+        <a href="#typography">Typographie</a>
+        <a href="#layouts">Layouts</a>
+        <a href="#components">Composants</a>
+        <a href="#priorities">Priorités</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="hero" id="direction">
+        <div class="eyebrow">Mars 2026 · Cocro Angular</div>
+        <h1>Un cahier collaboratif, pas une app générique.</h1>
+        <p>Le design actuel fonctionne quand il assume trois choses en même temps: une structure éditoriale nette, une matérialité de cahier scolaire, et une interaction tactile propre au jeu. La landing porte l’identité principale sur la route par défaut, en unifiant les états connecté et non connecté sur un seul shell visuel. L’éditeur de grille converge progressivement vers ce même noyau via les composants partagés. Le reste du produit doit suivre cette direction, pas s’en écarter.</p>
+        <div class="hero-meta">
+          <div>
+            <div class="eyebrow">Direction</div>
+            <strong>Editorial notebook, softened</strong>
+          </div>
+          <div>
+            <div class="eyebrow">Forces</div>
+            <strong>Fond, contraste, CTA, respiration</strong>
+          </div>
+          <div>
+            <div class="eyebrow">Risque</div>
+            <strong>Drift local et lourdeur visuelle</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="section" id="review">
+        <div class="eyebrow">Review</div>
+        <h2>Evaluation du design actuel</h2>
+        <p class="section-intro">Le design a une vraie personnalité. Il ne ressemble ni à un dashboard standard ni à un thème de jeu mobile cliché. En revanche, il n’est pas encore totalement systématisé. Le principal sujet n’est pas la direction, qui est bonne, mais la discipline d’exécution selon les écrans et le dosage des effets visuels.</p>
+
+        <div class="review">
+          <article class="review-item review-item--good">
+            <h3>Ce qui marche</h3>
+            <p>Le fond réglé, la ligne de marge rouge, la palette papier/forêt/encre, et le mélange Space Grotesk + Lexend + Patrick Hand produisent une identité immédiatement mémorisable. La landing unifie les états connecté et non connecté sur la route par défaut. L’éditeur de grille utilise désormais cocro-card avec badge de titre sur la bordure pointillée, et le `.toggle-btn` est une utilitaire globale mutualisée entre tous les composants éditeur.</p>
+          </article>
+
+          <article class="review-item">
+            <h3>Point critique 1 · Deux systèmes de navigation coexistent</h3>
+            <p>La landing utilise une navigation éditoriale légère, propre et bien hiérarchisée. Le composant header partagé reste visuellement plus ancien, plus neutre et plus pauvre. Si de nouveaux écrans reprennent ce header, le produit se fracture visuellement.</p>
+          </article>
+
+          <article class="review-item review-item--good">
+            <h3>Point résolu · L’éditeur de grille s’appuie maintenant sur le design system</h3>
+            <p>Les panneaux d’outils utilisent cocro-card avec le nouvel input title pour afficher un badge vert forêt sur la bordure pointillée. La barre de paramètres est une cocro-card horizontale. Les toggles de type de cellule, de séparateur et de direction d’indice utilisent la classe globale .toggle-btn définie dans styles.scss — les composants éditeur n’en contiennent plus que les overrides locaux.</p>
+          </article>
+
+          <article class="review-item">
+            <h3>Point de vigilance · Duplication dans les formulaires auth et lobby</h3>
+            <p>Les composants login, register et create-session partagent des structures SCSS très proches (card container, form layout, error message) sans classe utilitaire commune. C’est un nettoyage potentiel si ces écrans évoluent ensemble.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="tokens">
+        <div class="eyebrow">Tokens</div>
+        <h2>Palette et matières</h2>
+        <p class="section-intro">La palette est petite, lisible, et suffisamment contrastée. C’est un bon choix pour un jeu collaboratif où la grille doit rester la star. Il faut garder cette retenue, y compris sur les pointillés, les rayons et les ombres.</p>
+
+        <table class="token-table">
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th>Valeur</th>
+              <th>Lecture design</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--color-paper</code></td>
+              <td><span class="swatch"><span class="swatch__chip" style="background:#F0EDE5"></span>#F0EDE5</span></td>
+              <td>Fond global, chaleur, base du cahier.</td>
+            </tr>
+            <tr>
+              <td><code>--color-surface</code></td>
+              <td><span class="swatch"><span class="swatch__chip" style="background:#FFFFFF"></span>#FFFFFF</span></td>
+              <td>Surface claire des panneaux et formulaires, avec bords plus souples.</td>
+            </tr>
+            <tr>
+              <td><code>--color-forest</code></td>
+              <td><span class="swatch"><span class="swatch__chip" style="background:#2D5A3D"></span>#2D5A3D</span></td>
+              <td>Accent primaire, panneau sombre, CTA.</td>
+            </tr>
+            <tr>
+              <td><code>--color-ink</code></td>
+              <td><span class="swatch"><span class="swatch__chip" style="background:#1A1A1A"></span>#1A1A1A</span></td>
+              <td>Texte, contour et base des ombres offset courtes.</td>
+            </tr>
+            <tr>
+              <td><code>--color-ink-muted</code></td>
+              <td><span class="swatch"><span class="swatch__chip" style="background:#6B5E4E"></span>#6B5E4E</span></td>
+              <td>Secondaire, métadonnées, labels atténués.</td>
+            </tr>
+            <tr>
+              <td><code>--color-red</code></td>
+              <td><span class="swatch"><span class="swatch__chip" style="background:#B83225"></span>#B83225</span></td>
+              <td>Erreur, danger, retour négatif net.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="chips">
+          <div class="chip">Fond papier + grain</div>
+          <div class="chip">Lignes bleues répétées</div>
+          <div class="chip">Marge rouge fixe</div>
+          <div class="chip">Bordures encrées</div>
+          <div class="chip">Ombres dures offset</div>
+        </div>
+      </section>
+
+      <section class="section" id="typography">
+        <div class="eyebrow">Typographie</div>
+        <h2>Hiérarchie des fontes</h2>
+        <p class="section-intro">Le système typographique est juste parce qu’il distribue des rôles clairs. Il faut continuer à penser en rôles et non en préférences locales par écran.</p>
+
+        <div class="grid grid--two">
+          <article class="card">
+            <h3>Rôles validés</h3>
+            <ul class="list">
+              <li><strong>Space Grotesk</strong> pour le titre, la promesse, les repères majeurs.</li>
+              <li><strong>Lexend</strong> pour les textes de lecture et l’explication.</li>
+              <li><strong>Plus Jakarta Sans</strong> pour l’interface utilitaire.</li>
+              <li><strong>Patrick Hand</strong> pour donner une énergie manuelle aux actions.</li>
+              <li><strong>Spline Sans</strong> pour les labels compacts et le micro-texte structurant.</li>
+            </ul>
+          </article>
+
+          <article class="card card--dark">
+            <h3>Règle importante</h3>
+            <p>`Patrick Hand` doit rester rare. Sa force vient précisément du fait qu’elle ne contamine pas tout. Si elle passe dans la navigation, les paragraphes ou les libellés standards, l’interface devient décorative au lieu de rester directionnelle.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="layouts">
+        <div class="eyebrow">Layouts</div>
+        <h2>Compositions de référence</h2>
+        <p class="section-intro">Le produit dispose déjà de deux compositions utiles: le shell éditorial à deux panneaux et la carte centrée de formulaire. Ce sont ces compositions qu’il faut prolonger. L’accueil s’appuie désormais sur un seul shell et une seule route, puis se différencie par les droits et les actions.</p>
+
+        <div class="spec-panels">
+          <div class="spec-panel">
+            <div class="eyebrow">Landing / Home</div>
+            <div class="mini-hero">Mots fléchés<br>collaboratifs</div>
+            <p>Grande entrée éditoriale, navigation légère, puis split clair entre un panneau d’action clair et un panneau d’engagement sombre.</p>
+            <div class="field">
+              <label>Code de partage</label>
+              <input placeholder="ABC123">
+            </div>
+            <div class="btn-row">
+              <div class="btn btn--primary">Rejoindre</div>
+            </div>
+          </div>
+          <div class="spec-panel spec-panel--dark">
+            <div class="eyebrow" style="color:rgba(255,255,255,0.65)">Panneau accent</div>
+            <div class="mini-hero">Votre atelier</div>
+            <p>Le panneau forêt sert de contrepoint. Il doit rester simple, dense, et piloté par la conversion, sans donner l’impression d’un bloc soudé au panneau voisin.</p>
+            <div class="btn-row">
+              <div class="btn btn--secondary">Créer un compte</div>
+              <div class="btn btn--secondary">Se connecter</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid--two">
+          <article class="card">
+            <h3>Auth</h3>
+            <p>Page centrée, brand fort, une seule carte, très peu de bruit. C’est un bon contrepoint à la landing plus éditoriale.</p>
+          </article>
+          <article class="card">
+            <h3>Grid editor</h3>
+            <p>Bonne base modulaire, mais pas encore assez disciplinée dans l’usage des composants partagés. L’éditeur doit devenir l’extension naturelle du design system, pas son exception.</p>
+          </article>
+        </div>
+
+        <div class="eyebrow" style="margin-top:40px">Focus écran</div>
+        <h2 style="margin-top:8px">Rendu actuel de Grid Create</h2>
+        <p class="section-intro">L’éditeur utilise une sidebar gauche repliable (ne se replie pas automatiquement à la navigation). En haut : une cocro-card horizontale "Paramètres de la grille" avec badge vert forêt sur la bordure. À gauche : panneau d’outils (type de cellule, contenu). À droite : le plateau. Tous les panneaux utilisent cocro-card avec title. La vue ci-dessous représente le rendu réel.</p>
+
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div style="display:grid; grid-template-columns:120px 1.35fr 0.65fr; gap:40px; padding:0; background:transparent;">
+            <div style="display:flex; flex-direction:column; min-height:780px; padding:14px 12px; border-right:var(--border-soft-rule); background:linear-gradient(180deg, rgba(255,255,255,0.94), rgba(247,244,237,0.9));">
+              <div style="width:42px; padding:10px 8px; border:var(--border-dashed-rule); border-radius:16px; background:rgba(255,255,255,0.88); box-shadow:var(--shadow-sm);">
+                <div style="height:2px; background:var(--ink); margin-bottom:5px;"></div>
+                <div style="height:2px; background:var(--ink); margin-bottom:5px;"></div>
+                <div style="height:2px; background:var(--ink);"></div>
+              </div>
+              <div style="margin-top:16px;">
+                <div style="font-family:var(--font-title); font-size:2rem; font-weight:700; line-height:1;">CoCro</div>
+                <div style="margin-top:6px; font-family:var(--font-label); font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-muted);">Atelier collaboratif</div>
+              </div>
+              <div style="display:grid; gap:8px; margin-top:24px;">
+                <div style="padding:12px 14px; border:var(--border-dashed-rule); border-radius:16px; background:rgba(255,255,255,0.7); font-family:var(--font-ui); font-size:0.9rem; font-weight:600;">01&nbsp; Accueil</div>
+                <div style="padding:12px 14px; border:var(--border-dashed-rule); border-radius:16px; background:rgba(45,90,61,0.1); font-family:var(--font-ui); font-size:0.9rem; font-weight:600;">02&nbsp; Éditeur</div>
+                <div style="padding:12px 14px; border:var(--border-dashed-rule); border-radius:16px; background:rgba(255,255,255,0.7); font-family:var(--font-ui); font-size:0.9rem; font-weight:600;">03&nbsp; Session</div>
+              </div>
+              <div style="margin-top:auto; padding-top:14px; border-top:var(--border-soft-rule);">
+                <div style="font-family:var(--font-label); font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-muted);">Connecté en tant que</div>
+                <div style="margin-top:4px; font-family:var(--font-ui); font-size:0.9rem; font-weight:700;">testplayer</div>
+                <div style="margin-top:16px; padding:12px 14px; border:var(--border-ink); border-radius:16px; font-family:var(--font-ui); font-size:0.9rem; font-weight:600; background:transparent;">00&nbsp; Déconnexion</div>
+              </div>
+            </div>
+
+            <div style="padding:36px 0 44px 0;">
+            <div>
+              <div class="eyebrow">Plateau</div>
+              <div style="margin-top:18px; display:grid; grid-template-columns:repeat(10, 44px); gap:0; width:max-content; border:1px solid #151515; background:#fcfffb;">
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#f6a7ac;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+                <div style="width:44px;height:44px;border:0.5px solid #151515;background:#fff;"></div>
+              </div>
+              <p style="margin-top:16px">Le plateau est grand, très peu décoré, et posé sans carte autour. La cellule sélectionnée rose est l’élément de focus principal. C’est un écran de travail plus brut que le reste de l’app.</p>
+            </div>
+            </div>
+
+            <div style="padding:36px 44px 44px 0;">
+              <div class="eyebrow">Colonne d’outils</div>
+              <div class="tool-stack">
+                <div class="tool-card" style="box-shadow:var(--shadow-card);">
+                  <h3>Paramètres de la grille</h3>
+                  <div class="tool-field">
+                    <label>Nom de la grille</label>
+                    <input value="Nouvelle grille">
+                  </div>
+                  <div class="counter-row">
+                    <div class="counter-row__label">Lignes :</div>
+                    <div class="counter-controls">
+                      <div class="counter-btn">−</div>
+                      <div class="counter-chip">8</div>
+                      <div class="counter-btn">+</div>
+                    </div>
+                  </div>
+                  <div class="counter-row">
+                    <div class="counter-row__label">Colonnes :</div>
+                    <div class="counter-controls">
+                      <div class="counter-btn">−</div>
+                      <div class="counter-chip">10</div>
+                      <div class="counter-btn">+</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tool-card" style="box-shadow:var(--shadow-card);">
+                  <h3>Type de cellule</h3>
+                  <div class="toggle-list">
+                    <div class="toggle-item toggle-item--active">&nbsp;</div>
+                    <div class="toggle-item">Indice simple</div>
+                    <div class="toggle-item">Indice double</div>
+                    <div class="toggle-item">Case noire</div>
+                  </div>
+                </div>
+
+                <div class="tool-card" style="box-shadow:var(--shadow-card);">
+                  <h3>Contenu de la lettre</h3>
+                  <div style="display:flex; gap:8px; margin-top:16px;">
+                    <div class="toggle-item" style="flex:0 0 auto; padding:10px 14px;">Gauche</div>
+                    <div class="toggle-item" style="flex:0 0 auto; padding:10px 14px;">Haut</div>
+                    <input value="future number component" style="flex:1; min-width:0; padding:10px 12px; border:var(--border-dashed-rule); background:#fffde7; font-family:var(--font-hand); font-size:0.9rem;">
+                  </div>
+                </div>
+
+                <div class="btn btn--primary" style="align-self:flex-start; padding-inline:14px;">Creer la grille</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid--two">
+          <article class="card">
+            <h3>Ce que ce rendu réussit</h3>
+            <ul class="list">
+              <li>La séparation gauche/droite rend le workflow compréhensible immédiatement.</li>
+              <li>La sidebar donne un point d’ancrage produit sans voler de hauteur utile à l’éditeur.</li>
+              <li>Le mode fermé reste lisible parce qu’il ne laisse que le burger, pas une mini-colonne parasite.</li>
+              <li>La grille prend la priorité visuelle sans être enfermée dans une surcouche décorative.</li>
+              <li>Les cartes d’outils restent compactes et lisibles malgré leur densité.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Points de vigilance</h3>
+            <ul class="list list--danger">
+              <li>La sidebar doit rester discrète — elle ne doit pas entrer en concurrence avec le panneau d’outils.</li>
+              <li>Le bouton size="sm" (32px) n’existe que pour les contextes denses (barre de params). Ne pas généraliser.</li>
+              <li>Les champs natifs dans les composants éditeur (lettre, indice) ne passent pas encore par cocro-input.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="components">
+        <div class="eyebrow">Composants</div>
+        <h2>Règles de construction</h2>
+        <p class="section-intro">Les composants partagés existants sont globalement bons. Il faut surtout empêcher les variantes locales de prendre le dessus. La direction actuelle privilégie des cartes plus aérées, moins anguleuses et moins lourdes visuellement, ainsi que des boutons plus doux et plus ludiques.</p>
+
+        <div class="grid grid--two">
+          <article class="card">
+            <h3>Boutons</h3>
+            <ul class="list">
+              <li>Conserver l’effet tactile sur les variants à action forte, sans surcharger la page.</li>
+              <li>Réserver `ghost` aux actions secondaires et de navigation.</li>
+              <li>Ne pas réinventer des CTA par feature si un variant existant suffit.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Inputs</h3>
+            <ul class="list">
+              <li>Préférer `cocro-input` pour garder labels, erreurs et fonds cohérents.</li>
+              <li>Limiter les champs natifs sur mesure aux cas vraiment spécifiques.</li>
+              <li>Garder une lecture calme, sans chrome inutile.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Cards</h3>
+            <ul class="list">
+              <li>Les cards portent déjà très bien l’identité du produit.</li>
+              <li>La bordure pointillée et l’ombre offset doivent rester la norme, mais en version courte et légère.</li>
+              <li>Utiliser l’input <code>title</code> pour afficher un badge forêt sur la bordure supérieure — pas de h3 dans les cartes d’outils.</li>
+              <li>Eviter les cartes plates autant que les cartes trop lourdes.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Grille</h3>
+            <ul class="list">
+              <li>La grille doit rester lisible avant d’être expressive.</li>
+              <li>Ses états de sélection peuvent être tokenisés davantage.</li>
+              <li>Les dimensions locales en `rem` méritent une harmonisation avec les tokens de cellules.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="priorities">
+        <div class="eyebrow">Priorités</div>
+        <h2>Ce qu’il faut faire ensuite</h2>
+        <p class="section-intro">La meilleure suite n’est pas de changer de direction. C’est de rendre la direction existante plus stricte, plus respirante, et mieux documentée.</p>
+
+        <div class="grid grid--two">
+          <article class="card">
+            <h3>Priorités produit</h3>
+            <ul class="list">
+              <li>Faire converger le header partagé vers la navigation de la landing.</li>
+              <li>Migrer les champs natifs des composants éditeur vers cocro-input.</li>
+              <li>Consolider les patterns dupliqués dans auth/lobby (card container, form, error) en classes utilitaires.</li>
+              <li>Mettre à jour le book et la charte à chaque évolution sensible du système visuel.</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Garde-fous</h3>
+            <ul class="list list--danger">
+              <li>Pas de nouvelle palette autonome par feature.</li>
+              <li>Pas de nouveau style de header.</li>
+              <li>Pas de boutons pill ni d’ombres floues comme langage principal.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        Documents associés: `cocro-design-charter.md` pour les agents et ce book HTML pour la lecture humaine.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
