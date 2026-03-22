@@ -21,6 +21,11 @@ import com.cocro.kernel.grid.model.valueobject.GridWidth
 import com.cocro.kernel.grid.model.valueobject.LetterValue
 import java.util.UUID
 
+private val VALID_DIFFICULTIES = setOf("NONE", "0", "1", "2", "3", "4", "5", "0-1", "1-2", "2-3", "3-4", "4-5")
+
+private fun normalizeDifficulty(raw: String?): String =
+    if (raw != null && raw in VALID_DIFFICULTIES) raw else "NONE"
+
 internal fun SubmitGridDto.toDomain(
     shortId: GridShareCode,
     userId: UserId,
@@ -30,7 +35,7 @@ internal fun SubmitGridDto.toDomain(
         shortId = shortId,
         title = GridTitle(this.title),
         metadata = GridMetadata(
-            difficulty = this.difficulty,
+            difficulty = normalizeDifficulty(this.difficulty),
             author = userId,
             reference = this.reference,
             description = this.description,
@@ -44,11 +49,11 @@ internal fun SubmitGridDto.toDomain(
 
 internal fun PatchGridDto.applyPatchTo(grid: Grid): Grid {
     val patchedMetadata = grid.metadata.copy(
-        difficulty = this.difficulty ?: grid.metadata.difficulty,
+        difficulty = this.difficulty?.let { normalizeDifficulty(it) } ?: grid.metadata.difficulty,
         reference = this.reference ?: grid.metadata.reference,
         description = this.description ?: grid.metadata.description,
-        globalClueLabel = if (this.globalClueLabel != null) this.globalClueLabel else grid.metadata.globalClueLabel,
-        globalClueWords = if (this.globalClueWords != null) this.globalClueWords else grid.metadata.globalClueWords,
+        globalClueLabel = this.globalClueLabel ?: grid.metadata.globalClueLabel,
+        globalClueWords = this.globalClueWords ?: grid.metadata.globalClueWords,
     )
     val patchedWidth = this.width?.let { GridWidth(it) } ?: grid.width
     val patchedHeight = this.height?.let { GridHeight(it) } ?: grid.height
