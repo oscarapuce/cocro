@@ -1,10 +1,15 @@
-<input
-  type="text"
-  maxlength="1"
-  pattern="[A-Za-z]"
-  class="letter-input"
-  [value]="letter.value"
-  [disabled]="!active"
-  [readonly]="!active"
-  (input)="onInput($event)"
-  inputmode="latin" />
+<div class="letter-input-wrapper">
+  <input
+    type="text"
+    maxlength="1"
+    pattern="[A-Za-z]"
+    class="letter-input"
+    [value]="letter.value"
+    [disabled]="!active"
+    [readonly]="!active"
+    (input)="onInput($event)"
+    inputmode="latin" />
+  @if (letter?.number !== undefined && letter?.number !== null) {
+    <span class="letter-input__number">{{ letter.number }}</span>
+  }
+</div>
