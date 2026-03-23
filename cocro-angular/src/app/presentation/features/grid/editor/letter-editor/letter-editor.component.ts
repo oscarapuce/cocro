@@ -1,7 +1,13 @@
 import { Component, computed, inject, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Cell, Letter } from '@domain/models/grid.model';
-import { getSepKeysFromSeparator, SepKey, toggleSeparatorKey } from '@domain/services/cell-utils.service';
+import { Cell } from '@domain/models/grid.model';
+import {
+  getSepKeysFromSeparator,
+  setSeparatorInCell,
+  SepKey,
+  toggleSeparatorKey,
+  writeNumberInCell,
+} from '@domain/services/cell-utils.service';
 import { GridSelectorService } from '@application/service/grid-selector.service';
 
 @Component({
@@ -30,50 +36,27 @@ export class LetterEditorComponent {
   }
 
   toggleSep(key: SepKey): void {
-    this.ensureLetter();
-    this.cell.letter!.separator = toggleSeparatorKey(
-      this.cell.letter!.separator ?? 'NONE',
-      key
-    );
-    this.selectorService.updateCellInGrid(this.cell);
+    const newSep = toggleSeparatorKey(this.cell.letter?.separator ?? 'NONE', key);
+    this.selectorService.updateCellInGrid(setSeparatorInCell(this.cell, newSep));
   }
 
   onNumberChange(value: number | null): void {
-    this.ensureLetter();
-    const max = this.maxIndex();
-    const clamped = value == null || value < 1 ? undefined : Math.min(value, max);
-    this.cell.letter!.number = clamped;
-    this.selectorService.updateCellInGrid(this.cell);
+    const clamped = value == null || value < 1 ? undefined : Math.min(value, this.maxIndex());
+    this.selectorService.updateCellInGrid(writeNumberInCell(this.cell, clamped));
   }
 
   incrementNumber(): void {
-    this.ensureLetter();
-    const current = this.cell.letter!.number ?? 0;
-    this.cell.letter!.number = Math.min(this.maxIndex(), current + 1);
-    this.selectorService.updateCellInGrid(this.cell);
+    const next = Math.min(this.maxIndex(), (this.cell.letter?.number ?? 0) + 1);
+    this.selectorService.updateCellInGrid(writeNumberInCell(this.cell, next));
   }
 
   decrementNumber(): void {
-    this.ensureLetter();
-    const current = this.cell.letter!.number;
-    if (current === undefined || current <= 1) {
-      this.cell.letter!.number = undefined;
-    } else {
-      this.cell.letter!.number = current - 1;
-    }
-    this.selectorService.updateCellInGrid(this.cell);
+    const current = this.cell.letter?.number;
+    const next = current === undefined || current <= 1 ? undefined : current - 1;
+    this.selectorService.updateCellInGrid(writeNumberInCell(this.cell, next));
   }
 
   clearNumber(): void {
-    this.ensureLetter();
-    this.cell.letter!.number = undefined;
-    this.selectorService.updateCellInGrid(this.cell);
-  }
-
-  private ensureLetter(): void {
-    if (!this.cell.letter) {
-      const fallback: Letter = { value: '', separator: 'NONE' };
-      this.cell.letter = fallback;
-    }
+    this.selectorService.updateCellInGrid(writeNumberInCell(this.cell, undefined));
   }
 }
