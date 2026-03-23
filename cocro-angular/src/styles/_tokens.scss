@@ -27,7 +27,8 @@ $bp-md: 960px;
   --color-red:          #B83225;
   --color-red-light:    #E8756A;
 
-  --color-border:       #1A1A1A;
+  --color-border: #1e1e1e;
+  --color-border-inter-grid: #4f674f99;
   --color-border-soft:  #C8C0A8;
   --color-border-dashed: #b5c3ad;
   --color-margin-line:  rgba(232, 160, 144, 0.6); // trait rouge vertical Séyès
@@ -83,7 +84,7 @@ $bp-md: 960px;
 
   // — Grid lines —
   --grid-inner-width: 0.5px;
-  --grid-inner-color: var(--color-border);        // lignes inter-cellules
+  --grid-inner-color: var(--color-border-inter-grid);   // lignes inter-cellules
   --grid-outer-width: 2px;
   --grid-outer-color: var(--color-border);        // contour extérieur
   --grid-sep-width:   2px;
