@@ -124,4 +124,31 @@ sealed interface GridError : CocroError {
                 "reason" to reason,
             )
     }
+
+    object GlobalClueLabelMissing : GridError {
+        override val errorCode = ErrorCode.GRID_GLOBAL_CLUE_LABEL_MISSING
+    }
+
+    object GlobalClueNoWords : GridError {
+        override val errorCode = ErrorCode.GRID_GLOBAL_CLUE_NO_WORDS
+    }
+
+    data class GlobalClueWordLengthInvalid(val index: Int) : GridError {
+        override val errorCode = ErrorCode.GRID_GLOBAL_CLUE_WORD_LENGTH_INVALID
+
+        override fun context() = mapOf("wordIndex" to index.toString())
+    }
+
+    data class GlobalClueLetterCountMismatch(val expected: Int, val actual: Int) : GridError {
+        override val errorCode = ErrorCode.GRID_GLOBAL_CLUE_LETTER_COUNT_MISMATCH
+
+        override fun context() = mapOf(
+            "expected" to expected.toString(),
+            "actual" to actual.toString(),
+        )
+    }
+
+    object GlobalClueNumberingInvalid : GridError {
+        override val errorCode = ErrorCode.GRID_GLOBAL_CLUE_NUMBERING_INVALID
+    }
 }

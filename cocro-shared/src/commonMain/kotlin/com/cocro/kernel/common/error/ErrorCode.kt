@@ -25,6 +25,11 @@ enum class ErrorCode(
     GRID_INVALID_CLUE_COUNT("Too many clues in a cell", 400),
     GRID_DUPLICATE_CLUE_DIRECTION("Duplicate clue direction in a cell", 400),
     GRID_INVALID_SAFE_STRING("Invalid safe string", 400),
+    GRID_GLOBAL_CLUE_LABEL_MISSING("Global clue label is required when word lengths are specified", 400),
+    GRID_GLOBAL_CLUE_NO_WORDS("Global clue must have at least one word", 400),
+    GRID_GLOBAL_CLUE_WORD_LENGTH_INVALID("Global clue word length must be at least 1", 400),
+    GRID_GLOBAL_CLUE_LETTER_COUNT_MISMATCH("Global clue letter count does not match indexed cell count", 400),
+    GRID_GLOBAL_CLUE_NUMBERING_INVALID("Indexed cell numbers must form a consecutive sequence starting at 1", 400),
 
     // --- grid state domain ---
     GRID_STATE_INVALID_LETTER("Invalid letter for grid state", 400),
