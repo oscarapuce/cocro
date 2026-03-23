@@ -8,5 +8,5 @@ data class GridMetadata(
     val description: String?,
     val difficulty: String = "NONE",
     val globalClueLabel: String? = null,
-    val globalClueWords: List<List<Int>>? = null,
+    val globalClueWordLengths: List<Int>? = null,
 )
