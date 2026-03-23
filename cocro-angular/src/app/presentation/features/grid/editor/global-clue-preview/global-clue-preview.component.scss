@@ -15,12 +15,13 @@
 
 .gcp__word {
   display: flex;
+  border: var(--grid-outer-width) solid var(--grid-outer-color);
 }
 
 .gcp__cell {
   width: var(--cell-size-editor);
   height: var(--cell-size-editor);
-  border: 1.5px solid var(--color-ink-muted);
+  border-right: var(--grid-inner-width) solid var(--grid-inner-color);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -31,8 +32,7 @@
   color: var(--color-ink);
   text-transform: uppercase;
 
-  // Shared border between adjacent cells in the same word
-  & + & {
-    border-left: none;
+  &:last-child {
+    border-right: none;
   }
 }
