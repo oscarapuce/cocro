@@ -1,23 +1,46 @@
-<div class="letter-editor-card">
-  <div class="letter-item">
-    <div class="separator-type-toggle">
+<div class="le">
+
+  <div class="le__section">
+    <span class="le__label">Séparateurs</span>
+    <div class="le__sep-row">
       <button
-        class="toggle-btn"
+        class="le__sep-btn le__sep-btn--left"
         [class.active]="isSepActive('left')"
         (click)="toggleSep('left')"
-      >Gauche</button>
+      >
+        Gauche
+      </button>
       <button
-        class="toggle-btn"
+        class="le__sep-btn le__sep-btn--up"
         [class.active]="isSepActive('up')"
         (click)="toggleSep('up')"
-      >Haut</button>
-    </div>
-
-    <div class="number-field">
-      <input type="number" min="1" max="99"
-             [ngModel]="cell.letter?.number"
-             (ngModelChange)="onNumberChange($event)" />
-      <button type="button" class="clear-btn" (click)="clearNumber()">×</button>
+      >
+        Haut
+      </button>
     </div>
   </div>
+
+  <div class="le__section">
+    <span class="le__label">N° d'index</span>
+    <div class="le__number-row">
+      <span class="le__number-badge" [class.le__number-badge--set]="cell.letter?.number !== undefined">
+        {{ cell.letter?.number ?? '–' }}
+      </span>
+      <input
+        class="le__number-input"
+        type="number" min="1" [max]="maxIndex()"
+        placeholder="–"
+        [ngModel]="cell.letter?.number"
+        (ngModelChange)="onNumberChange($event)"
+      />
+      <div class="le__number-arrows">
+        <button type="button" class="le__arrow" (click)="incrementNumber()" title="Augmenter">▲</button>
+        <button type="button" class="le__arrow" (click)="decrementNumber()" title="Diminuer">▼</button>
+      </div>
+      @if (cell.letter?.number !== undefined) {
+        <button type="button" class="le__clear" (click)="clearNumber()" title="Effacer">×</button>
+      }
+    </div>
+  </div>
+
 </div>
