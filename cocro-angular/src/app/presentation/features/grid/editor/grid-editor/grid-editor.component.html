@@ -1,6 +1,9 @@
 <div class="grid-editor">
   <cocro-card class="grid-params-bar" title="Paramètres de la grille">
-    <cocro-grid-params />
+    <cocro-grid-params
+      [globalClueActive]="showGlobalClue()"
+      (globalCluePanelToggle)="toggleGlobalClue()"
+    />
     <cocro-button variant="primary" size="sm" (click)="onSubmit()" [disabled]="saving()">
       Créer la grille
     </cocro-button>
@@ -20,12 +23,21 @@
         </cocro-card>
       }
 
-      <cocro-card title="Énigme globale">
-        <cocro-global-clue-editor />
-      </cocro-card>
+      @if (showGlobalClue()) {
+        <cocro-card title="Énigme globale">
+          <cocro-global-clue-editor />
+        </cocro-card>
+      }
+
+      <cocro-button variant="danger" size="sm" (click)="resetDraft()">
+        Supprimer le brouillon
+      </cocro-button>
     </aside>
 
     <div class="grid-wrapper">
+      @if (showGlobalClue()) {
+        <cocro-global-clue-preview />
+      }
       <cocro-grid />
     </div>
   </div>
