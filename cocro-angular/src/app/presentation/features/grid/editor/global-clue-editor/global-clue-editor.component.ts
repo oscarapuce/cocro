@@ -13,34 +13,18 @@ import { GlobalClue } from '@domain/models/grid.model';
 export class GlobalClueEditorComponent {
   readonly selectorService = inject(GridSelectorService);
 
-  // Map number → letter, recomputed only when grid() changes
-  readonly letterByNumber = computed(() => {
-    const map = new Map<number, string>();
-    for (const cell of this.selectorService.grid().cells) {
-      if (cell.letter?.number !== undefined && cell.letter?.number !== null) {
-        map.set(cell.letter.number, cell.letter.value || '_');
-      }
-    }
-    return map;
-  });
+  readonly numberedCellCount = computed(() =>
+    this.selectorService.grid().cells.filter(c => c.letter?.number != null).length
+  );
 
-  getLetterForNumber(n: number): string {
-    return this.letterByNumber().get(n) ?? '_';
-  }
+  readonly totalRequested = computed(() =>
+    (this.globalClue?.wordLengths ?? []).reduce((a, b) => a + b, 0)
+  );
 
-  isUnresolved(n: number): boolean {
-    return !this.letterByNumber().has(n);
-  }
-
-  parseWord(raw: string): number[] {
-    return raw.split(',')
-      .map(s => parseInt(s.trim(), 10))
-      .filter(n => !isNaN(n) && n > 0);
-  }
-
-  wordToRaw(word: number[]): string {
-    return word.join(', ');
-  }
+  readonly countMismatch = computed(() =>
+    (this.globalClue?.wordLengths?.length ?? 0) > 0 &&
+    this.totalRequested() !== this.numberedCellCount()
+  );
 
   get globalClue(): GlobalClue | undefined {
     return this.selectorService.grid().globalClue;
@@ -50,35 +34,40 @@ export class GlobalClueEditorComponent {
     const current = this.globalClue;
     this.selectorService.updateGlobalClue({
       label,
-      words: current?.words ?? [],
+      wordLengths: current?.wordLengths ?? [],
     });
   }
 
-  updateWord(index: number, raw: string): void {
+  incrementLength(index: number): void {
     const current = this.globalClue;
     if (!current) return;
-    const words = [...current.words];
-    words[index] = this.parseWord(raw);
-    this.selectorService.updateGlobalClue({ ...current, words });
+    const wordLengths = [...current.wordLengths];
+    wordLengths[index] = (wordLengths[index] ?? 1) + 1;
+    this.selectorService.updateGlobalClue({ ...current, wordLengths });
+  }
+
+  decrementLength(index: number): void {
+    const current = this.globalClue;
+    if (!current) return;
+    const wordLengths = [...current.wordLengths];
+    if ((wordLengths[index] ?? 1) <= 1) return;
+    wordLengths[index] = wordLengths[index] - 1;
+    this.selectorService.updateGlobalClue({ ...current, wordLengths });
   }
 
   addWord(): void {
     const current = this.globalClue;
-    const words = current ? [...current.words, []] : [[]];
+    const wordLengths = current ? [...current.wordLengths, 1] : [1];
     this.selectorService.updateGlobalClue({
       label: current?.label ?? '',
-      words,
+      wordLengths,
     });
   }
 
   removeWord(index: number): void {
     const current = this.globalClue;
     if (!current) return;
-    const words = current.words.filter((_, i) => i !== index);
-    this.selectorService.updateGlobalClue({ ...current, words });
-  }
-
-  clearGlobalClue(): void {
-    this.selectorService.updateGlobalClue(undefined);
+    const wordLengths = current.wordLengths.filter((_, i) => i !== index);
+    this.selectorService.updateGlobalClue({ ...current, wordLengths });
   }
 }

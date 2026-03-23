@@ -1,105 +1,182 @@
-.global-clue-editor {
+.gce {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0 var(--space-xs);
+}
+
+// ── Question row ─────────────────────────────────────────────────────────────
+
+.gce__question {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.gce__q-mark {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.gce__label-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--color-border-dashed);
+  outline: none;
+  padding: var(--space-2xs) 0;
+  font-family: var(--font-hand);
+  font-size: var(--text-base);
+  color: var(--color-ink);
+  transition: border-color var(--transition-smooth);
+
+  &::placeholder {
+    color: var(--color-ink-muted);
+    font-style: italic;
+  }
+
+  &:focus {
+    border-bottom-color: var(--color-forest);
+  }
+}
+
+// ── Words list ────────────────────────────────────────────────────────────────
+
+.gce__words {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  padding: var(--space-sm) 0;
-
-  &__label-field {
-    input {
-      width: 100%;
-      padding: var(--space-xs) var(--space-sm);
-      font-size: var(--text-sm);
-      font-family: var(--font-ui);
-      border: var(--border-dashed);
-      background-color: var(--color-input-bg);
-      outline: none;
-
-      &:focus {
-        border-color: var(--color-forest);
-        background-color: var(--color-surface);
-      }
-    }
-  }
-
-  &__words {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-  }
-
-  &__word-row {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2xs);
-
-    input {
-      width: 100%;
-      padding: var(--space-xs) var(--space-sm);
-      font-size: var(--text-sm);
-      font-family: var(--font-ui);
-      border: var(--border-dashed);
-      background-color: var(--color-input-bg);
-      outline: none;
-
-      &:focus {
-        border-color: var(--color-forest);
-        background-color: var(--color-surface);
-      }
-    }
-  }
-
-  &__preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-  }
 }
 
-.remove-btn {
-  align-self: flex-end;
-  background: none;
-  border: none;
-  color: var(--color-ink-muted);
-  cursor: pointer;
-  font-size: var(--text-base);
-  padding: 0 var(--space-xs);
-
-  &:hover {
-    color: var(--color-ink);
-  }
+.gce__word {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
-.add-word-btn {
-  align-self: flex-start;
-  background: none;
-  border: 1px dashed var(--color-border);
-  color: var(--color-forest);
-  cursor: pointer;
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  padding: var(--space-2xs) var(--space-sm);
-
-  &:hover {
-    background-color: var(--color-croco-wash);
-  }
+.gce__word-label {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 3.2rem;
 }
 
-.preview-cell {
+// ── Stepper ───────────────────────────────────────────────────────────────────
+
+.gce__stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 1;
+}
+
+.gce__step-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: none;
   border: 1px solid var(--color-border);
-  font-family: var(--font-grid);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  border-radius: 4px;
   color: var(--color-ink);
-  background-color: var(--color-paper);
+  font-size: var(--text-base);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transition-smooth), border-color var(--transition-smooth);
 
-  &--unresolved {
-    color: var(--color-red-light);
-    border-color: var(--color-red-light);
+  &:hover:not(:disabled) {
+    background-color: var(--color-forest-tint);
+    border-color: var(--color-forest);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.gce__step-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-ink);
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+// ── Validation warning ────────────────────────────────────────────────────────
+
+.gce__warning {
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  color: var(--color-gold);
+  margin: 0;
+  padding: var(--space-xs) var(--space-sm);
+  background-color: rgba(var(--color-gold-rgb, 180, 130, 0), 0.08);
+  border-radius: 4px;
+  border: 1px solid rgba(var(--color-gold-rgb, 180, 130, 0), 0.2);
+}
+
+// ── Remove button ─────────────────────────────────────────────────────────────
+
+.gce__remove {
+  background: none;
+  border: none;
+  padding: 0 var(--space-2xs);
+  color: var(--color-border-soft);
+  font-size: var(--text-base);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--transition-snap);
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--color-red);
+  }
+}
+
+// ── Add button ────────────────────────────────────────────────────────────────
+
+.gce__add {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: 1px dashed var(--color-border-dashed);
+  border-radius: 6px;
+  color: var(--color-forest);
+  cursor: pointer;
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: var(--space-xs) var(--space-sm);
+  transition:
+    background-color var(--transition-smooth),
+    border-color var(--transition-smooth);
+
+  &:hover {
+    background-color: var(--color-forest-tint);
+    border-color: var(--color-forest);
+  }
+
+  .gce__add-icon {
+    font-size: var(--text-base);
+    line-height: 1;
+    font-family: var(--font-display);
+    font-weight: 700;
   }
 }

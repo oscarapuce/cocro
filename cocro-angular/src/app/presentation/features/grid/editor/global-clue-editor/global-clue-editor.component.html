@@ -1,38 +1,43 @@
-<div class="global-clue-editor">
-  <div class="global-clue-editor__label-field">
+<div class="gce">
+
+  <div class="gce__question">
+    <span class="gce__q-mark">?</span>
     <input
+      class="gce__label-input"
       type="text"
       maxlength="200"
-      placeholder="ex. Auteur de l'Étranger :"
+      placeholder="L'énigme à résoudre…"
       [ngModel]="globalClue?.label ?? ''"
       (ngModelChange)="updateLabel($event)"
     />
   </div>
 
-  @if (globalClue) {
-    <div class="global-clue-editor__words">
-      @for (word of globalClue.words; track $index) {
-        <div class="global-clue-editor__word-row">
-          <input
-            type="text"
-            placeholder="1, 2, 3"
-            [ngModel]="wordToRaw(word)"
-            (ngModelChange)="updateWord($index, $event)"
-          />
-          <button type="button" class="remove-btn" (click)="removeWord($index)">×</button>
-
-          <div class="global-clue-editor__preview">
-            @for (n of word; track $index) {
-              <span
-                class="preview-cell"
-                [class.preview-cell--unresolved]="isUnresolved(n)"
-              >{{ getLetterForNumber(n) }}</span>
-            }
+  @if (globalClue?.wordLengths?.length) {
+    <div class="gce__words">
+      @for (len of globalClue!.wordLengths; track $index) {
+        <div class="gce__word">
+          <span class="gce__word-label">MOT {{ $index + 1 }}</span>
+          <div class="gce__stepper">
+            <button type="button" class="gce__step-btn" (click)="decrementLength($index)" [disabled]="len <= 1">−</button>
+            <span class="gce__step-value">{{ len }}</span>
+            <button type="button" class="gce__step-btn" (click)="incrementLength($index)">+</button>
           </div>
+          <button type="button" class="gce__remove" (click)="removeWord($index)" title="Supprimer">×</button>
         </div>
       }
     </div>
   }
 
-  <button type="button" class="add-word-btn" (click)="addWord()">+ Ajouter un mot</button>
+  <button type="button" class="gce__add" (click)="addWord()">
+    <span class="gce__add-icon">+</span>
+    Ajouter un mot
+  </button>
+
+  @if (countMismatch()) {
+    <p class="gce__warning">
+      ⚠ {{ totalRequested() }} lettre{{ totalRequested() > 1 ? 's' : '' }} demandée{{ totalRequested() > 1 ? 's' : '' }}
+      / {{ numberedCellCount() }} indexée{{ numberedCellCount() > 1 ? 's' : '' }}
+    </p>
+  }
+
 </div>
