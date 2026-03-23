@@ -34,6 +34,7 @@ export interface Cell {
 export interface Grid {
   id: string;
   title: string;
+  reference?: string;
   width: number;
   height: number;
   cells: Cell[];

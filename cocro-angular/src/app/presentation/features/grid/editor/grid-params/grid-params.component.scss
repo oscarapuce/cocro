@@ -19,6 +19,10 @@
     white-space: nowrap;
   }
 
+  &--short input {
+    width: 6rem;
+  }
+
   input {
     padding: var(--space-xs) var(--space-sm);
     font-size: var(--text-base);

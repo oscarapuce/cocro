@@ -178,6 +178,20 @@ export class GridSelectorService {
     this.grid.update(g => ({ ...g, title }));
   }
 
+  updateReference(reference: string): void {
+    this.grid.update(g => ({ ...g, reference: reference || undefined }));
+  }
+
+  clearEnigmaData(): void {
+    this.grid.update(g => ({
+      ...g,
+      globalClue: undefined,
+      cells: g.cells.map(cell =>
+        cell.letter ? { ...cell, letter: { ...cell.letter, number: undefined } } : cell
+      ),
+    }));
+  }
+
   private eraseLetter(): void {
     const cell = this.selectedCell();
     if (!cell || !isCellLetter(cell)) return;

@@ -10,6 +10,17 @@
     />
   </div>
 
+  <div class="grid-params__title-field grid-params__title-field--short">
+    <label for="grid-reference">Réf.</label>
+    <input
+      id="grid-reference"
+      type="text"
+      [ngModel]="selectorService.grid().reference ?? ''"
+      (ngModelChange)="selectorService.updateReference($event)"
+      placeholder="—"
+    />
+  </div>
+
   <div class="grid-params__separator"></div>
 
   <div class="grid-params__size-control">
@@ -44,4 +55,20 @@
       }
     </select>
   </div>
+
+  <div class="grid-params__separator"></div>
+
+  <button
+    class="grid-params__enigma-toggle"
+    [class.active]="globalClueActive()"
+    type="button"
+    (click)="globalCluePanelToggle.emit()"
+  >
+    <span class="toggle-indicator"></span>
+    @if (globalClueActive()) {
+      ÉNIGME GLOBALE
+    } @else {
+      Pas d'énigme
+    }
+  </button>
 </div>

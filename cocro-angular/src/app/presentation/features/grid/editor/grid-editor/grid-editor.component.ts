@@ -80,6 +80,7 @@ export class GridEditorComponent {
       const request: SubmitGridRequest = {
         gridId: grid.id,
         title: grid.title,
+        reference: grid.reference,
         difficulty: grid.difficulty ?? 'NONE',
         description: grid.description,
         width: grid.width,
