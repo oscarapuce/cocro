@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   padding: 0.5rem 0;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-lg);
 }
 
 .gcp__row {
@@ -19,6 +19,7 @@
 }
 
 .gcp__cell {
+  position: relative;
   width: var(--cell-size-editor);
   height: var(--cell-size-editor);
   border-right: var(--grid-inner-width) solid var(--grid-inner-color);
@@ -35,4 +36,16 @@
   &:last-child {
     border-right: none;
   }
+}
+
+.gcp__cell-num {
+  position: absolute;
+  top: 0px;
+  left: 2px;
+  font-size: 0.45rem;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  line-height: 1;
+  pointer-events: none;
 }

@@ -10,17 +10,11 @@ import { GridSelectorService } from '@application/service/grid-selector.service'
 export class GlobalCluePreviewComponent {
   private readonly selectorService = inject(GridSelectorService);
 
-  /**
-   * Returns an array of words, each word being an array of letter strings.
-   * Empty string means the corresponding numbered cell has no letter yet.
-   * If no global clue or no word lengths defined, returns [].
-   */
-  readonly previewWords = computed<string[][]>(() => {
+  readonly previewWords = computed<{ letter: string; index: number }[][]>(() => {
     const grid = this.selectorService.grid();
     const wordLengths = grid.globalClue?.wordLengths;
     if (!wordLengths?.length) return [];
 
-    // Build number → letter value map from all cells
     const letterByNumber = new Map<number, string>();
     for (const cell of grid.cells) {
       if (cell.letter?.number != null && cell.letter.value) {
@@ -28,12 +22,12 @@ export class GlobalCluePreviewComponent {
       }
     }
 
-    const words: string[][] = [];
+    const words: { letter: string; index: number }[][] = [];
     let offset = 0;
     for (const length of wordLengths) {
-      const word: string[] = [];
+      const word: { letter: string; index: number }[] = [];
       for (let i = 1; i <= length; i++) {
-        word.push(letterByNumber.get(offset + i) ?? '');
+        word.push({ letter: letterByNumber.get(offset + i) ?? '', index: offset + i });
       }
       offset += length;
       words.push(word);

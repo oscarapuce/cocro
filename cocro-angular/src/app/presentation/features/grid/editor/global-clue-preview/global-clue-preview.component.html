@@ -3,8 +3,11 @@
     <div class="gcp__row">
       @for (word of previewWords(); track $index) {
         <div class="gcp__word">
-          @for (letter of word; track $index) {
-            <span class="gcp__cell">{{ letter }}</span>
+          @for (cell of word; track cell.index) {
+            <span class="gcp__cell">
+              <span class="gcp__cell-num">{{ cell.index }}</span>
+              {{ cell.letter }}
+            </span>
           }
         </div>
       }
