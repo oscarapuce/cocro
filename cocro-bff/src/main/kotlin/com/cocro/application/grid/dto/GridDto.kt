@@ -25,7 +25,7 @@ data class SubmitGridDto(
     override val height: Int,
     override val cells: List<CellDto>,
     val globalClueLabel: String? = null,
-    val globalClueWords: List<List<Int>>? = null,
+    val globalClueWordLengths: List<Int>? = null,
 ) : GridDto
 
 data class PatchGridDto(
@@ -38,7 +38,7 @@ data class PatchGridDto(
     override val height: Int?,
     override val cells: List<CellDto>?,
     val globalClueLabel: String? = null,
-    val globalClueWords: List<List<Int>>? = null,
+    val globalClueWordLengths: List<Int>? = null,
 ) : GridDto
 
 data class ClueDto(

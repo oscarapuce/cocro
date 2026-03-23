@@ -40,7 +40,7 @@ internal fun SubmitGridDto.toDomain(
             reference = this.reference,
             description = this.description,
             globalClueLabel = this.globalClueLabel,
-            globalClueWords = this.globalClueWords,
+            globalClueWordLengths = this.globalClueWordLengths,
         ),
         width = GridWidth(this.width),
         height = GridHeight(this.height),
@@ -53,7 +53,7 @@ internal fun PatchGridDto.applyPatchTo(grid: Grid): Grid {
         reference = this.reference ?: grid.metadata.reference,
         description = this.description ?: grid.metadata.description,
         globalClueLabel = this.globalClueLabel ?: grid.metadata.globalClueLabel,
-        globalClueWords = this.globalClueWords ?: grid.metadata.globalClueWords,
+        globalClueWordLengths = this.globalClueWordLengths ?: grid.metadata.globalClueWordLengths,
     )
     val patchedWidth = this.width?.let { GridWidth(it) } ?: grid.width
     val patchedHeight = this.height?.let { GridHeight(it) } ?: grid.height
