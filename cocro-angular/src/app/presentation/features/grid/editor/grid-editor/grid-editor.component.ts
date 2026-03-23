@@ -38,6 +38,14 @@ export class GridEditorComponent {
   private readonly draft = inject(EDITOR_DRAFT_PORT); // lecture + auto-save uniquement
 
   readonly saving = signal(false);
+  readonly showGlobalClue = signal(false);
+
+  toggleGlobalClue(): void {
+    if (this.showGlobalClue()) {
+      this.selectorService.clearEnigmaData();
+    }
+    this.showGlobalClue.update(v => !v);
+  }
 
   readonly isClueSelected = computed(() => {
     const type = this.selectorService.selectedCell()?.type;
@@ -50,11 +58,17 @@ export class GridEditorComponent {
 
   constructor() {
     const draft = this.draft.load();
-    this.selectorService.initGrid(draft ?? createEmptyGrid('0', 'Nouvelle grille', 10, 8));
+    this.selectorService.initGrid(draft ?? createEmptyGrid('0', 'Nouvelle grille', 10, 13));
 
     effect(() => {
       this.draft.save(this.selectorService.grid());
     });
+  }
+
+  resetDraft(): void {
+    this.draft.clear();
+    this.selectorService.initGrid(createEmptyGrid('0', 'Nouvelle grille', 10, 13));
+    this.showGlobalClue.set(false);
   }
 
   async onSubmit() {
@@ -70,7 +84,7 @@ export class GridEditorComponent {
         height: grid.height,
         cells: grid.cells.map(cellToDto),
         globalClueLabel: grid.globalClue?.label,
-        globalClueWords: grid.globalClue?.words,
+        globalClueWordLengths: grid.globalClue?.wordLengths,
       };
       const id = await this.createGridUseCase.execute(request);
       this.toast.success(`Grille creee avec succes (ID: ${id})`);

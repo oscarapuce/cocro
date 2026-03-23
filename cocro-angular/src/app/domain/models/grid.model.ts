@@ -9,7 +9,7 @@ export type GridDifficulty =
 
 export interface GlobalClue {
   label: string;
-  words: number[][];
+  wordLengths: number[];
 }
 
 export interface Clue {

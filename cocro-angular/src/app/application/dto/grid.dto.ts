@@ -25,7 +25,7 @@ export interface SubmitGridRequest {
   height: number;
   cells: CellDto[];
   globalClueLabel?: string;
-  globalClueWords?: number[][];
+  globalClueWordLengths?: number[];
 }
 
 export interface PatchGridRequest {
@@ -38,7 +38,7 @@ export interface PatchGridRequest {
   height?: number;
   cells?: CellDto[];
   globalClueLabel?: string;
-  globalClueWords?: number[][];
+  globalClueWordLengths?: number[];
 }
 
 export interface GridSubmitResponse {
