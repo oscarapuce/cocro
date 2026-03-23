@@ -1,0 +1,38 @@
+.gcp {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+  margin-bottom: 0.25rem;
+}
+
+.gcp__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.gcp__word {
+  display: flex;
+}
+
+.gcp__cell {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--color-ink-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  background: white;
+  color: var(--color-ink);
+  text-transform: uppercase;
+
+  // Shared border between adjacent cells in the same word
+  & + & {
+    border-left: none;
+  }
+}

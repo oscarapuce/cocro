@@ -1,0 +1,13 @@
+@if (previewWords().length) {
+  <div class="gcp">
+    <div class="gcp__row">
+      @for (word of previewWords(); track $index) {
+        <div class="gcp__word">
+          @for (letter of word; track $index) {
+            <span class="gcp__cell">{{ letter }}</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
