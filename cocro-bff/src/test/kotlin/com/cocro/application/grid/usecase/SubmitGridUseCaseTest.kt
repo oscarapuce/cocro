@@ -129,4 +129,116 @@ class SubmitGridUseCaseTest {
         assertThat(errors).anyMatch { it is GridError.TitleInvalid }
         verifyNoInteractions(gridRepository)
     }
+
+    private fun validDtoWithNumberedCells(
+        wordLengths: List<Int>,
+        label: String = "Qui suis-je ?",
+    ): SubmitGridDto {
+        val base = validDto()
+        // Number consecutive cells starting at 1
+        var n = 1
+        val cells = base.cells.map { cell ->
+            if (cell.type == CellType.LETTER && n <= wordLengths.sum()) {
+                cell.copy(number = n++)
+            } else {
+                cell
+            }
+        }
+        return base.copy(
+            cells = cells,
+            globalClueLabel = label,
+            globalClueWordLengths = wordLengths,
+        )
+    }
+
+    @Test
+    fun `submit with valid global clue succeeds`() {
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
+        whenever(gridIdGenerator.generateId()).thenReturn(GridShareCode("ABCDEF"))
+        whenever(gridRepository.findByHashLetters(any())).thenReturn(null)
+        whenever(gridRepository.save(any())).thenAnswer { it.arguments[0] as com.cocro.kernel.grid.model.Grid }
+
+        val dto = validDtoWithNumberedCells(listOf(2, 1))
+        val result = useCase.execute(dto)
+
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+    }
+
+    @Test
+    fun `submit with global clue but missing label returns GlobalClueLabelMissing`() {
+        val dto = validDtoWithNumberedCells(listOf(2, 1), label = "")
+        val result = useCase.execute(dto)
+
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is GridError.GlobalClueLabelMissing }
+    }
+
+    @Test
+    fun `submit with empty word lengths list returns GlobalClueNoWords`() {
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
+        val dto = validDto().copy(
+            globalClueLabel = "Qui suis-je ?",
+            globalClueWordLengths = emptyList(),
+        )
+        val result = useCase.execute(dto)
+
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is GridError.GlobalClueNoWords }
+    }
+
+    @Test
+    fun `submit with word length of 0 returns GlobalClueWordLengthInvalid`() {
+        val dto = validDtoWithNumberedCells(listOf(0, 2))
+        val result = useCase.execute(dto)
+
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is GridError.GlobalClueWordLengthInvalid && it.index == 0 }
+    }
+
+    @Test
+    fun `submit with letter count mismatch returns GlobalClueLetterCountMismatch`() {
+        // Request 5 letters but only number 3 cells
+        val base = validDto()
+        val cells = base.cells.mapIndexed { i, cell ->
+            if (i < 3 && cell.type == CellType.LETTER) cell.copy(number = i + 1) else cell
+        }
+        val dto = base.copy(
+            cells = cells,
+            globalClueLabel = "Qui suis-je ?",
+            globalClueWordLengths = listOf(3, 2), // sum = 5
+        )
+        val result = useCase.execute(dto)
+
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is GridError.GlobalClueLetterCountMismatch }
+    }
+
+    @Test
+    fun `submit with non-consecutive numbering returns GlobalClueNumberingInvalid`() {
+        val base = validDto()
+        // Number 3 cells but with a gap: 1, 2, 4 (missing 3)
+        val numbers = listOf(1, 2, 4)
+        var idx = 0
+        val cells = base.cells.map { cell ->
+            if (cell.type == CellType.LETTER && idx < numbers.size) {
+                cell.copy(number = numbers[idx++])
+            } else {
+                cell
+            }
+        }
+        val dto = base.copy(
+            cells = cells,
+            globalClueLabel = "Qui suis-je ?",
+            globalClueWordLengths = listOf(2, 1), // sum = 3
+        )
+        val result = useCase.execute(dto)
+
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is GridError.GlobalClueNumberingInvalid }
+    }
 }

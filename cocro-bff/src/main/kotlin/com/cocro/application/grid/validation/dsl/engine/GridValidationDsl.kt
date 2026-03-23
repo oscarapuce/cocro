@@ -1,5 +1,6 @@
 package com.cocro.application.grid.validation.dsl.engine
 
+import com.cocro.application.grid.dto.CellDto
 import com.cocro.application.grid.dto.GridDto
 import com.cocro.kernel.grid.error.GridError
 
@@ -17,6 +18,9 @@ internal class GridValidationDsl(
     fun reference(block: SafeStringDsl.() -> Unit) = SafeStringDsl(engine) { engine.getReference() }.block()
 
     fun description(block: SafeStringDsl.() -> Unit) = SafeStringDsl(engine) { engine.getDescription() }.block()
+
+    fun globalClue(label: String?, wordLengths: List<Int>?, cells: List<CellDto>?) =
+        engine.validateGlobalClue(label, wordLengths, cells)
 }
 
 internal fun validateGrid(

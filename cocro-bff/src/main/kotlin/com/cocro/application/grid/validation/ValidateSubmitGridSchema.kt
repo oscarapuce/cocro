@@ -32,4 +32,6 @@ internal fun validateSubmitGrid(dto: SubmitGridDto): List<GridError> =
                 }
             }
         }
+
+        globalClue(dto.globalClueLabel, dto.globalClueWordLengths, dto.cells)
     }

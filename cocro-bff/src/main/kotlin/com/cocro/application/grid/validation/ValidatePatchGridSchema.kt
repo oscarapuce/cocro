@@ -34,4 +34,6 @@ internal fun validatePatchGrid(dto: PatchGridDto): List<GridError> =
                 }
             }
         }
+
+        globalClue(dto.globalClueLabel, dto.globalClueWordLengths, dto.cells)
     }

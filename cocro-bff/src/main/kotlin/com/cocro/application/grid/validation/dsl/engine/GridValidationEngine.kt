@@ -142,4 +142,47 @@ class GridValidationEngine(
     internal fun getReference(): String? = dto.reference
 
     internal fun getDescription(): String? = dto.description
+
+    // -------------------------------------------------------------------------
+    // GLOBAL CLUE
+    // -------------------------------------------------------------------------
+
+    fun validateGlobalClue(
+        globalClueLabel: String?,
+        globalClueWordLengths: List<Int>?,
+        cells: List<CellDto>?,
+    ) {
+        if (globalClueLabel == null && globalClueWordLengths == null) return
+
+        if (globalClueWordLengths != null && globalClueLabel.isNullOrBlank()) {
+            errors += GridError.GlobalClueLabelMissing
+        }
+
+        if (globalClueWordLengths != null) {
+            if (globalClueWordLengths.isEmpty()) {
+                errors += GridError.GlobalClueNoWords
+                return
+            }
+
+            globalClueWordLengths.forEachIndexed { i, len ->
+                if (len < 1) errors += GridError.GlobalClueWordLengthInvalid(i)
+            }
+
+            if (cells != null) {
+                val numberedCells = cells
+                    .filter { it.type == CellType.LETTER && it.number != null }
+                    .map { it.number!! }
+
+                val expected = globalClueWordLengths.sum()
+                if (numberedCells.size != expected) {
+                    errors += GridError.GlobalClueLetterCountMismatch(expected, numberedCells.size)
+                } else {
+                    val sorted = numberedCells.sorted()
+                    if (sorted != (1..numberedCells.size).toList()) {
+                        errors += GridError.GlobalClueNumberingInvalid
+                    }
+                }
+            }
+        }
+    }
 }
