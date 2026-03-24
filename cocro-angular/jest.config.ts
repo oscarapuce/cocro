@@ -9,7 +9,7 @@ const config: Config = {
     '^@infrastructure/(.*)$': '<rootDir>/src/app/infrastructure/$1',
     '^@presentation/(.*)$': '<rootDir>/src/app/presentation/$1',
   },
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/e2e/'],
 };
 
 export default config;

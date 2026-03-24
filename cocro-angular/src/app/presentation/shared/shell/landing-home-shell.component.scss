@@ -111,7 +111,7 @@
       overflow: hidden;
       animation-delay: 250ms;
 
-      // Subtle crossword hint in the corner (CSS-only)
+      // First decorative crossword hint (bottom-right)
       &::after {
         content: '';
         position: absolute;
@@ -130,6 +130,25 @@
         pointer-events: none;
       }
 
+      // Second decorative crossword hint (top-left, smaller, different angle)
+      &::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        width: 56px;
+        height: 56px;
+        background-color: rgba(255, 255, 255, 0.08);
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.22) 1px, transparent 1px);
+        background-size: 14px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        opacity: 0.4;
+        transform: rotate(-8deg);
+        pointer-events: none;
+      }
+
       ::ng-deep .section-label,
       ::ng-deep h2,
       ::ng-deep p,
@@ -140,11 +159,12 @@
 
       ::ng-deep h2 {
         color: #fff;
+        margin-bottom: var(--space-xs);
       }
 
       ::ng-deep p {
         max-width: 34ch;
-        margin-bottom: calc(var(--space-xl) + var(--space-xs));
+        margin-bottom: var(--space-xl);
       }
 
       cocro-button ::ng-deep .cocro-btn--secondary {

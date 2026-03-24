@@ -250,6 +250,45 @@ describe('GridSelectorService', () => {
     });
   });
 
+  describe('setLetterAt / clearLetterAt', () => {
+    beforeEach(() => {
+      service.initGrid(createEmptyGrid('g', '', 5, 5));
+    });
+
+    it('setLetterAt should write the letter without moving cursor', () => {
+      service.setLetterAt(2, 2, 'Z');
+      const cell = getCell(service.grid(), 2, 2);
+      expect(cell!.letter!.value).toBe('Z');
+      expect(service.selectedX()).toBe(0);
+      expect(service.selectedY()).toBe(0);
+    });
+
+    it('setLetterAt should overwrite an existing letter', () => {
+      service.setLetterAt(1, 1, 'A');
+      service.setLetterAt(1, 1, 'B');
+      expect(getCell(service.grid(), 1, 1)!.letter!.value).toBe('B');
+    });
+
+    it('clearLetterAt should erase the letter', () => {
+      service.setLetterAt(3, 0, 'X');
+      service.clearLetterAt(3, 0);
+      expect(getCell(service.grid(), 3, 0)!.letter!.value).toBe('');
+    });
+
+    it('setLetterAt on a non-LETTER cell should do nothing', () => {
+      const grid = createEmptyGrid('g', '', 5, 5);
+      const clue = { x: 0, y: 0, type: 'CLUE_SINGLE' as const, clues: [{ direction: 'RIGHT' as const, text: 'x' }] };
+      service.initGrid(withUpdatedCell(grid, clue));
+      service.setLetterAt(0, 0, 'A');
+      const cell = getCell(service.grid(), 0, 0);
+      expect(cell!.type).toBe('CLUE_SINGLE');
+    });
+
+    it('setLetterAt out of bounds should not throw', () => {
+      expect(() => service.setLetterAt(99, 99, 'A')).not.toThrow();
+    });
+  });
+
   describe('rows', () => {
     it('should return cells grouped by rows', () => {
       service.initGrid(createEmptyGrid('g', '', 3, 2));

@@ -1,16 +1,16 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Router, NavigationEnd } from '@angular/router';
-import { HeaderComponent } from '@presentation/shared/header/header.component';
 import { ToastContainerComponent } from '@presentation/shared/components/toast/toast.component';
 import { AuthService } from '@infrastructure/auth/auth.service';
 import { AuthSidebarComponent } from '@presentation/shared/sidebar/auth-sidebar.component';
+import { UserProfileWidgetComponent } from '@presentation/shared/user-profile/user-profile-widget.component';
 import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, ToastContainerComponent, AuthSidebarComponent],
+  imports: [RouterOutlet, ToastContainerComponent, AuthSidebarComponent, UserProfileWidgetComponent],
   templateUrl: './root.component.html',
   styleUrl: './root.component.scss',
 })
@@ -38,14 +38,7 @@ export class RootComponent {
   readonly hasToolSidebar = (): boolean =>
     this.auth.isAuthenticated() && this.showSidebar();
 
-  readonly hasTopHeader = (): boolean =>
-    this.auth.isAuthenticated() && !this.hasToolSidebar();
-
   toggleSidebar(): void {
     this.sidebarCollapsed.update((value) => !value);
-  }
-
-  collapseSidebar(): void {
-    this.sidebarCollapsed.set(true);
   }
 }

@@ -1,7 +1,6 @@
 @if (side() === 'join') {
 
-  <span class="section-label">Rejoindre une partie</span>
-  <h2>Vous avez un code ?</h2>
+  <h2>Rejoindre une partie</h2>
 
   @if (auth.isAnonymous()) {
     <p class="front-panel__guest-info text-muted">
@@ -27,21 +26,12 @@
 
 } @else {
 
-  <span class="section-label">
-    @if (auth.isPlayer()) { Créer } @else { Commencer }
-  </span>
-  <h2>Votre atelier</h2>
-  <p>
-    @if (auth.isPlayer()) {
-      Concevez une grille et invitez des amis à la résoudre ensemble.
-    } @else {
-      Connectez-vous pour créer vos grilles et lancer vos propres sessions.
-    }
-  </p>
-  <div class="front-panel__actions">
+  <h2>Créer</h2>
+  <p class="front-panel__subtitle">Éditez une grille ou lancez une nouvelle session</p>
+  <div class="front-panel__actions front-panel__actions--big">
     @if (auth.isPlayer()) {
       <cocro-button variant="secondary" routerLink="/grid/create">
-        Éditeur de grille
+        Créer une grille
       </cocro-button>
       <cocro-button variant="secondary" routerLink="/lobby/create">
         Nouvelle session

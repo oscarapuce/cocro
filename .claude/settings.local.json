@@ -12,7 +12,29 @@
       "Bash(./gradlew cocro-shared:jvmTest cocro-bff:test 2>&1 | grep -E \"tests|passed|failed|BUILD|FAILED\" | head -10)",
       "Bash(./gradlew cocro-shared:jvmTest cocro-bff:test --rerun 2>&1 | grep -E \"[0-9]+ tests|BUILD\" | head -5)",
       "Bash(find /Users/oscar_mallet/Documents/cocro -path \"*/build/test-results/**/*.xml\" | xargs grep -h \"tests=\" | grep -oP 'tests=\"\\\\K[0-9]+' | paste -sd+ | bc && find /Users/oscar_mallet/Documents/cocro -path \"*/build/test-results/**/*.xml\" | xargs grep -h \"tests=\" | grep -oP 'failures=\"\\\\K[0-9]+' | paste -sd+ | bc)",
-      "Bash(./gradlew cocro-bff:compileKotlin 2>&1 | tail -50)"
+      "Bash(./gradlew cocro-bff:compileKotlin 2>&1 | tail -50)",
+      "Bash(cd /Users/oscar_mallet/Documents/cocro/cocro-angular && npx ng build 2>&1 | grep -E \"error|warning|ERROR|complete\" | head -20)",
+      "Bash(find cocro-angular/src -name \"grid-params*\" -type f | xargs ls 2>/dev/null)",
+      "Bash(npx ng:*)",
+      "Bash(TESTCONTAINERS_RYUK_DISABLED=true ./gradlew cocro-bff:test --no-daemon --tests \"com.cocro.application.*\" 2>&1 | tail -20)",
+      "Bash(cd /Users/oscar_mallet/Documents/cocro/cocro-angular && npx jest --passWithNoTests 2>&1 | tail -20)",
+      "Bash(npx jest:*)",
+      "Bash(cat /Users/oscar_mallet/Documents/cocro/cocro-bff/src/main/kotlin/com/cocro/presentation/rest/error/toResponseEntity.kt 2>/dev/null || find /Users/oscar_mallet/Documents/cocro/cocro-bff/src/main -name \"*.kt\" | xargs grep -l \"toResponseEntity\" | head -3)",
+      "Bash(TESTCONTAINERS_RYUK_DISABLED=true ./gradlew cocro-bff:test --tests \"com.cocro.application.session.*\" --tests \"com.cocro.presentation.rest.session.*\" --no-daemon 2>&1 | grep \"FAILED\\\\|Exception\\\\|error:\" | head -30)",
+      "Bash(find /Users/oscar_mallet/Documents/cocro/cocro-shared -name \"GridMetadata.kt\" | xargs cat)",
+      "Bash(TESTCONTAINERS_RYUK_DISABLED=true ./gradlew cocro-bff:test --tests \"com.cocro.application.session.mapper.GridTemplateMapperTest.should map grid metadata\" --no-daemon 2>&1 | grep -A 20 \"IllegalArgumentException\")",
+      "Bash(TESTCONTAINERS_RYUK_DISABLED=true ./gradlew cocro-bff:test --tests \"com.cocro.application.session.*\" --tests \"com.cocro.presentation.rest.session.*\" --no-daemon 2>&1 | tail -15)",
+      "Bash(grep -r \"apiBaseUrl\\\\|proxy\\\\|4200\\\\|8080\" /Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/infrastructure/environment*.ts 2>/dev/null | head -10)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/api/sessions/AB12/grid-template -H \"Authorization: Bearer invalid\" 2>&1)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:8080/api/sessions/2D4C6L/grid-template\" -H \"Authorization: Bearer invalid\" 2>&1)",
+      "Bash(./gradlew cocro-bff:compileKotlin --no-daemon 2>&1 | tail -10)",
+      "Bash(find /Users/oscar_mallet/Documents/cocro/cocro-shared -name \"SessionId.kt\" | xargs cat)",
+      "Bash(python3 -m json.tool)",
+      "Bash(find /Users/oscar_mallet -maxdepth 4 -name \"*.json\" 2>/dev/null | xargs grep -l \"qmd\\\\|quarto\" 2>/dev/null | grep -v node_modules | head -5)",
+      "Read(//usr/local/bin/**)",
+      "Read(//usr/local/**)",
+      "Bash(ls /Users/oscar_mallet/node_modules/.bin/qmd 2>/dev/null && /Users/oscar_mallet/node_modules/.bin/qmd --version 2>/dev/null | head -3)",
+      "Bash(claude mcp:*)"
     ]
   }
 }

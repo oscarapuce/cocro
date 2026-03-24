@@ -12,4 +12,5 @@ data class GridCheckResult(
     val isCorrect: Boolean,
     val filledCount: Int,
     val totalCount: Int,
+    val wrongCount: Int,
 )

@@ -75,8 +75,8 @@ class CheckGridUseCase(
         val result = gridState.checkAgainst(referenceGrid)
 
         logger.info(
-            "Grid check session={} complete={} correct={} filled={}/{}",
-            shareCode, result.isComplete, result.isCorrect, result.filledCount, result.totalCount,
+            "Grid check session={} complete={} correct={} wrong={} filled={}/{}",
+            shareCode, result.isComplete, result.isCorrect, result.wrongCount, result.filledCount, result.totalCount,
         )
 
         return CocroResult.Success(
@@ -86,6 +86,7 @@ class CheckGridUseCase(
                 isCorrect = result.isCorrect,
                 filledCount = result.filledCount,
                 totalCount = result.totalCount,
+                wrongCount = result.wrongCount,
             ),
         )
     }

@@ -61,6 +61,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.isCorrect).isFalse()
         assertThat(result.filledCount).isEqualTo(0)
         assertThat(result.totalCount).isEqualTo(2)
+        assertThat(result.wrongCount).isEqualTo(0)
     }
 
     @Test
@@ -74,6 +75,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.isCorrect).isFalse()
         assertThat(result.filledCount).isEqualTo(1)
         assertThat(result.totalCount).isEqualTo(2)
+        assertThat(result.wrongCount).isEqualTo(0)
     }
 
     @Test
@@ -87,6 +89,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.isCorrect).isTrue()
         assertThat(result.filledCount).isEqualTo(2)
         assertThat(result.totalCount).isEqualTo(2)
+        assertThat(result.wrongCount).isEqualTo(0)
     }
 
     @Test
@@ -100,6 +103,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.isCorrect).isFalse()
         assertThat(result.filledCount).isEqualTo(2)
         assertThat(result.totalCount).isEqualTo(2)
+        assertThat(result.wrongCount).isEqualTo(2)
     }
 
     @Test
@@ -113,6 +117,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.isCorrect).isTrue()
         assertThat(result.filledCount).isEqualTo(0)
         assertThat(result.totalCount).isEqualTo(0)
+        assertThat(result.wrongCount).isEqualTo(0)
     }
 
     @Test
@@ -126,5 +131,20 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.isCorrect).isTrue()
         assertThat(result.filledCount).isEqualTo(1)
         assertThat(result.totalCount).isEqualTo(1)
+        assertThat(result.wrongCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `partially filled with one wrong letter — not complete, 1 wrong`() {
+        val grid = buildGrid(listOf(letterCell(0, 0, 'A'), letterCell(1, 0, 'B'), letterCell(2, 0, 'C')))
+        val state = stateWithLetters(Triple(0, 0, 'A'), Triple(1, 0, 'Z'))
+
+        val result = state.checkAgainst(grid)
+
+        assertThat(result.isComplete).isFalse()
+        assertThat(result.isCorrect).isFalse()
+        assertThat(result.filledCount).isEqualTo(2)
+        assertThat(result.totalCount).isEqualTo(3)
+        assertThat(result.wrongCount).isEqualTo(1)
     }
 }

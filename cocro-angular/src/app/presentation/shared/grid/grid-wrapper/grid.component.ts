@@ -1,5 +1,5 @@
 import { NgStyle } from '@angular/common';
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, Input } from '@angular/core';
 
 import { GridCellComponent } from '@presentation/shared/grid/cell-wrapper/grid-cell.component';
 import { GridSelectorService } from '@application/service/grid-selector.service';
@@ -17,8 +17,15 @@ import { GridSelectorService } from '@application/service/grid-selector.service'
 export class GridComponent {
   readonly selector = inject(GridSelectorService);
 
+  /** Disable keyboard handling (for game board which manages its own keyboard). */
+  @Input() disableKeyboard = false;
+  /** Optional callback to compute a CSS class for a letter cell (used for player coloring). */
+  @Input() cellColorClassFn: ((x: number, y: number) => string) | null = null;
+
   @HostListener('window:keydown', ['$event'])
   handleKey(event: KeyboardEvent) {
+    if (this.disableKeyboard) return;
+
     const target = event.target as HTMLElement;
     const tag = target.tagName.toLowerCase();
 

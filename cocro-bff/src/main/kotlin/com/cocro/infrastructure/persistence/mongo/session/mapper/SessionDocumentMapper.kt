@@ -19,7 +19,7 @@ import com.cocro.kernel.session.model.valueobject.SessionShareCode
 
 fun Session.toDocument(): SessionDocument =
     SessionDocument(
-        id = id.value,
+        id = id.toString(),
         shareCode = shareCode.toString(),
         creatorId = creatorId.toString(),
         gridShortId = gridId.toString(),
@@ -57,7 +57,7 @@ fun SessionGridState.toDocument(): SessionGridStateDocument =
 
 fun SessionDocument.toDomain(): Session =
     Session.rehydrate(
-        id = SessionId(id),
+        id = SessionId.from(id),
         shareCode = SessionShareCode(shareCode),
         creatorId = UserId.from(creatorId),
         gridId = GridShareCode(gridShortId),

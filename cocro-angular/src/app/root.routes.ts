@@ -31,10 +31,11 @@ export const routes: Routes = [
     loadChildren: () => import('@presentation/features/lobby/lobby.routes').then(m => m.LOBBY_ROUTES),
   },
   {
-    path: 'game',
+    path: 'play',
     data: { showSidebar: true },
     canActivate: [authGuard],
-    loadChildren: () => import('@presentation/features/game/game.routes').then(m => m.GAME_ROUTES),
+    loadChildren: () => import('@presentation/features/grid/play/play.routes').then(m => m.PLAY_ROUTES),
   },
+
   { path: '**', redirectTo: '' },
 ];

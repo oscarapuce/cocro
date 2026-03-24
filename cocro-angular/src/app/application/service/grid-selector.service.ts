@@ -78,6 +78,18 @@ export class GridSelectorService {
     this.goToNextCell();
   }
 
+  /** Updates a letter at (x,y) without moving the cursor — used for remote WebSocket updates. */
+  setLetterAt(x: number, y: number, letter: string): void {
+    const cell = getCell(this.grid(), x, y);
+    if (!cell || !isCellLetter(cell)) return;
+    const updated = writeLetterInCell(cell, letter);
+    this.grid.update(g => withUpdatedCell(g, updated));
+  }
+
+  clearLetterAt(x: number, y: number): void {
+    this.setLetterAt(x, y, '');
+  }
+
   handleBackspace(): void {
     this.eraseLetter();
     this.goToNextCell(false);

@@ -1,0 +1,65 @@
+.grid-player {
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  color: var(--color-ink);
+  min-height: 100vh;
+  background-color: var(--color-paper);
+}
+
+// Params bar: cocro-card with horizontal flex layout (mirrors editor)
+.play-params-bar ::ng-deep .cocro-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-xl);
+  flex-wrap: wrap;
+}
+
+// Workspace: side panel + grid
+.play-workspace {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xl);
+}
+
+// Side panel
+.play-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  width: 18rem;
+  flex-shrink: 0;
+}
+
+// Grid wrapper
+.grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  gap: var(--space-lg);
+}
+
+// Loading state
+.play-loading {
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  color: var(--color-ink-muted);
+  text-align: center;
+  padding: var(--space-3xl) 0;
+  animation: fade-in 300ms ease-in-out;
+}
+
+// Error banner
+.play-error {
+  padding: var(--space-sm) var(--space-xl);
+  color: var(--color-red);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  background-color: rgba(184, 50, 37, 0.08);
+  border-left: 3px solid var(--color-red);
+  border-radius: var(--radius-sm);
+}

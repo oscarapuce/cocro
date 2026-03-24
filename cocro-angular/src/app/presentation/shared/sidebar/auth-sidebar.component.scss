@@ -153,16 +153,6 @@
     }
   }
 
-  &__link-icon {
-    min-width: 24px;
-    font-family: var(--font-label);
-    font-size: var(--text-xs);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-ink-muted);
-    text-align: center;
-  }
-
   &__footer {
     margin-top: auto;
     display: grid;
@@ -192,4 +182,3 @@
     box-shadow: none;
   }
 }
-

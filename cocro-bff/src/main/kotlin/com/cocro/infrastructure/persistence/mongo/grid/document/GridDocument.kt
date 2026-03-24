@@ -5,7 +5,6 @@ import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
-import java.util.UUID
 
 @Document(collection = "grids")
 @CompoundIndex(
@@ -15,7 +14,7 @@ import java.util.UUID
 )
 data class GridDocument(
     @Id
-    val id: UUID,
+    val id: String,
     @Indexed(unique = true)
     val shortId: String,
     val title: String,

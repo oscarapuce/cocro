@@ -1,0 +1,46 @@
+<div class="grid-player">
+
+  <!-- Params bar — même structure que l'éditeur -->
+  <cocro-card class="play-params-bar" title="Session de jeu">
+    <cocro-play-header
+      [shareCode]="shareCode()"
+      [title]="selector.grid().title"
+      [author]="selector.grid().author ?? ''"
+      [difficulty]="selector.grid().difficulty ?? 'NONE'"
+      [reference]="selector.grid().reference"
+      [participantCount]="participantCount()"
+      [revision]="revision()"
+      [connected]="connected()"
+      (leave)="leave()"
+    />
+  </cocro-card>
+
+  <!-- Error banner -->
+  @if (error()) {
+    <div class="play-error">{{ error() }}</div>
+  }
+
+  <!-- Workspace: side info + grid -->
+  @if (!loading()) {
+    <div class="play-workspace">
+
+      <!-- Side info panel -->
+      <aside class="play-side">
+        <cocro-card title="Informations">
+          <cocro-play-info />
+        </cocro-card>
+      </aside>
+
+      <!-- Grid area -->
+      <div class="grid-wrapper">
+        @if (hasGlobalClue()) {
+          <cocro-global-clue-preview />
+        }
+        <cocro-grid [disableKeyboard]="true" [cellColorClassFn]="getCellColorClass" />
+      </div>
+    </div>
+  } @else {
+    <div class="play-loading">Chargement de la grille…</div>
+  }
+
+</div>

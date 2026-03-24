@@ -2,11 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { CreateGridUseCase } from './create-grid.use-case';
 import { GridPort, GRID_PORT } from '@application/ports/grid/grid.port';
+import { EditorDraftPort, EDITOR_DRAFT_PORT } from '@application/ports/editor/editor-draft.port';
 import { SubmitGridRequest, GridSubmitResponse } from '@application/dto/grid.dto';
 
 describe('CreateGridUseCase', () => {
   let useCase: CreateGridUseCase;
   let mockGridPort: jest.Mocked<GridPort>;
+  let mockEditorDraft: jest.Mocked<EditorDraftPort>;
 
   beforeEach(() => {
     mockGridPort = {
@@ -14,11 +16,17 @@ describe('CreateGridUseCase', () => {
       submitGrid: jest.fn(),
       patchGrid: jest.fn(),
     };
+    mockEditorDraft = {
+      save: jest.fn(),
+      load: jest.fn(),
+      clear: jest.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         CreateGridUseCase,
         { provide: GRID_PORT, useValue: mockGridPort },
+        { provide: EDITOR_DRAFT_PORT, useValue: mockEditorDraft },
       ],
     });
 

@@ -1,0 +1,44 @@
+<div class="upw">
+  @if (auth.isAuthenticated()) {
+
+    <!-- Avatar button -->
+    <button
+      type="button"
+      class="upw__avatar"
+      [class.upw__avatar--open]="dropdownOpen()"
+      (click)="toggleDropdown()"
+      [attr.aria-label]="'Profil de ' + auth.currentUser()?.username"
+      aria-haspopup="true"
+      [attr.aria-expanded]="dropdownOpen()"
+    >
+      {{ avatarLetter() }}
+    </button>
+
+    <!-- Dropdown -->
+    @if (dropdownOpen()) {
+      <div class="upw__dropdown" role="menu">
+        <div class="upw__dropdown-user">
+          <span class="upw__dropdown-label">Connecté en tant que</span>
+          <strong class="upw__dropdown-username">{{ auth.currentUser()?.username }}</strong>
+        </div>
+        <button type="button" class="upw__logout" (click)="logout()" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Déconnexion
+        </button>
+      </div>
+    }
+
+  } @else {
+
+    <!-- Guest actions -->
+    <div class="upw__guest">
+      <a routerLink="/auth/login" class="upw__guest-btn upw__guest-btn--primary">Connexion</a>
+      <a routerLink="/auth/register" class="upw__guest-btn">Inscription</a>
+    </div>
+
+  }
+</div>

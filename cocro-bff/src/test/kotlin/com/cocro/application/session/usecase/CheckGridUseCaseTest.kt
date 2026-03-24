@@ -107,6 +107,7 @@ class CheckGridUseCaseTest {
         assertThat(success.isCorrect).isTrue()
         assertThat(success.filledCount).isEqualTo(0)
         assertThat(success.totalCount).isEqualTo(0)
+        assertThat(success.wrongCount).isEqualTo(0)
     }
 
     @Test

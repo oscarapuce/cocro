@@ -200,6 +200,23 @@ The grid editor uses a three-zone layout:
 
 All tool panels use `cocro-card` with the `title` input. All toggle controls use the global `.toggle-btn` utility. Component SCSS files only contain local layout overrides.
 
+### Grid Player (Play View)
+
+The play view mirrors the editor's three-zone layout but replaces all editing controls with read-only information:
+
+- **Params bar** (top): `cocro-card` with title badge "Session de jeu", split into two zones:
+  - Left: grid title, author, difficulty badge (forest green), reference
+  - Right: share code, participant count, revision, connection indicator, leave button
+- **Side panel** (left, 18rem): `cocro-card` with title badge "Informations" containing:
+  - Optional description (italic, muted)
+  - Global clue section (forest green accent, word lengths)
+  - Selected clue cell content (when a clue cell is focused)
+- **Grid workspace** (right): `cocro-global-clue-preview` (if global clue exists) then `cocro-grid`
+
+The play view reuses `GridSelectorService` (singleton), `GridComponent`, and `GlobalCluePreviewComponent` from the editor. Letter coloring uses `cellColorClassFn` callback: `letter--mine` (forest green) and `letter--other` (sepia/brown) for multi-player awareness.
+
+Route: `/play/:shareCode` — accessible via `authGuard`.
+
 ## Anti-Patterns
 
 Do not introduce:

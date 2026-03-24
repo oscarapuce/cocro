@@ -6,6 +6,7 @@ import com.cocro.application.session.dto.LeaveSessionDto
 import com.cocro.application.session.dto.StartSessionDto
 import com.cocro.application.session.usecase.CheckGridUseCase
 import com.cocro.application.session.usecase.CreateSessionUseCase
+import com.cocro.application.session.usecase.GetSessionGridTemplateUseCase
 import com.cocro.application.session.usecase.GetSessionStateUseCase
 import com.cocro.application.session.usecase.JoinSessionUseCase
 import com.cocro.application.session.usecase.LeaveSessionUseCase
@@ -29,6 +30,7 @@ class SessionController(
     private val leaveSessionUseCase: LeaveSessionUseCase,
     private val startSessionUseCase: StartSessionUseCase,
     private val getSessionStateUseCase: GetSessionStateUseCase,
+    private val getSessionGridTemplateUseCase: GetSessionGridTemplateUseCase,
     private val checkGridUseCase: CheckGridUseCase,
 ) {
     @PostMapping
@@ -74,6 +76,16 @@ class SessionController(
         @PathVariable shareCode: String,
     ): ResponseEntity<*> =
         getSessionStateUseCase
+            .execute(shareCode)
+            .toResponseEntity(HttpStatus.OK)
+
+    /** Returns the reference grid with letters stripped (structure only). */
+    @GetMapping("/{shareCode}/grid-template")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN', 'ANONYMOUS')")
+    fun getSessionGridTemplate(
+        @PathVariable shareCode: String,
+    ): ResponseEntity<*> =
+        getSessionGridTemplateUseCase
             .execute(shareCode)
             .toResponseEntity(HttpStatus.OK)
 

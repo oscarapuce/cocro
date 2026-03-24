@@ -51,16 +51,19 @@ data class SessionGridState(
 
         val totalCount = referenceLetters.size
         val filledCount = referenceLetters.keys.count { pos -> cells.containsKey(pos) }
-        val isComplete = filledCount == totalCount
-        val isCorrect = isComplete && referenceLetters.all { (pos, expectedChar) ->
-            (cells[pos] as? SessionGridCellState.Letter)?.value == expectedChar
+        val wrongCount = referenceLetters.count { (pos, expectedChar) ->
+            val placed = (cells[pos] as? SessionGridCellState.Letter)?.value
+            placed != null && placed != expectedChar
         }
+        val isComplete = filledCount == totalCount
+        val isCorrect = isComplete && wrongCount == 0
 
         return GridCheckResult(
             isComplete = isComplete,
             isCorrect = isCorrect,
             filledCount = filledCount,
             totalCount = totalCount,
+            wrongCount = wrongCount,
         )
     }
 

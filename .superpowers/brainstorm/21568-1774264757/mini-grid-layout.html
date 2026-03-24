@@ -1,0 +1,221 @@
+<style>
+  body { font-family: 'Georgia', serif; }
+  .preview-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .editor-mock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 320px;
+  }
+  .editor-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 0.25rem;
+  }
+  /* Mini-grid shared styles */
+  .mini-grid-wrapper {
+    background: #F9F5EC;
+    border: 1px solid #d4cdb8;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .mini-grid-enigme {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: #5a5040;
+    margin-bottom: 0.25rem;
+  }
+  /* Mini cells */
+  .mini-cell {
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid #8a8070;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'Georgia', serif;
+    background: white;
+    color: #1a1a1a;
+    position: relative;
+  }
+  .mini-cell--empty { color: #ccc; }
+  .mini-cell--numbered::before {
+    content: attr(data-n);
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    font-size: 0.35rem;
+    color: #999;
+    font-family: sans-serif;
+  }
+  .mini-cell + .mini-cell { border-left: none; }
+
+  /* Option A: single row, words separated by gap */
+  .mini-row-a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .mini-word-a {
+    display: flex;
+  }
+
+  /* Option B: stacked rows with word labels */
+  .mini-row-b {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mini-word-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #b48a30;
+    min-width: 2rem;
+    flex-shrink: 0;
+  }
+  .mini-word-b {
+    display: flex;
+  }
+
+  /* Main grid mock */
+  .main-grid-mock {
+    display: grid;
+    grid-template-columns: repeat(7, 26px);
+    border: 2px solid #3a3a3a;
+    background: #e8e0d0;
+  }
+  .grid-cell {
+    width: 26px;
+    height: 26px;
+    border-right: 1px solid #888;
+    border-bottom: 1px solid #888;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    position: relative;
+  }
+  .grid-cell .num {
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    font-size: 0.38rem;
+    color: #888;
+    font-family: sans-serif;
+  }
+  .grid-cell--black { background: #2a2a2a; }
+  .grid-wrapper-mock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+</style>
+
+<h2>Disposition de la mini-grille d'énigme</h2>
+<p class="subtitle">Comment afficher les cases de l'énigme globale au-dessus de la grille principale ?</p>
+
+<div class="preview-container">
+
+  <!-- Option A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Ligne unique — mots côte à côte</h3>
+      <p>Tous les mots sur une seule ligne, séparés par un espace. Simple, compact.</p>
+
+      <div class="grid-wrapper-mock" style="margin-top:1rem">
+        <div class="mini-grid-wrapper">
+          <div class="mini-grid-enigme">? Personnage mystérieux du roman…</div>
+          <div class="mini-row-a">
+            <div class="mini-word-a">
+              <div class="mini-cell mini-cell--numbered" data-n="1">V</div><div class="mini-cell mini-cell--numbered" data-n="2">I</div><div class="mini-cell mini-cell--numbered" data-n="3">C</div><div class="mini-cell mini-cell--numbered" data-n="4">T</div>
+            </div>
+            <div class="mini-word-a">
+              <div class="mini-cell mini-cell--numbered" data-n="5">O</div><div class="mini-cell mini-cell--numbered" data-n="6">R</div>
+            </div>
+            <div class="mini-word-a">
+              <div class="mini-cell mini-cell--empty">_</div><div class="mini-cell mini-cell--empty">_</div><div class="mini-cell mini-cell--empty">_</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-grid-mock">
+          <div class="grid-cell"><span class="num">1</span>V</div>
+          <div class="grid-cell"><span class="num">2</span>I</div>
+          <div class="grid-cell"><span class="num">3</span>C</div>
+          <div class="grid-cell"><span class="num">4</span>T</div>
+          <div class="grid-cell"><span class="num">5</span>O</div>
+          <div class="grid-cell"><span class="num">6</span>R</div>
+          <div class="grid-cell--black grid-cell"></div>
+          <div class="grid-cell">A</div><div class="grid-cell">L</div><div class="grid-cell">P</div><div class="grid-cell">H</div><div class="grid-cell">A</div><div class="grid-cell">B</div><div class="grid-cell">E</div>
+          <div class="grid-cell">T</div><div class="grid-cell">E</div><div class="grid-cell">S</div><div class="grid-cell">T</div><div class="grid-cell">E</div><div class="grid-cell">R</div><div class="grid-cell">S</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Mots empilés avec étiquettes</h3>
+      <p>Un mot par ligne avec son label (MOT 1, MOT 2…). Plus lisible quand les mots sont longs.</p>
+
+      <div class="grid-wrapper-mock" style="margin-top:1rem">
+        <div class="mini-grid-wrapper">
+          <div class="mini-grid-enigme">? Personnage mystérieux du roman…</div>
+          <div class="mini-row-b">
+            <span class="mini-word-label">MOT 1</span>
+            <div class="mini-word-b">
+              <div class="mini-cell mini-cell--numbered" data-n="1">V</div><div class="mini-cell mini-cell--numbered" data-n="2">I</div><div class="mini-cell mini-cell--numbered" data-n="3">C</div><div class="mini-cell mini-cell--numbered" data-n="4">T</div>
+            </div>
+          </div>
+          <div class="mini-row-b">
+            <span class="mini-word-label">MOT 2</span>
+            <div class="mini-word-b">
+              <div class="mini-cell mini-cell--numbered" data-n="5">O</div><div class="mini-cell mini-cell--numbered" data-n="6">R</div>
+            </div>
+          </div>
+          <div class="mini-row-b">
+            <span class="mini-word-label">MOT 3</span>
+            <div class="mini-word-b">
+              <div class="mini-cell mini-cell--empty">_</div><div class="mini-cell mini-cell--empty">_</div><div class="mini-cell mini-cell--empty">_</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-grid-mock">
+          <div class="grid-cell"><span class="num">1</span>V</div>
+          <div class="grid-cell"><span class="num">2</span>I</div>
+          <div class="grid-cell"><span class="num">3</span>C</div>
+          <div class="grid-cell"><span class="num">4</span>T</div>
+          <div class="grid-cell"><span class="num">5</span>O</div>
+          <div class="grid-cell"><span class="num">6</span>R</div>
+          <div class="grid-cell--black grid-cell"></div>
+          <div class="grid-cell">A</div><div class="grid-cell">L</div><div class="grid-cell">P</div><div class="grid-cell">H</div><div class="grid-cell">A</div><div class="grid-cell">B</div><div class="grid-cell">E</div>
+          <div class="grid-cell">T</div><div class="grid-cell">E</div><div class="grid-cell">S</div><div class="grid-cell">T</div><div class="grid-cell">E</div><div class="grid-cell">R</div><div class="grid-cell">S</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

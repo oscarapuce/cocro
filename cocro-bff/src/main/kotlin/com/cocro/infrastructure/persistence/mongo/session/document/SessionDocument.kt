@@ -5,9 +5,8 @@ import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
-import java.util.UUID
 
-@Document(collection = "grids")
+@Document(collection = "sessions")
 @CompoundIndex(
     name = "shareCode_idx",
     def = "{'shareCode': 1}",
@@ -15,7 +14,7 @@ import java.util.UUID
 )
 data class SessionDocument(
     @Id
-    val id: UUID,
+    val id: String,
     @Indexed(unique = true)
     val shareCode: String,
     val creatorId: String,

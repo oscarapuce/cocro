@@ -23,6 +23,14 @@
     font-family: var(--font-body);
   }
 
+  &__subtitle {
+    font-size: var(--text-sm);
+    opacity: 0.78;
+    margin-bottom: var(--space-lg);
+    max-width: 28ch;
+    line-height: 1.5;
+  }
+
   &__actions {
     display: flex;
     flex-wrap: nowrap;
@@ -30,6 +38,14 @@
 
     cocro-button {
       flex: 1 1 0;
+    }
+
+    &--big {
+      cocro-button ::ng-deep .cocro-btn {
+        padding: var(--space-md) var(--space-xl);
+        font-size: var(--text-base);
+        font-weight: 700;
+      }
     }
   }
 }

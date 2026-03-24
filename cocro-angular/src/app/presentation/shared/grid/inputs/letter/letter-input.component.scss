@@ -37,4 +37,14 @@
   }
   pointer-events: none; // empêche le clic de rester bloqué
   caret-color: transparent; // cache le curseur
+
+  &.letter--mine {
+    color: var(--color-forest);
+    font-weight: 700;
+  }
+
+  &.letter--other {
+    color: #8B6914; // brun/sépia
+    font-weight: 600;
+  }
 }

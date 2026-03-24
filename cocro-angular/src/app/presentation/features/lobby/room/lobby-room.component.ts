@@ -45,7 +45,7 @@ export class LobbyRoomComponent implements OnInit {
   startGame(): void {
     this.starting.set(true);
     this.sessionPort.startSession({ shareCode: this.shareCode() }).subscribe({
-      next: () => this.router.navigate(['/game', this.shareCode()]),
+      next: () => this.router.navigate(['/play', this.shareCode()]),
       error: (err: unknown) => {
         this.error.set(getNetworkErrorMessage(err, 'Erreur.'));
         this.starting.set(false);

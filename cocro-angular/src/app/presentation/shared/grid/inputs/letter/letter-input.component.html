@@ -4,12 +4,13 @@
     maxlength="1"
     pattern="[A-Za-z]"
     class="letter-input"
+    [ngClass]="colorClass"
     [value]="letter.value"
     [disabled]="!active"
     [readonly]="!active"
     (input)="onInput($event)"
     inputmode="latin" />
-  @if (letter?.number !== undefined && letter?.number !== null) {
+  @if (letter.number != null) {
     <span class="letter-input__number">{{ letter.number }}</span>
   }
 </div>

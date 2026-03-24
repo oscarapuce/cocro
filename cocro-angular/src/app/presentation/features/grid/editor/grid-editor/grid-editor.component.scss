@@ -6,14 +6,23 @@
   color: var(--color-ink);
 }
 
-// --- Grid params bar: cocro-card with horizontal flex layout ---
+// --- Grid params bar: flex row, params grow, button stays right ---
 .grid-params-bar ::ng-deep .cocro-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-lg);
   padding: var(--space-md) var(--space-xl);
-  flex-wrap: wrap;
+}
+
+.grid-params-bar cocro-grid-params {
+  flex: 1;
+  min-width: 0;
+}
+
+// Button in the params bar: aligned to end, centered vertically
+.grid-params-bar cocro-button {
+  flex-shrink: 0;
+  align-self: center;
 }
 
 // --- Workspace: side panel + grid ---

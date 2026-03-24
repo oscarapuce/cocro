@@ -1,0 +1,23 @@
+{
+  "id": "session-1774297404844",
+  "startedAt": "2026-03-23T20:23:24.844Z",
+  "cwd": "/Users/oscar_mallet/Documents/cocro/cocro-angular",
+  "context": {
+    "lastMatchedPatterns": [
+      "mem-MEMORY-test-infrastructure",
+      "mem-MEMORY-angular-frontend--cocro-angula",
+      "mem-MEMORY-stomp-websocket-auth--critical",
+      "mem-project_ui_audit_2026_03-issues-fixed---ui-ux-audit--ma",
+      "mem-MEMORY-infrastructure"
+    ]
+  },
+  "metrics": {
+    "edits": 38,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "updatedAt": "2026-03-24T11:00:44.642Z",
+  "endedAt": "2026-03-24T11:00:44.767Z",
+  "duration": 52639924
+}

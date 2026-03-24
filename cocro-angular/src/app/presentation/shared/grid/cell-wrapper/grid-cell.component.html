@@ -6,7 +6,7 @@
      (click)="onClick()"
 >
   @if (isLetter()) {
-    <cocro-letter-input [letter]="cell.letter" [active]="selected()"/>
+    <cocro-letter-input [letter]="cell.letter" [active]="selected()" [colorClass]="letterColorClass"/>
   } @else if (isClue()) {
     <cocro-clue-input [clues]="getClues()"/>
   } @else {

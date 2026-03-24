@@ -1,74 +1,79 @@
 <div class="grid-params">
-  <div class="grid-params__title-field">
-    <label for="grid-title">Nom</label>
-    <input
-      id="grid-title"
-      type="text"
-      [ngModel]="selectorService.grid().title"
-      (ngModelChange)="selectorService.updateTitle($event)"
-      placeholder="Ma super grille"
-    />
-  </div>
 
-  <div class="grid-params__title-field grid-params__title-field--short">
-    <label for="grid-reference">Réf.</label>
-    <input
-      id="grid-reference"
-      type="text"
-      [ngModel]="selectorService.grid().reference ?? ''"
-      (ngModelChange)="selectorService.updateReference($event)"
-      placeholder="—"
-    />
-  </div>
-
-  <div class="grid-params__separator"></div>
-
-  <div class="grid-params__size-control">
-    <label>Lignes</label>
-    <div class="resize-controls">
-      <cocro-button variant="ghost" (click)="onRemoveRow()">−</cocro-button>
-      <span>{{ selectorService.grid().height }}</span>
-      <cocro-button variant="ghost" (click)="onAddRow()">+</cocro-button>
+  <!-- Groupe 1: Titre + Référence -->
+  <div class="grid-params__group grid-params__group--wide">
+    <div class="grid-params__field">
+      <label for="grid-title">Nom</label>
+      <input
+        id="grid-title"
+        type="text"
+        [ngModel]="selectorService.grid().title"
+        (ngModelChange)="selectorService.updateTitle($event)"
+        placeholder="Ma super grille"
+      />
+    </div>
+    <div class="grid-params__field">
+      <label for="grid-reference">Réf.</label>
+      <input
+        id="grid-reference"
+        type="text"
+        [ngModel]="selectorService.grid().reference ?? ''"
+        (ngModelChange)="selectorService.updateReference($event)"
+        placeholder="—"
+      />
     </div>
   </div>
 
-  <div class="grid-params__size-control">
-    <label>Colonnes</label>
-    <div class="resize-controls">
-      <cocro-button variant="ghost" (click)="onRemoveColumn()">−</cocro-button>
-      <span>{{ selectorService.grid().width }}</span>
-      <cocro-button variant="ghost" (click)="onAddColumn()">+</cocro-button>
+  <!-- Groupe 2: Lignes + Colonnes -->
+  <div class="grid-params__group">
+    <div class="grid-params__size-control">
+      <label>Lignes</label>
+      <div class="resize-controls">
+        <cocro-button variant="ghost" (click)="onRemoveRow()">−</cocro-button>
+        <span>{{ selectorService.grid().height }}</span>
+        <cocro-button variant="ghost" (click)="onAddRow()">+</cocro-button>
+      </div>
+    </div>
+    <div class="grid-params__size-control">
+      <label>Colonnes</label>
+      <div class="resize-controls">
+        <cocro-button variant="ghost" (click)="onRemoveColumn()">−</cocro-button>
+        <span>{{ selectorService.grid().width }}</span>
+        <cocro-button variant="ghost" (click)="onAddColumn()">+</cocro-button>
+      </div>
     </div>
   </div>
 
-  <div class="grid-params__separator"></div>
-
-  <div class="grid-params__difficulty">
-    <label for="grid-difficulty">Difficulté</label>
-    <select
-      id="grid-difficulty"
-      [ngModel]="selectorService.grid().difficulty ?? 'NONE'"
-      (ngModelChange)="updateDifficulty($event)"
-    >
-      @for (d of DIFFICULTIES; track d.value) {
-        <option [value]="d.value">{{ d.label }}</option>
-      }
-    </select>
+  <!-- Groupe 3: Difficulté -->
+  <div class="grid-params__group grid-params__group--center">
+    <div class="grid-params__difficulty">
+      <label for="grid-difficulty">Difficulté</label>
+      <select
+        id="grid-difficulty"
+        [ngModel]="selectorService.grid().difficulty ?? 'NONE'"
+        (ngModelChange)="updateDifficulty($event)"
+      >
+        @for (d of DIFFICULTIES; track d.value) {
+          <option [value]="d.value">{{ d.label }}</option>
+        }
+      </select>
+    </div>
   </div>
 
-  <div class="grid-params__separator"></div>
+  <!-- Groupe 4: Énigme globale -->
+  <div class="grid-params__group grid-params__group--center">
+    <label class="grid-params__enigma-toggle" (click)="globalCluePanelToggle.emit()">
+      <span class="enigma-toggle__track" [class.active]="globalClueActive()">
+        <span class="enigma-toggle__thumb"></span>
+      </span>
+      <span class="enigma-toggle__label">
+        @if (globalClueActive()) {
+          Énigme globale
+        } @else {
+          Pas d'énigme
+        }
+      </span>
+    </label>
+  </div>
 
-  <button
-    class="grid-params__enigma-toggle"
-    [class.active]="globalClueActive()"
-    type="button"
-    (click)="globalCluePanelToggle.emit()"
-  >
-    <span class="toggle-indicator"></span>
-    @if (globalClueActive()) {
-      ÉNIGME GLOBALE
-    } @else {
-      Pas d'énigme
-    }
-  </button>
 </div>

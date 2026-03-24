@@ -29,3 +29,5 @@ internal fun validateUpdateSessionGridDto(dto: UpdateSessionGridDto): List<Sessi
     position(dto.posX, dto.posY) { nonNegative() }
     command(dto.commandType, dto.letter) { valid() }
 }
+
+

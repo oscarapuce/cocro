@@ -18,6 +18,7 @@ import { isCellClue, isCellLetter } from '@domain/services/cell-utils.service';
 })
 export class GridCellComponent {
   @Input() cell!: Cell;
+  @Input() letterColorClass = '';
 
   private selector = inject(GridSelectorService);
 

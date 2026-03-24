@@ -1,10 +1,12 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {NgClass} from '@angular/common';
 import {Letter} from '@domain/models/grid.model';
 import {DEFAULT_LETTER} from '@domain/services/cell-utils.service';
 
 @Component({
   selector: 'cocro-letter-input',
   standalone: true,
+  imports: [NgClass],
   templateUrl: './letter-input.component.html',
   styleUrls: ['./letter-input.component.scss']
 })
@@ -18,6 +20,7 @@ export class LetterInputComponent {
     return this._letter;
   }
   @Input() active: boolean = false;
+  @Input() colorClass = '';
   @Output() valueChange = new EventEmitter<string>();
 
   onInput(event: Event): void {

@@ -4,6 +4,7 @@ import com.cocro.infrastructure.persistence.mongo.grid.document.CellDocument
 import com.cocro.infrastructure.persistence.mongo.grid.document.GridDocument
 import com.cocro.infrastructure.persistence.mongo.grid.document.GridMetadataDocument
 import com.cocro.kernel.auth.model.valueobject.UserId
+import java.util.UUID
 import com.cocro.kernel.grid.enums.CellType
 import com.cocro.kernel.grid.enums.ClueDirection
 import com.cocro.kernel.grid.enums.SeparatorType
@@ -22,7 +23,7 @@ import com.cocro.kernel.grid.model.valueobject.LetterValue
 
 fun Grid.toDocument(): GridDocument =
     GridDocument(
-        id = id,
+        id = id.toString(),
         shortId = shortId.value,
         title = title.value,
         metadata = GridMetadataDocument(
@@ -76,7 +77,7 @@ fun Cell.toDocument(): CellDocument =
 
 fun GridDocument.toDomain(): Grid =
     Grid(
-        id = id,
+        id = UUID.fromString(id),
         shortId = GridShareCode(shortId),
         title = GridTitle(title),
         metadata = GridMetadata(

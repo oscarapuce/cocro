@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GridSelectorService } from '@application/service/grid-selector.service';
 import { GridDifficulty } from '@domain/models/grid.model';
@@ -13,6 +13,9 @@ import { ButtonComponent } from '@presentation/shared/components/button/button.c
 })
 export class GridParamsComponent {
   readonly selectorService = inject(GridSelectorService);
+
+  globalClueActive = input(false);
+  @Output() globalCluePanelToggle = new EventEmitter<void>();
 
   readonly DIFFICULTIES: { value: GridDifficulty; label: string }[] = [
     { value: 'NONE', label: '–' },
