@@ -9,11 +9,6 @@ export const LOBBY_ROUTES: Routes = [
       import('./create/create-session.component').then((m) => m.CreateSessionComponent),
   },
   {
-    path: 'room/:shareCode',
-    loadComponent: () =>
-      import('./room/lobby-room.component').then((m) => m.LobbyRoomComponent),
-  },
-  {
     path: '',
     redirectTo: 'create',
     pathMatch: 'full',
