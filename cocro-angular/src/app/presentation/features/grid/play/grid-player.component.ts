@@ -3,20 +3,20 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@infrastructure/auth/auth.service';
 import { SESSION_SOCKET_PORT } from '@application/ports/session/session-socket.port';
 import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
-import { SESSION_GRID_TEMPLATE_PORT } from '@application/ports/session/session-grid-template.port';
 import { GridSelectorService } from '@application/service/grid-selector.service';
 import { createEmptyGrid } from '@domain/services/grid-utils.service';
 import { mapGridTemplateToGrid } from '@infrastructure/adapters/session/grid-template.mapper';
+import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
 import {
+  GridCheckedEvent,
   GridUpdatedEvent,
   ParticipantJoinedEvent,
   ParticipantLeftEvent,
   SessionEvent,
-  SessionStartedEvent,
   SessionWelcomeEvent,
   SyncRequiredEvent,
 } from '@domain/models/session-events.model';
-import { CellStateDto, SessionStatus } from '@domain/models/session.model';
+import { CellStateDto, SessionFullResponse, SessionStateResponse, SessionStatus } from '@domain/models/session.model';
 import { CardComponent } from '@presentation/shared/components/card/card.component';
 import { GridComponent } from '@presentation/shared/grid/grid-wrapper/grid.component';
 import { GlobalCluePreviewComponent } from '@presentation/features/grid/editor/global-clue-preview/global-clue-preview.component';
@@ -58,7 +58,6 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly sessionSocket = inject(SESSION_SOCKET_PORT);
   private readonly gameSession = inject(GAME_SESSION_PORT);
-  private readonly gridTemplatePort = inject(SESSION_GRID_TEMPLATE_PORT);
   readonly selector = inject(GridSelectorService);
   private readonly router = inject(Router);
 
@@ -67,8 +66,8 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   readonly hasGlobalClue = computed(() => !!this.selector.grid().globalClue?.label);
 
   ngOnInit(): void {
-    const code = this.route.snapshot.paramMap.get('shareCode') ?? '';
-    this.shareCode.set(code);
+    const shareCode = this.route.snapshot.paramMap.get('shareCode') ?? '';
+    this.shareCode.set(shareCode);
 
     const token = this.auth.token();
     if (!token) {
@@ -76,9 +75,27 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.sessionSocket.connect(token, code, (event) => {
-      this.connected.set(true);
-      this.handleEvent(event);
+    this.gameSession.joinSession({ shareCode }).subscribe({
+      next: (fullDto: SessionFullResponse) => {
+        this.selector.initGrid(mapGridTemplateToGrid(fullDto.gridTemplate));
+        fullDto.cells.forEach((c: CellStateDto) => {
+          if (c.letter) this.selector.setLetterAt(c.x, c.y, c.letter);
+        });
+        this.revision.set(fullDto.gridRevision);
+        this.participantCount.set(fullDto.participantCount);
+        this.status.set(fullDto.status);
+        this.gridLoaded.set(true);
+        this.loading.set(false);
+
+        this.sessionSocket.connect(token, shareCode, (event) => {
+          this.connected.set(true);
+          this.handleEvent(event);
+        });
+      },
+      error: (err: unknown) => {
+        this.error.set(getNetworkErrorMessage(err, 'Impossible de rejoindre la session.'));
+        this.loading.set(false);
+      },
     });
   }
 
@@ -143,37 +160,6 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
     this.router.navigate(['/']);
   }
 
-  private loadGridTemplate(): void {
-    this.gridTemplatePort.getGridTemplate(this.shareCode()).subscribe({
-      next: (template) => {
-        this.selector.initGrid(mapGridTemplateToGrid(template));
-        this.gridLoaded.set(true);
-        this.loadCurrentState();
-      },
-      error: () => {
-        this.error.set('Impossible de charger la grille. Veuillez réessayer.');
-        this.loading.set(false);
-      },
-    });
-  }
-
-  private loadCurrentState(): void {
-    this.gameSession.getState(this.shareCode()).subscribe({
-      next: (state) => {
-        this.revision.set(state.revision);
-        state.cells.forEach((c: CellStateDto) => {
-          if (c.letter) {
-            this.selector.setLetterAt(c.x, c.y, String(c.letter));
-          }
-        });
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
-    });
-  }
-
   private handleEvent(event: SessionEvent): void {
     switch (event.type) {
       case 'SessionWelcome':
@@ -188,9 +174,8 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
       case 'ParticipantLeft':
         this.participantCount.set((event as ParticipantLeftEvent).participantCount);
         break;
-      case 'SessionStarted':
-        this.status.set('PLAYING');
-        this.participantCount.set((event as SessionStartedEvent).participantCount);
+      case 'GridChecked':
+        // GridChecked event received — result available in (event as GridCheckedEvent)
         break;
       case 'SyncRequired':
         this.resync((event as SyncRequiredEvent).currentRevision);
@@ -202,7 +187,6 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
     this.status.set(event.status);
     this.participantCount.set(event.participantCount);
     this.revision.set(event.gridRevision);
-    this.loadGridTemplate();
   }
 
   private onGridUpdated(event: GridUpdatedEvent): void {
@@ -227,6 +211,13 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
 
   private resync(_targetRevision: number): void {
     this.letterAuthors.set(new Map());
-    this.loadCurrentState();
+    this.gameSession.getState(this.shareCode()).subscribe({
+      next: (state: SessionStateResponse) => {
+        this.revision.set(state.revision);
+        state.cells.forEach((c: CellStateDto) => {
+          if (c.letter) this.selector.setLetterAt(c.x, c.y, c.letter);
+        });
+      },
+    });
   }
 }
