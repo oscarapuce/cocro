@@ -2,9 +2,9 @@ package com.cocro.application.session.usecase
 
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.session.dto.JoinSessionDto
-import com.cocro.application.session.dto.SessionJoinSuccess
+import com.cocro.application.session.dto.SessionFullDto
 import com.cocro.application.session.dto.notification.SessionEvent
-import com.cocro.application.session.mapper.toSessionJoinSuccess
+import com.cocro.application.session.mapper.toSessionFullDto
 import com.cocro.application.session.port.HeartbeatTracker
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
@@ -28,7 +28,7 @@ class JoinSessionUseCase(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun execute(joinSessionDto: JoinSessionDto): CocroResult<SessionJoinSuccess, SessionError> {
+    fun execute(joinSessionDto: JoinSessionDto): CocroResult<SessionFullDto, SessionError> {
         val user =
             currentUserProvider.currentUserOrNull()
                 ?: run {
@@ -58,7 +58,9 @@ class JoinSessionUseCase(
                 user.userId(), session.shareCode.value,
                 ParticipantsRule.countActiveParticipants(session.participants),
             )
-            return CocroResult.Success(session.toSessionJoinSuccess())
+            val gridState = sessionGridStateCache.get(session.id) ?: session.sessionGridState
+            val activeCount = ParticipantsRule.countActiveParticipants(session.participants)
+            return CocroResult.Success(session.toSessionFullDto(gridState, activeCount))
         }
 
         // DOMAIN COMMAND (validates status, capacity, duplicates)
@@ -94,6 +96,8 @@ class JoinSessionUseCase(
             "User {} successfully joined session {} ({} participants)",
             user.userId(), savedSession.shareCode.value, activeParticipantCount,
         )
-        return CocroResult.Success(savedSession.toSessionJoinSuccess())
+        val gridState = sessionGridStateCache.get(savedSession.id) ?: savedSession.sessionGridState
+        val activeCount = ParticipantsRule.countActiveParticipants(savedSession.participants)
+        return CocroResult.Success(savedSession.toSessionFullDto(gridState, activeCount))
     }
 }

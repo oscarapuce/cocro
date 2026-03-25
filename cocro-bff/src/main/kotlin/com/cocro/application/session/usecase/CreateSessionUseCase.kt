@@ -3,9 +3,10 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.session.dto.CreateSessionDto
-import com.cocro.application.session.dto.SessionCreationSuccess
+import com.cocro.application.session.dto.SessionFullDto
 import com.cocro.application.session.mapper.toGridTemplateSnapshot
-import com.cocro.application.session.mapper.toSessionCreationSuccess
+import com.cocro.application.session.mapper.toSessionFullDto
+import com.cocro.application.session.port.HeartbeatTracker
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.service.SessionCodeGenerator
@@ -14,6 +15,7 @@ import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.session.error.SessionError
 import com.cocro.kernel.session.model.Session
+import com.cocro.kernel.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -24,10 +26,11 @@ class CreateSessionUseCase(
     private val sessionGridStateCache: SessionGridStateCache,
     private val shareCodeGenerator: SessionCodeGenerator,
     private val gridRepository: GridRepository,
+    private val heartbeatTracker: HeartbeatTracker,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun execute(createSessionDto: CreateSessionDto): CocroResult<SessionCreationSuccess, SessionError> {
+    fun execute(createSessionDto: CreateSessionDto): CocroResult<SessionFullDto, SessionError> {
         // EARLY AUTH CHECK
         val user =
             currentUserProvider.currentUserOrNull()
@@ -64,8 +67,14 @@ class CreateSessionUseCase(
 
         sessionGridStateCache.initialize(savedSession.id, savedSession.sessionGridState)
 
+        // HEARTBEAT
+        heartbeatTracker.markActive(savedSession.id, user.userId)
+        heartbeatTracker.registerUserSession(user.userId, savedSession.id)
+
         // SUCCESS
         logger.info("Session {} successfully created by user {} for grid {}", savedSession.shareCode.value, user.userId(), gridId.value)
-        return CocroResult.Success(savedSession.toSessionCreationSuccess())
+        val activeCount = ParticipantsRule.countActiveParticipants(savedSession.participants)
+        val gridState = sessionGridStateCache.get(savedSession.id) ?: savedSession.sessionGridState
+        return CocroResult.Success(savedSession.toSessionFullDto(gridState, activeCount))
     }
 }

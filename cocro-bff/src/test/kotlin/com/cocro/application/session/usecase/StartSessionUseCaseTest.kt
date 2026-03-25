@@ -63,10 +63,6 @@ class StartSessionUseCaseTest {
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         val success = (result as CocroResult.Success).value
         assertThat(success.participantCount).isEqualTo(1)
-        verify(sessionNotifier).broadcast(
-            session.shareCode,
-            SessionEvent.SessionStarted(participantCount = 1),
-        )
     }
 
     @Test

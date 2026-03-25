@@ -59,6 +59,7 @@ class JoinSessionUseCaseTest {
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
         whenever(sessionRepository.save(any())).thenAnswer { it.arguments[0] as Session }
+        whenever(sessionGridStateCache.get(session.id)).thenReturn(null)
 
         // when
         val result = useCase.execute(dto)
@@ -67,6 +68,7 @@ class JoinSessionUseCaseTest {
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         val success = (result as CocroResult.Success).value
         assertThat(success.participantCount).isEqualTo(2)
+        assertThat(success.shareCode).isEqualTo("AB12")
         verify(sessionNotifier).broadcast(
             session.shareCode,
             SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), participantCount = 2),
@@ -169,6 +171,7 @@ class JoinSessionUseCaseTest {
             sessionGridState = session.sessionGridState,
             createdAt = session.createdAt,
             updatedAt = session.updatedAt,
+            gridTemplate = session.gridTemplate,
         )
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(endedSession)
