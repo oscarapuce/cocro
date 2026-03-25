@@ -14,6 +14,7 @@ import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.session.error.SessionError
 import com.cocro.kernel.session.model.SessionLifecycleCommand
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.kernel.session.enum.InviteStatus
 import com.cocro.kernel.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -68,15 +69,20 @@ class JoinSessionUseCase(
             when (val result = session.apply(SessionLifecycleCommand.Join(user.userId))) {
                 is CocroResult.Success -> result.value
                 is CocroResult.Error -> {
-                    // IDEMPOTENT REJOIN: active participant navigating to /play returns full dto
+                    // IDEMPOTENT REJOIN: active (JOINED) participant navigating to /play returns full dto
                     if (result.errors.singleOrNull() is SessionError.AlreadyParticipant) {
-                        logger.info(
-                            "User {} already in session {} — returning full dto (idempotent join)",
-                            user.userId(), session.shareCode.value,
-                        )
-                        val gridState = sessionGridStateCache.get(session.id) ?: session.sessionGridState
-                        val activeCount = ParticipantsRule.countActiveParticipants(session.participants)
-                        return CocroResult.Success(session.toSessionFullDto(gridState, activeCount))
+                        val isActive = session.participants.any {
+                            it.userId == user.userId && it.status == InviteStatus.JOINED
+                        }
+                        if (isActive) {
+                            logger.info(
+                                "User {} already in session {} — returning full dto (idempotent join)",
+                                user.userId(), session.shareCode.value,
+                            )
+                            val gridState = sessionGridStateCache.get(session.id) ?: session.sessionGridState
+                            val activeCount = ParticipantsRule.countActiveParticipants(session.participants)
+                            return CocroResult.Success(session.toSessionFullDto(gridState, activeCount))
+                        }
                     }
                     logger.warn("Session join rejected: {} for session {}", result.errors, session.shareCode.value)
                     return CocroResult.Error(result.errors)

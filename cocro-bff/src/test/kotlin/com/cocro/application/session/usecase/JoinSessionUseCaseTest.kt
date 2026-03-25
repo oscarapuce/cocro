@@ -124,20 +124,21 @@ class JoinSessionUseCaseTest {
     }
 
     @Test
-    fun `should return error when user is already a participant`() {
-        // given
+    fun `should return SessionFullDto when active participant joins again (idempotent)`() {
+        // given — creator is already a JOINED participant
         val dto = JoinSessionDto(shareCode = "AB12")
         val creatorUser = AuthenticatedUser(creatorId, setOf(Role.PLAYER))
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(creatorUser)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
+        whenever(sessionGridStateCache.get(session.id)).thenReturn(null)
 
         // when
         val result = useCase.execute(dto)
 
-        // then
-        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
-        val errors = (result as CocroResult.Error).errors
-        assertThat(errors).anyMatch { it is SessionError.AlreadyParticipant }
+        // then — idempotent: returns full dto instead of error
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+        val success = (result as CocroResult.Success).value
+        assertThat(success.shareCode).isEqualTo("AB12")
     }
 
     @Test
