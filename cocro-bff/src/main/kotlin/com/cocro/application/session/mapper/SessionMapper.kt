@@ -82,12 +82,10 @@ internal fun Session.toSessionFullDto(
         topicToSubscribe = "/topic/session/${this.shareCode.value}",
         gridTemplate = template.toDto(),
         gridRevision = gridState.revision.value,
-        cells = gridState.cells.map { (pos, state) ->
-            CellStateDto(
-                x = pos.x,
-                y = pos.y,
-                letter = (state as SessionGridCellState.Letter).value,
-            )
+        cells = gridState.cells.mapNotNull { (pos, state) ->
+            (state as? SessionGridCellState.Letter)?.let {
+                CellStateDto(x = pos.x, y = pos.y, letter = it.value)
+            }
         },
     )
 }
