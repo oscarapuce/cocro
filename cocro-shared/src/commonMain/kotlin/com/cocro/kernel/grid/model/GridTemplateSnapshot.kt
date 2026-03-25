@@ -3,7 +3,7 @@ package com.cocro.kernel.grid.model
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 
 data class GridTemplateSnapshot(
-    val gridShortId: GridShareCode,
+    val shortId: GridShareCode,
     val title: String,
     val width: Int,
     val height: Int,
