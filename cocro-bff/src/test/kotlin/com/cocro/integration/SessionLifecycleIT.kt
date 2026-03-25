@@ -1,15 +1,19 @@
 package com.cocro.integration
 
 import com.cocro.application.auth.dto.AuthSuccess
+import com.cocro.application.grid.dto.CellDto
+import com.cocro.application.grid.dto.ClueDto
+import com.cocro.application.grid.dto.SubmitGridDto
 import com.cocro.application.session.dto.CreateSessionDto
 import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.LeaveSessionDto
-import com.cocro.application.session.dto.SessionCreationSuccess
-import com.cocro.application.session.dto.SessionJoinSuccess
 import com.cocro.application.session.dto.SessionStateDto
 import com.cocro.infrastructure.security.jwt.JwtTokenIssuer
 import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.valueobject.UserId
+import com.cocro.kernel.grid.enums.CellType
+import com.cocro.kernel.grid.enums.ClueDirection
+import com.cocro.kernel.grid.enums.SeparatorType
 import com.redis.testcontainers.RedisContainer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -22,6 +26,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.MongoDBContainer
@@ -32,12 +37,11 @@ import org.testcontainers.junit.jupiter.Testcontainers
  * Integration tests for the full session lifecycle.
  *
  * Requires Docker. Starts real MongoDB + Redis containers via Testcontainers.
- * Exercises the full stack: HTTP → Controller → UseCase → Domain → MongoDB/Redis.
- *
- * Remove @Disabled once the test environment is validated (CI Docker available).
+ * Exercises the full stack: HTTP -> Controller -> UseCase -> Domain -> MongoDB/Redis.
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers
+@ActiveProfiles("test")
 class SessionLifecycleIT {
 
     companion object {
@@ -47,6 +51,9 @@ class SessionLifecycleIT {
 
         @Container
         val redis = RedisContainer("redis:7-alpine")
+
+        /** Incremented per createTestGrid call to ensure unique letter hashes. */
+        private var gridCounter = 0
 
         @JvmStatic
         @DynamicPropertySource
@@ -78,26 +85,86 @@ class SessionLifecycleIT {
     private fun <T> get(path: String, token: String, responseType: Class<T>) =
         restTemplate.exchange(path, HttpMethod.GET, HttpEntity<Unit>(headersFor(token)), responseType)
 
+    /**
+     * Creates a valid 5x5 grid via the API and returns its shortId (gridId).
+     * Min grid size is 5x5 per GridWidthRule/GridHeightRule.
+     *
+     * GridShareCode is a @JvmInline value class; Jackson serializes it as a plain string.
+     */
+    private fun createTestGrid(token: String): String {
+        gridCounter++
+        val w = 5
+        val h = 5
+        val cells = (0 until h).flatMap { y ->
+            (0 until w).map { x ->
+                if (x == 0 && y == 0) {
+                    CellDto(
+                        x = x, y = y, type = CellType.CLUE_SINGLE,
+                        letter = null, separator = null, number = null,
+                        clues = listOf(ClueDto(direction = ClueDirection.RIGHT, text = "Test clue")),
+                    )
+                } else {
+                    // Vary the letter per gridCounter to avoid duplicate hash detection
+                    val letter = ('A' + ((x + y + gridCounter) % 26)).toString()
+                    CellDto(
+                        x = x, y = y, type = CellType.LETTER,
+                        letter = letter, separator = SeparatorType.NONE, number = null,
+                        clues = null,
+                    )
+                }
+            }
+        }
+        val gridDto = SubmitGridDto(
+            title = "Test Grid $gridCounter",
+            width = w,
+            height = h,
+            difficulty = "NONE",
+            reference = null,
+            description = null,
+            cells = cells,
+        )
+        val resp = post("/api/grids", gridDto, token, String::class.java)
+        assertThat(resp.statusCode).isEqualTo(HttpStatus.CREATED)
+        val body = resp.body!!
+        // Value class might serialize as plain string "ABCDEF" or as JSON {"value":"ABCDEF"}
+        return if (body.startsWith("{")) {
+            body.substringAfter("\"value\":\"").substringBefore("\"")
+        } else {
+            body.trim('"')
+        }
+    }
+
+    /**
+     * Creates a session via POST /api/sessions and returns the shareCode.
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun createSession(gridId: String, token: String): String {
+        val resp = post("/api/sessions", CreateSessionDto(gridId = gridId), token, Map::class.java)
+        assertThat(resp.statusCode).isEqualTo(HttpStatus.CREATED)
+        return resp.body!!["shareCode"] as String
+    }
+
     // -------------------------------------------------------------------------
-    // Full lifecycle: create → join → start → update grid → resync
+    // Full lifecycle: create -> join -> update grid -> resync
     // -------------------------------------------------------------------------
 
     @Test
-    fun `full session lifecycle — create, join, update grid, resync`() {
+    fun `full session lifecycle -- create, join, update grid, resync`() {
         val creatorToken = tokenFor()
         val joinerToken = tokenFor()
 
+        // --- SEED GRID ---
+        val gridId = createTestGrid(creatorToken)
+
         // --- CREATE ---
-        val createResp = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
-        assertThat(createResp.statusCode).isEqualTo(HttpStatus.CREATED)
-        val shareCode = createResp.body!!.shareCode
+        val shareCode = createSession(gridId, creatorToken)
 
         // --- JOIN ---
-        val joinResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, SessionJoinSuccess::class.java)
+        val joinResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Map::class.java)
         assertThat(joinResp.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(joinResp.body!!.participantCount).isEqualTo(2)
+        assertThat(joinResp.body!!["participantCount"]).isEqualTo(2)
 
-        // --- RESYNC (grid updates happen via STOMP — see SessionWebSocketIT) ---
+        // --- RESYNC (grid updates happen via STOMP -- see SessionWebSocketIT) ---
         val stateResp = get("/api/sessions/$shareCode/state", joinerToken, SessionStateDto::class.java)
         assertThat(stateResp.statusCode).isEqualTo(HttpStatus.OK)
         val state = stateResp.body!!
@@ -106,10 +173,10 @@ class SessionLifecycleIT {
     }
 
     @Test
-    fun `joining a full session returns 400 SessionFull`() {
+    fun `joining a full session returns 409 SessionFull`() {
         val creatorToken = tokenFor()
-        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
-            .body!!.shareCode
+        val gridId = createTestGrid(creatorToken)
+        val shareCode = createSession(gridId, creatorToken)
 
         repeat(3) {
             post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), tokenFor(), Any::class.java)
@@ -129,13 +196,12 @@ class SessionLifecycleIT {
     fun `leave then rejoin is rejected (AlreadyParticipant)`() {
         val creatorToken = tokenFor()
         val joinerToken = tokenFor()
-        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
-            .body!!.shareCode
+        val gridId = createTestGrid(creatorToken)
+        val shareCode = createSession(gridId, creatorToken)
         post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
         post("/api/sessions/leave", LeaveSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
 
-        // Left participants cannot rejoin (status LEFT — not re-joinable under current rules)
-        // TODO: update this test if re-join is allowed in the future
+        // Left participants cannot rejoin (status LEFT -- not re-joinable under current rules)
         val rejoin = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
         assertThat(rejoin.statusCode).isEqualTo(HttpStatus.CONFLICT)
     }
@@ -156,25 +222,25 @@ class SessionLifecycleIT {
 
         // Creator creates a session
         val creatorToken = tokenFor()
-        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
-            .body!!.shareCode
+        val gridId = createTestGrid(creatorToken)
+        val shareCode = createSession(gridId, creatorToken)
 
         // Guest joins with the token from /auth/guest
-        val joinResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), guest.token, SessionJoinSuccess::class.java)
+        val joinResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), guest.token, Map::class.java)
         assertThat(joinResp.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(joinResp.body!!.participantCount).isEqualTo(2)
+        assertThat(joinResp.body!!["participantCount"]).isEqualTo(2)
     }
 
     // -------------------------------------------------------------------------
-    // State endpoint — authorization errors
+    // State endpoint -- authorization errors
     // -------------------------------------------------------------------------
 
     @Test
     fun `get state returns 403 when user is not a participant`() {
         val creatorToken = tokenFor()
         val outsiderToken = tokenFor()
-        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
-            .body!!.shareCode
+        val gridId = createTestGrid(creatorToken)
+        val shareCode = createSession(gridId, creatorToken)
 
         val stateResp = get("/api/sessions/$shareCode/state", outsiderToken, Any::class.java)
         assertThat(stateResp.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -188,7 +254,7 @@ class SessionLifecycleIT {
     }
 
     // -------------------------------------------------------------------------
-    // Check grid endpoint — error scenarios
+    // Check grid endpoint -- error scenarios
     // -------------------------------------------------------------------------
 
     @Test
@@ -199,14 +265,15 @@ class SessionLifecycleIT {
     }
 
     @Test
-    fun `check grid returns 404 when reference grid not found`() {
-        // Create a session (gridId GRID01 doesn't exist in DB)
+    fun `check grid returns result for valid session`() {
         val creatorToken = tokenFor()
-        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
-            .body!!.shareCode
+        val gridId = createTestGrid(creatorToken)
+        val shareCode = createSession(gridId, creatorToken)
 
-        val resp = post("/api/sessions/$shareCode/check", emptyMap<String, String>(), creatorToken, Any::class.java)
-        assertThat(resp.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        val resp = post("/api/sessions/$shareCode/check", emptyMap<String, String>(), creatorToken, Map::class.java)
+        assertThat(resp.statusCode).isEqualTo(HttpStatus.OK)
+        val body = resp.body!! as Map<String, Any?>
+        assertThat(body).containsKey("isComplete")
+        assertThat(body).containsKey("isCorrect")
     }
 }
-
