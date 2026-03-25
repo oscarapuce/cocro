@@ -4,8 +4,8 @@ export type SessionEventType =
   | 'SessionWelcome'
   | 'ParticipantJoined'
   | 'ParticipantLeft'
-  | 'SessionStarted'
   | 'GridUpdated'
+  | 'GridChecked'
   | 'SyncRequired';
 
 export interface SessionEvent {
@@ -34,11 +34,6 @@ export interface ParticipantLeftEvent extends SessionEvent {
   reason: 'explicit' | 'timeout';
 }
 
-export interface SessionStartedEvent extends SessionEvent {
-  type: 'SessionStarted';
-  participantCount: number;
-}
-
 export interface GridUpdatedEvent extends SessionEvent {
   type: 'GridUpdated';
   actorId: string;
@@ -46,6 +41,14 @@ export interface GridUpdatedEvent extends SessionEvent {
   posY: number;
   commandType: CommandType;
   letter?: string;
+}
+
+export interface GridCheckedEvent extends SessionEvent {
+  type: 'GridChecked';
+  userId: string;
+  isComplete: boolean;
+  correctCount: number;
+  totalCount: number;
 }
 
 export interface SyncRequiredEvent extends SessionEvent {
