@@ -18,7 +18,7 @@ class SessionFlushScheduler(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Scheduled(fixedDelayString = "\${cocro.session.flush.idle-check-ms:30000}")
+    @Scheduled(fixedDelayString = "\${cocro.session.flush.idle-check-ms:60000}")
     fun flushIdleSessions() {
         val activeSessions = sessionGridStateCache.getActiveSessions()
 

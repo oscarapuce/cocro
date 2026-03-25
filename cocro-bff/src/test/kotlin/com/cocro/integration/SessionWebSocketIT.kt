@@ -3,7 +3,6 @@ package com.cocro.integration
 import com.cocro.application.session.dto.CreateSessionDto
 import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.SessionCreationSuccess
-import com.cocro.application.session.dto.StartSessionDto
 import com.cocro.infrastructure.security.jwt.JwtTokenIssuer
 import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.valueobject.UserId
@@ -146,8 +145,6 @@ class SessionWebSocketIT {
             token,
             SessionCreationSuccess::class.java,
         ).body!!.shareCode
-        post("/api/sessions/start", StartSessionDto(shareCode = shareCode), token, Any::class.java)
-
         val received = LinkedBlockingQueue<Map<*, *>>()
         val session = stompConnect(token, shareCode)
         session.subscribe("/topic/session/$shareCode", mapFrameHandler { received.offer(it) })
@@ -182,7 +179,6 @@ class SessionWebSocketIT {
             SessionCreationSuccess::class.java,
         ).body!!.shareCode
         post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
-        post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
 
         val received1 = LinkedBlockingQueue<Map<*, *>>()
         val received2 = LinkedBlockingQueue<Map<*, *>>()

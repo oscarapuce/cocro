@@ -3,14 +3,11 @@ package com.cocro.presentation.rest.session
 import com.cocro.application.session.dto.CreateSessionDto
 import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.LeaveSessionDto
-import com.cocro.application.session.dto.StartSessionDto
 import com.cocro.application.session.usecase.CheckGridUseCase
 import com.cocro.application.session.usecase.CreateSessionUseCase
-import com.cocro.application.session.usecase.GetSessionGridTemplateUseCase
 import com.cocro.application.session.usecase.GetSessionStateUseCase
 import com.cocro.application.session.usecase.JoinSessionUseCase
 import com.cocro.application.session.usecase.LeaveSessionUseCase
-import com.cocro.application.session.usecase.StartSessionUseCase
 import com.cocro.presentation.rest.error.toResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -28,9 +25,7 @@ class SessionController(
     private val createSessionUseCase: CreateSessionUseCase,
     private val joinSessionUseCase: JoinSessionUseCase,
     private val leaveSessionUseCase: LeaveSessionUseCase,
-    private val startSessionUseCase: StartSessionUseCase,
     private val getSessionStateUseCase: GetSessionStateUseCase,
-    private val getSessionGridTemplateUseCase: GetSessionGridTemplateUseCase,
     private val checkGridUseCase: CheckGridUseCase,
 ) {
     @PostMapping
@@ -60,15 +55,6 @@ class SessionController(
             .execute(dto)
             .toResponseEntity(HttpStatus.OK)
 
-    @PostMapping("/start")
-    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
-    fun startSession(
-        @RequestBody dto: StartSessionDto,
-    ): ResponseEntity<*> =
-        startSessionUseCase
-            .execute(dto)
-            .toResponseEntity(HttpStatus.OK)
-
     /** Resync endpoint: returns the current grid state from cache or MongoDB. */
     @GetMapping("/{shareCode}/state")
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN', 'ANONYMOUS')")
@@ -76,16 +62,6 @@ class SessionController(
         @PathVariable shareCode: String,
     ): ResponseEntity<*> =
         getSessionStateUseCase
-            .execute(shareCode)
-            .toResponseEntity(HttpStatus.OK)
-
-    /** Returns the reference grid with letters stripped (structure only). */
-    @GetMapping("/{shareCode}/grid-template")
-    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN', 'ANONYMOUS')")
-    fun getSessionGridTemplate(
-        @PathVariable shareCode: String,
-    ): ResponseEntity<*> =
-        getSessionGridTemplateUseCase
             .execute(shareCode)
             .toResponseEntity(HttpStatus.OK)
 

@@ -7,7 +7,6 @@ import com.cocro.application.session.dto.LeaveSessionDto
 import com.cocro.application.session.dto.SessionCreationSuccess
 import com.cocro.application.session.dto.SessionJoinSuccess
 import com.cocro.application.session.dto.SessionStateDto
-import com.cocro.application.session.dto.StartSessionDto
 import com.cocro.infrastructure.security.jwt.JwtTokenIssuer
 import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.valueobject.UserId
@@ -84,7 +83,7 @@ class SessionLifecycleIT {
     // -------------------------------------------------------------------------
 
     @Test
-    fun `full session lifecycle — create, join, start, update grid, resync`() {
+    fun `full session lifecycle — create, join, update grid, resync`() {
         val creatorToken = tokenFor()
         val joinerToken = tokenFor()
 
@@ -97,10 +96,6 @@ class SessionLifecycleIT {
         val joinResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, SessionJoinSuccess::class.java)
         assertThat(joinResp.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(joinResp.body!!.participantCount).isEqualTo(2)
-
-        // --- START ---
-        val startResp = post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
-        assertThat(startResp.statusCode).isEqualTo(HttpStatus.OK)
 
         // --- RESYNC (grid updates happen via STOMP — see SessionWebSocketIT) ---
         val stateResp = get("/api/sessions/$shareCode/state", joinerToken, SessionStateDto::class.java)
@@ -122,17 +117,6 @@ class SessionLifecycleIT {
 
         val overflowResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), tokenFor(), Any::class.java)
         assertThat(overflowResp.statusCode).isEqualTo(HttpStatus.CONFLICT)
-    }
-
-    @Test
-    fun `starting a session in PLAYING state returns 400 InvalidStatusForAction`() {
-        val creatorToken = tokenFor()
-        val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
-            .body!!.shareCode
-        post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
-
-        val secondStart = post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
-        assertThat(secondStart.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     @Test
@@ -191,7 +175,6 @@ class SessionLifecycleIT {
         val outsiderToken = tokenFor()
         val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
             .body!!.shareCode
-        post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
 
         val stateResp = get("/api/sessions/$shareCode/state", outsiderToken, Any::class.java)
         assertThat(stateResp.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -217,11 +200,10 @@ class SessionLifecycleIT {
 
     @Test
     fun `check grid returns 404 when reference grid not found`() {
-        // Create and start a session (gridId GRID01 doesn't exist in DB)
+        // Create a session (gridId GRID01 doesn't exist in DB)
         val creatorToken = tokenFor()
         val shareCode = post("/api/sessions", CreateSessionDto(gridId = "GRID01"), creatorToken, SessionCreationSuccess::class.java)
             .body!!.shareCode
-        post("/api/sessions/start", StartSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
 
         val resp = post("/api/sessions/$shareCode/check", emptyMap<String, String>(), creatorToken, Any::class.java)
         assertThat(resp.statusCode).isEqualTo(HttpStatus.NOT_FOUND)

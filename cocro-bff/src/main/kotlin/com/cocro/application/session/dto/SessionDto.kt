@@ -12,10 +12,6 @@ data class LeaveSessionDto(
     val shareCode: String,
 )
 
-data class StartSessionDto(
-    val shareCode: String,
-)
-
 data class UpdateSessionGridDto(
     val shareCode: String,
     val posX: Int,
