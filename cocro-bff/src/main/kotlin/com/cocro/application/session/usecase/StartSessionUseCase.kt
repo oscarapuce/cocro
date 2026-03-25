@@ -9,8 +9,8 @@ import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateStartSessionDto
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.error.SessionError
-import com.cocro.kernel.session.model.SessionLifecycleCommand
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 import com.cocro.kernel.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
@@ -46,19 +46,20 @@ class StartSessionUseCase(
                     return CocroResult.Error(listOf(SessionError.SessionNotFound(sessionShareCode.toString())))
                 }
 
-        // DOMAIN COMMAND (validates status and minimum participant count)
-        val startedSession =
-            when (val result = session.apply(SessionLifecycleCommand.Start(user.userId))) {
-                is CocroResult.Success -> result.value
-                is CocroResult.Error -> {
-                    logger.warn("Session start rejected: {} for session {}", result.errors, session.shareCode.value)
-                    return CocroResult.Error(result.errors)
-                }
-            }
+        // DOMAIN VALIDATION: session must be in PLAYING status (sessions start as PLAYING now)
+        if (session.status != SessionStatus.PLAYING) {
+            logger.warn("Session start rejected: invalid status {} for session {}", session.status, session.shareCode.value)
+            return CocroResult.Error(listOf(SessionError.InvalidStatusForAction(session.status, "start")))
+        }
+
+        val activeCount = ParticipantsRule.countActiveParticipants(session.participants)
+        if (activeCount < 1) {
+            logger.warn("Session start rejected: not enough participants for session {}", session.shareCode.value)
+            return CocroResult.Error(listOf(SessionError.NotEnoughParticipants))
+        }
 
         // PERSISTENCE
-        val savedSession = sessionRepository.save(startedSession)
-        val activeCount = ParticipantsRule.countActiveParticipants(savedSession.participants)
+        val savedSession = sessionRepository.save(session)
 
         // NOTIFICATION
         sessionNotifier.broadcast(savedSession.shareCode, SessionEvent.SessionStarted(participantCount = activeCount))

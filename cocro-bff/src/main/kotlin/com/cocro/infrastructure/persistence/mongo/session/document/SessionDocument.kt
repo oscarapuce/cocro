@@ -19,6 +19,7 @@ data class SessionDocument(
     val shareCode: String,
     val creatorId: String,
     val gridShortId: String,
+    val gridTemplate: GridTemplateDocument?,
     val status: String,
     val participants: Set<ParticipantDocument>,
     val sessionGridState: SessionGridStateDocument,

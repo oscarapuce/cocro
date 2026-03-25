@@ -1,5 +1,7 @@
 package com.cocro.infrastructure.persistence.mongo.session.mapper
 
+import com.cocro.application.session.mapper.toDocument
+import com.cocro.application.session.mapper.toSnapshot
 import com.cocro.infrastructure.persistence.mongo.grid.document.CellDocument
 import com.cocro.infrastructure.persistence.mongo.session.document.ParticipantDocument
 import com.cocro.infrastructure.persistence.mongo.session.document.SessionDocument
@@ -23,6 +25,8 @@ fun Session.toDocument(): SessionDocument =
         shareCode = shareCode.toString(),
         creatorId = creatorId.toString(),
         gridShortId = gridId.toString(),
+        gridTemplate = gridTemplate?.toDocument()
+            ?: error("Session ${id} has no gridTemplate — cannot persist"),
         status = status.name,
         participants = participants.map { it.toDocument() }.toSet(),
         sessionGridState = sessionGridState.toDocument(),
@@ -66,6 +70,7 @@ fun SessionDocument.toDomain(): Session =
         sessionGridState = sessionGridState.toDomain(),
         createdAt = createdAt,
         updatedAt = updatedAt,
+        gridTemplate = gridTemplate?.toSnapshot(),
     )
 
 fun ParticipantDocument.toDomain(): Participant =

@@ -1,8 +1,10 @@
 package com.cocro.application.session.usecase
 
 import com.cocro.application.auth.port.CurrentUserProvider
+import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.session.dto.CreateSessionDto
 import com.cocro.application.session.dto.SessionCreationSuccess
+import com.cocro.application.session.mapper.toGridTemplateSnapshot
 import com.cocro.application.session.mapper.toSessionCreationSuccess
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
@@ -21,6 +23,7 @@ class CreateSessionUseCase(
     private val sessionRepository: SessionRepository,
     private val sessionGridStateCache: SessionGridStateCache,
     private val shareCodeGenerator: SessionCodeGenerator,
+    private val gridRepository: GridRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -43,12 +46,19 @@ class CreateSessionUseCase(
         // MAPPING
         val gridId = GridShareCode(createSessionDto.gridId)
 
+        val grid = gridRepository.findByShortId(gridId)
+            ?: run {
+                logger.warn("Session creation rejected: grid not found with id={}", gridId.value)
+                return CocroResult.Error(listOf(SessionError.ReferenceGridNotFound(gridId.value)))
+            }
+
         // PERSISTENCE
         val session =
             Session.create(
                 creatorId = user.userId,
                 shareCode = shareCodeGenerator.generateId(),
                 gridId = gridId,
+                gridTemplate = grid.toGridTemplateSnapshot(),
             )
         val savedSession = sessionRepository.save(session)
 
