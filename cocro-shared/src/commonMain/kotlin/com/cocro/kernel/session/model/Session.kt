@@ -2,6 +2,7 @@ package com.cocro.kernel.session.model
 
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.session.Participant
 import com.cocro.kernel.session.enum.InviteStatus
@@ -22,6 +23,7 @@ data class Session private constructor(
     val status: SessionStatus,
     val participants: List<Participant>,
     val sessionGridState: SessionGridState,
+    val gridTemplate: GridTemplateSnapshot?,
     val createdAt: Instant,
     val updatedAt: Instant,
 ) {
@@ -30,6 +32,7 @@ data class Session private constructor(
             creatorId: UserId,
             shareCode: SessionShareCode,
             gridId: GridShareCode,
+            gridTemplate: GridTemplateSnapshot,
             now: Instant = Instant.now(),
         ): Session {
             val sessionId = SessionId.new()
@@ -39,9 +42,10 @@ data class Session private constructor(
                 shareCode = shareCode,
                 creatorId = creatorId,
                 gridId = gridId,
-                status = SessionStatus.CREATING,
+                status = SessionStatus.PLAYING,
                 participants = listOf(Participant.creator(creatorId)),
                 sessionGridState = SessionGridState.initial(sessionId, gridId),
+                gridTemplate = gridTemplate,
                 createdAt = now,
                 updatedAt = now,
             )
@@ -57,6 +61,7 @@ data class Session private constructor(
             sessionGridState: SessionGridState,
             createdAt: Instant,
             updatedAt: Instant,
+            gridTemplate: GridTemplateSnapshot? = null,
         ): Session {
             require(participants.any { it.userId == creatorId }) {
                 "Creator must be participant"
@@ -73,6 +78,7 @@ data class Session private constructor(
                 status,
                 participants,
                 sessionGridState,
+                gridTemplate,
                 createdAt,
                 updatedAt,
             )
@@ -85,7 +91,6 @@ data class Session private constructor(
         when (command) {
             is SessionLifecycleCommand.Join -> applyJoin(command.actorId)
             is SessionLifecycleCommand.Leave -> applyLeave(command.actorId)
-            is SessionLifecycleCommand.Start -> applyStart()
         }
 
     private fun applyJoin(actorId: UserId): CocroResult<Session, SessionError> {
@@ -108,16 +113,6 @@ data class Session private constructor(
         return ok(leave(actorId))
     }
 
-    private fun applyStart(): CocroResult<Session, SessionError> {
-        if (status != SessionStatus.CREATING) {
-            return err(SessionError.InvalidStatusForAction(status, "start"))
-        }
-        if (ParticipantsRule.countActiveParticipants(participants) < 1) {
-            return err(SessionError.NotEnoughParticipants)
-        }
-        return ok(startPlaying())
-    }
-
     // ---------- Commands / Rules ----------
 
 //    fun selectGrid(
@@ -135,8 +130,6 @@ data class Session private constructor(
 //
 //        return ok(copy(gridId = gridId, updatedAt = now))
 //    }
-
-    fun startPlaying(now: Instant = Instant.now()): Session = copy(status = SessionStatus.PLAYING, updatedAt = now)
 
 //    fun invite(
 //        actorId: UserId,

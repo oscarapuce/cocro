@@ -2,6 +2,7 @@ package com.cocro.kernel.session.model
 
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.session.enum.InviteStatus
 import com.cocro.kernel.session.enum.SessionStatus
@@ -19,6 +20,15 @@ class SessionApplyTest {
         creatorId = creatorId,
         shareCode = shareCode,
         gridId = GridShareCode("GRID01"),
+        gridTemplate = minimalSnapshot(),
+    )
+
+    private fun minimalSnapshot() = GridTemplateSnapshot(
+        shortId = GridShareCode("GRID01"),
+        title = "Test", width = 5, height = 5,
+        difficulty = null, author = null, reference = null,
+        description = null, globalClueLabel = null,
+        globalClueWordLengths = null, cells = emptyList()
     )
 
     // -------------------------------------------------------------------------
@@ -31,8 +41,9 @@ class SessionApplyTest {
         @Test
         fun `should add participant when session is CREATING`() {
             val joiner = UserId.new()
+            val creating = session.withStatus(SessionStatus.CREATING)
 
-            val result = session.apply(SessionLifecycleCommand.Join(joiner))
+            val result = creating.apply(SessionLifecycleCommand.Join(joiner))
 
             assertThat(result).isInstanceOf(CocroResult.Success::class.java)
             val updated = (result as CocroResult.Success).value
@@ -137,64 +148,16 @@ class SessionApplyTest {
     }
 
     // -------------------------------------------------------------------------
-    // START
-    // -------------------------------------------------------------------------
-
-    @Nested
-    inner class Start {
-
-        @Test
-        fun `should transition to PLAYING when session has active participants`() {
-            val result = session.apply(SessionLifecycleCommand.Start(creatorId))
-
-            assertThat(result).isInstanceOf(CocroResult.Success::class.java)
-            val updated = (result as CocroResult.Success).value
-            assertThat(updated.status).isEqualTo(SessionStatus.PLAYING)
-        }
-
-        @Test
-        fun `should fail when session is already PLAYING`() {
-            val playing = session.withStatus(SessionStatus.PLAYING)
-
-            val result = playing.apply(SessionLifecycleCommand.Start(creatorId))
-
-            assertThat(result).isInstanceOf(CocroResult.Error::class.java)
-            assertThat((result as CocroResult.Error).errors).anyMatch { it is SessionError.InvalidStatusForAction }
-        }
-
-        @Test
-        fun `should fail when no active participants`() {
-            val emptySession = session.withStatus(SessionStatus.CREATING)
-                .withAllParticipantsLeft()
-
-            val result = emptySession.apply(SessionLifecycleCommand.Start(creatorId))
-
-            assertThat(result).isInstanceOf(CocroResult.Error::class.java)
-            assertThat((result as CocroResult.Error).errors).contains(SessionError.NotEnoughParticipants)
-        }
-
-        @Test
-        fun `should fail when session is ENDED`() {
-            val ended = session.withStatus(SessionStatus.ENDED)
-
-            val result = ended.apply(SessionLifecycleCommand.Start(creatorId))
-
-            assertThat(result).isInstanceOf(CocroResult.Error::class.java)
-            assertThat((result as CocroResult.Error).errors).anyMatch { it is SessionError.InvalidStatusForAction }
-        }
-    }
-
-    // -------------------------------------------------------------------------
     // helpers
     // -------------------------------------------------------------------------
 
     private fun Session.withStatus(status: SessionStatus): Session =
-        Session.rehydrate(id, shareCode, creatorId, gridId, status, participants, sessionGridState, createdAt, updatedAt)
+        Session.rehydrate(id, shareCode, creatorId, gridId, status, participants, sessionGridState, createdAt, updatedAt, gridTemplate = null)
 
     private fun Session.withAllParticipantsLeft(): Session =
         Session.rehydrate(
             id, shareCode, creatorId, gridId, status,
             participants.map { it.copy(status = InviteStatus.LEFT) },
-            sessionGridState, createdAt, updatedAt,
+            sessionGridState, createdAt, updatedAt, gridTemplate = null,
         )
 }

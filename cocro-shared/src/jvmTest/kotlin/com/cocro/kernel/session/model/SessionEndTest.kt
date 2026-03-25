@@ -2,6 +2,7 @@ package com.cocro.kernel.session.model
 
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.error.SessionError
@@ -16,14 +17,23 @@ class SessionEndTest {
         creatorId = creatorId,
         shareCode = SessionShareCode("AB12"),
         gridId = GridShareCode("GRID01"),
+        gridTemplate = GridTemplateSnapshot(
+            shortId = GridShareCode("GRID01"),
+            title = "Test", width = 5, height = 5,
+            difficulty = null, author = null, reference = null,
+            description = null, globalClueLabel = null,
+            globalClueWordLengths = null, cells = emptyList()
+        ),
     )
 
     private fun Session.withStatus(status: SessionStatus): Session =
-        Session.rehydrate(id, shareCode, creatorId, gridId, status, participants, sessionGridState, createdAt, updatedAt)
+        Session.rehydrate(id, shareCode, creatorId, gridId, status, participants, sessionGridState, createdAt, updatedAt, gridTemplate = null)
 
     @Test
     fun `creator can end a CREATING session`() {
-        val result = session.end(creatorId)
+        val creating = session.withStatus(SessionStatus.CREATING)
+
+        val result = creating.end(creatorId)
 
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         assertThat((result as CocroResult.Success).value.status).isEqualTo(SessionStatus.ENDED)
