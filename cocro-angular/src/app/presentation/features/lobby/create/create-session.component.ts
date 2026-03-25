@@ -31,7 +31,7 @@ export class CreateSessionComponent {
     this.error.set('');
 
     this.sessionPort.createSession({ gridId: this.form.controls.gridId.value }).subscribe({
-      next: (res) => this.router.navigate(['/lobby/room', res.shareCode]),
+      next: (res) => this.router.navigate(['/play', res.shareCode]),
       error: (err: unknown) => {
         this.error.set(getNetworkErrorMessage(err, 'Impossible de créer la session.'));
         this.loading.set(false);

@@ -37,7 +37,7 @@ export class FrontPanelComponent {
 
     const { shareCode } = this.joinForm.getRawValue();
     this.joinSessionUseCase.execute(shareCode).subscribe({
-      next: () => this.router.navigate(['/lobby/room', shareCode]),
+      next: (fullDto) => this.router.navigate(['/play', fullDto.shareCode]),
       error: (err: unknown) => {
         this.joinError.set(getNetworkErrorMessage(err, 'Erreur serveur.'));
         this.joinLoading.set(false);
