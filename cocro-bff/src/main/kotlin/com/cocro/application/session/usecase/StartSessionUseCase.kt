@@ -3,7 +3,6 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.session.dto.StartSessionDto
 import com.cocro.application.session.dto.StartSessionSuccess
-import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.mapper.toStartSessionSuccess
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
@@ -60,9 +59,6 @@ class StartSessionUseCase(
 
         // PERSISTENCE
         val savedSession = sessionRepository.save(session)
-
-        // NOTIFICATION
-        sessionNotifier.broadcast(savedSession.shareCode, SessionEvent.SessionStarted(participantCount = activeCount))
 
         logger.info(
             "Session {} successfully started by user {} with {} participants",

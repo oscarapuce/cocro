@@ -1,6 +1,8 @@
 package com.cocro.application.session.mapper
 
+import com.cocro.application.session.dto.CellStateDto
 import com.cocro.application.session.dto.SessionCreationSuccess
+import com.cocro.application.session.dto.SessionFullDto
 import com.cocro.application.session.dto.SessionGridUpdateSuccess
 import com.cocro.application.session.dto.SessionJoinSuccess
 import com.cocro.application.session.dto.SessionLeaveSuccess
@@ -10,7 +12,9 @@ import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.grid.model.CellPos
 import com.cocro.kernel.session.enum.CommandType
 import com.cocro.kernel.session.model.Session
+import com.cocro.kernel.session.model.state.SessionGridCellState
 import com.cocro.kernel.session.model.state.SessionGridCommand
+import com.cocro.kernel.session.model.state.SessionGridState
 import com.cocro.kernel.session.model.valueobject.SessionId
 import com.cocro.kernel.session.rule.ParticipantsRule
 
@@ -63,3 +67,27 @@ internal fun UpdateSessionGridDto.toSuccess(sessionId: SessionId): SessionGridUp
         sessionId = sessionId.toString(),
         commandType = this.commandType,
     )
+
+internal fun Session.toSessionFullDto(
+    gridState: SessionGridState,
+    activeParticipantCount: Int,
+): SessionFullDto {
+    val template = this.gridTemplate
+        ?: error("Session ${this.id} has no gridTemplate")
+    return SessionFullDto(
+        sessionId = this.id.toString(),
+        shareCode = this.shareCode.value,
+        status = this.status.name,
+        participantCount = activeParticipantCount,
+        topicToSubscribe = "/topic/session/${this.shareCode.value}",
+        gridTemplate = template.toDto(),
+        gridRevision = gridState.revision.value,
+        cells = gridState.cells.map { (pos, state) ->
+            CellStateDto(
+                x = pos.x,
+                y = pos.y,
+                letter = (state as SessionGridCellState.Letter).value,
+            )
+        },
+    )
+}

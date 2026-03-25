@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName
     JsonSubTypes.Type(SessionEvent.SessionWelcome::class, name = "SessionWelcome"),
     JsonSubTypes.Type(SessionEvent.ParticipantJoined::class, name = "ParticipantJoined"),
     JsonSubTypes.Type(SessionEvent.ParticipantLeft::class, name = "ParticipantLeft"),
-    JsonSubTypes.Type(SessionEvent.SessionStarted::class, name = "SessionStarted"),
     JsonSubTypes.Type(SessionEvent.GridUpdated::class, name = "GridUpdated"),
     JsonSubTypes.Type(SessionEvent.SyncRequired::class, name = "SyncRequired"),
+    JsonSubTypes.Type(SessionEvent.GridChecked::class, name = "GridChecked"),
 )
 sealed interface SessionEvent {
 
@@ -45,11 +45,6 @@ sealed interface SessionEvent {
         val reason: String = "explicit",
     ) : SessionEvent
 
-    @JsonTypeName("SessionStarted")
-    data class SessionStarted(
-        val participantCount: Int,
-    ) : SessionEvent
-
     @JsonTypeName("GridUpdated")
     data class GridUpdated(
         val actorId: String,
@@ -66,5 +61,13 @@ sealed interface SessionEvent {
     @JsonTypeName("SyncRequired")
     data class SyncRequired(
         val currentRevision: Long,
+    ) : SessionEvent
+
+    @JsonTypeName("GridChecked")
+    data class GridChecked(
+        val userId: String,
+        val isComplete: Boolean,
+        val correctCount: Int,
+        val totalCount: Int,
     ) : SessionEvent
 }

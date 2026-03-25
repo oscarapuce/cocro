@@ -1,5 +1,8 @@
 package com.cocro.application.session.dto
 
+import com.cocro.application.session.dto.CellStateDto
+import com.cocro.application.session.dto.GridTemplateDto
+
 data class SessionCreationSuccess(
     val sessionId: String,
     val shareCode: String,
@@ -33,3 +36,13 @@ data class GridCheckSuccess(
     val wrongCount: Int,
 )
 
+data class SessionFullDto(
+    val sessionId: String,
+    val shareCode: String,
+    val status: String,
+    val participantCount: Int,
+    val topicToSubscribe: String,
+    val gridTemplate: GridTemplateDto,
+    val gridRevision: Long,
+    val cells: List<CellStateDto>,
+)
