@@ -8,6 +8,7 @@ import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.AuthenticatedUser
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.error.SessionError
@@ -42,18 +43,35 @@ class CheckGridUseCaseTest {
     private val shareCode = SessionShareCode("AB12")
     private val gridId = GridShareCode("GRID01")
 
-    private val playingSession = Session.rehydrate(
-        id = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId).id,
-        shareCode = shareCode,
-        creatorId = creatorId,
-        gridId = gridId,
-        status = SessionStatus.PLAYING,
-        participants = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId)
-            .join(participantId).participants,
-        sessionGridState = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId).sessionGridState,
-        createdAt = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId).createdAt,
-        updatedAt = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId).updatedAt,
+    private fun minimalSnapshot() = GridTemplateSnapshot(
+        shortId = gridId,
+        title = "T", width = 5, height = 5,
+        difficulty = null, author = null, reference = null,
+        description = null, globalClueLabel = null,
+        globalClueWordLengths = null, cells = emptyList(),
     )
+
+    private fun baseSession() = Session.create(
+        creatorId = creatorId,
+        shareCode = shareCode,
+        gridId = gridId,
+        gridTemplate = minimalSnapshot(),
+    )
+
+    private val playingSession: Session by lazy {
+        val base = baseSession()
+        Session.rehydrate(
+            id = base.id,
+            shareCode = shareCode,
+            creatorId = creatorId,
+            gridId = gridId,
+            status = SessionStatus.PLAYING,
+            participants = base.join(participantId).participants,
+            sessionGridState = base.sessionGridState,
+            createdAt = base.createdAt,
+            updatedAt = base.updatedAt,
+        )
+    }
 
     // Build a minimal Grid with no LetterCells so checkAgainst returns totalCount=0, filledCount=0
     private val referenceGrid = Grid(
@@ -72,7 +90,7 @@ class CheckGridUseCaseTest {
     )
 
     private fun buildPlayingSession(): Session {
-        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId)
+        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         val withParticipant = base.join(participantId)
         return Session.rehydrate(
             id = base.id,
@@ -175,7 +193,7 @@ class CheckGridUseCaseTest {
     @Test
     fun `should return InvalidStatusForAction when session is not PLAYING`() {
         // given
-        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId)
+        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         val withParticipant = base.join(participantId)
         // Session in CREATING status (the default after Session.create)
         val creatingSession = Session.rehydrate(

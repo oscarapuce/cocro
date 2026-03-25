@@ -17,6 +17,7 @@ import com.cocro.kernel.grid.model.GridMetadata
 import com.cocro.kernel.grid.model.Letter
 import com.cocro.kernel.grid.model.valueobject.ClueText
 import com.cocro.kernel.grid.model.valueobject.GridHeight
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.grid.model.valueobject.GridTitle
 import com.cocro.kernel.grid.model.valueobject.GridWidth
@@ -49,8 +50,15 @@ class GetSessionGridTemplateUseCaseTest {
     private val shareCode = SessionShareCode("AB12")
     private val gridId = GridShareCode("GRID01")
 
+    private fun minimalSnapshot() = GridTemplateSnapshot(
+        shortId = gridId, title = "T", width = 5, height = 5,
+        difficulty = null, author = null, reference = null,
+        description = null, globalClueLabel = null,
+        globalClueWordLengths = null, cells = emptyList(),
+    )
+
     private fun buildPlayingSessionWithParticipant(): Session {
-        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId)
+        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         val withParticipant = base.join(participantId)
         return Session.rehydrate(
             id = base.id,

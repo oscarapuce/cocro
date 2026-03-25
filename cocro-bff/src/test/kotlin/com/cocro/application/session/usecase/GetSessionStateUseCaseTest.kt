@@ -8,6 +8,7 @@ import com.cocro.kernel.auth.model.AuthenticatedUser
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.model.CellPos
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.error.SessionError
@@ -37,8 +38,15 @@ class GetSessionStateUseCaseTest {
     private val shareCode = SessionShareCode("AB12")
     private val gridId = GridShareCode("GRID01")
 
+    private fun minimalSnapshot() = GridTemplateSnapshot(
+        shortId = gridId, title = "T", width = 5, height = 5,
+        difficulty = null, author = null, reference = null,
+        description = null, globalClueLabel = null,
+        globalClueWordLengths = null, cells = emptyList(),
+    )
+
     private fun buildPlayingSessionWithParticipant(): Session {
-        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId)
+        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         val withParticipant = base.join(participantId)
         return Session.rehydrate(
             id = base.id, shareCode = base.shareCode, creatorId = base.creatorId,

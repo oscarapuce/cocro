@@ -10,6 +10,7 @@ import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.AuthenticatedUser
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.error.SessionError
@@ -38,10 +39,17 @@ class JoinSessionUseCaseTest {
     private val joiningUserId = UserId.new()
     private val joiningUser = AuthenticatedUser(joiningUserId, setOf(Role.PLAYER))
     private val shareCode = SessionShareCode("AB12")
+    private val gridId = GridShareCode("GRID01")
     private val session = Session.create(
         creatorId = creatorId,
         shareCode = shareCode,
-        gridId = GridShareCode("GRID01"),
+        gridId = gridId,
+        gridTemplate = GridTemplateSnapshot(
+            shortId = gridId, title = "T", width = 5, height = 5,
+            difficulty = null, author = null, reference = null,
+            description = null, globalClueLabel = null,
+            globalClueWordLengths = null, cells = emptyList(),
+        ),
     )
 
     @Test

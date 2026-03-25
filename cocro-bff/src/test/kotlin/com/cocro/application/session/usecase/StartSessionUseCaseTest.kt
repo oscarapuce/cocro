@@ -8,6 +8,7 @@ import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.AuthenticatedUser
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
 import com.cocro.kernel.session.enum.InviteStatus
 import com.cocro.kernel.session.enum.SessionStatus
@@ -34,10 +35,17 @@ class StartSessionUseCaseTest {
     private val creatorId = UserId.new()
     private val creatorUser = AuthenticatedUser(creatorId, setOf(Role.PLAYER))
     private val shareCode = SessionShareCode("AB12")
+    private val gridId = GridShareCode("GRID01")
     private val session = Session.create(
         creatorId = creatorId,
         shareCode = shareCode,
-        gridId = GridShareCode("GRID01"),
+        gridId = gridId,
+        gridTemplate = GridTemplateSnapshot(
+            shortId = gridId, title = "T", width = 5, height = 5,
+            difficulty = null, author = null, reference = null,
+            description = null, globalClueLabel = null,
+            globalClueWordLengths = null, cells = emptyList(),
+        ),
     )
 
     @Test
@@ -110,22 +118,22 @@ class StartSessionUseCaseTest {
     }
 
     @Test
-    fun `should return error when session is already started`() {
+    fun `should return error when session is in ENDED status`() {
         // given
         val dto = StartSessionDto(shareCode = "AB12")
-        val alreadyStarted = Session.rehydrate(
+        val endedSession = Session.rehydrate(
             id = session.id,
             shareCode = session.shareCode,
             creatorId = session.creatorId,
             gridId = session.gridId,
-            status = SessionStatus.PLAYING,
+            status = SessionStatus.ENDED,
             participants = session.participants,
             sessionGridState = session.sessionGridState,
             createdAt = session.createdAt,
             updatedAt = session.updatedAt,
         )
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(creatorUser)
-        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(alreadyStarted)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(endedSession)
 
         // when
         val result = useCase.execute(dto)
@@ -145,7 +153,7 @@ class StartSessionUseCaseTest {
             shareCode = session.shareCode,
             creatorId = session.creatorId,
             gridId = session.gridId,
-            status = SessionStatus.CREATING,
+            status = SessionStatus.PLAYING,
             participants = session.participants.map { it.copy(status = InviteStatus.LEFT) },
             sessionGridState = session.sessionGridState,
             createdAt = session.createdAt,

@@ -1,6 +1,7 @@
 package com.cocro.application.session.usecase
 
 import com.cocro.application.auth.port.CurrentUserProvider
+import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.session.dto.CreateSessionDto
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
@@ -9,7 +10,14 @@ import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.AuthenticatedUser
 import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.grid.model.Grid
+import com.cocro.kernel.grid.model.GridMetadata
+import com.cocro.kernel.grid.model.GridTemplateSnapshot
+import com.cocro.kernel.grid.model.valueobject.GridHeight
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
+import com.cocro.kernel.grid.model.valueobject.GridTitle
+import com.cocro.kernel.grid.model.valueobject.GridWidth
+import java.util.UUID
 import com.cocro.kernel.session.error.SessionError
 import com.cocro.kernel.session.model.Session
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
@@ -27,12 +35,14 @@ class CreateSessionUseCaseTest {
     private val sessionRepository: SessionRepository = mock()
     private val sessionGridStateCache: SessionGridStateCache = mock()
     private val shareCodeGenerator: SessionCodeGenerator = mock()
+    private val gridRepository: GridRepository = mock()
 
     private val useCase = CreateSessionUseCase(
         currentUserProvider,
         sessionRepository,
         sessionGridStateCache,
         shareCodeGenerator,
+        gridRepository,
     )
 
     private val authenticatedUser = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
@@ -42,13 +52,31 @@ class CreateSessionUseCaseTest {
         // given
         val dto = CreateSessionDto(gridId = "GRID01")
         val shareCode = SessionShareCode("AB12")
+        val gridId = GridShareCode("GRID01")
+        val grid = Grid(
+            id = UUID.randomUUID(),
+            shortId = gridId,
+            title = GridTitle("Test Grid"),
+            metadata = GridMetadata(author = authenticatedUser.userId, reference = null, description = null, difficulty = "NONE"),
+            width = GridWidth(5),
+            height = GridHeight(5),
+            cells = emptyList(),
+        )
+        val snapshot = GridTemplateSnapshot(
+            shortId = gridId, title = "T", width = 5, height = 5,
+            difficulty = null, author = null, reference = null,
+            description = null, globalClueLabel = null,
+            globalClueWordLengths = null, cells = emptyList(),
+        )
         val session = Session.create(
             creatorId = authenticatedUser.userId,
             shareCode = shareCode,
-            gridId = GridShareCode("GRID01"),
+            gridId = gridId,
+            gridTemplate = snapshot,
         )
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
         whenever(shareCodeGenerator.generateId()).thenReturn(shareCode)
+        whenever(gridRepository.findByShortId(gridId)).thenReturn(grid)
         whenever(sessionRepository.save(any())).thenReturn(session)
 
         // when
