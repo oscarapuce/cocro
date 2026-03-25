@@ -13,4 +13,5 @@ data class GridCheckResult(
     val filledCount: Int,
     val totalCount: Int,
     val wrongCount: Int,
+    val correctCount: Int,
 )

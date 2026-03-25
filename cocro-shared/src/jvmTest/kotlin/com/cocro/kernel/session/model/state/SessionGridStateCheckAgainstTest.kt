@@ -62,6 +62,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.filledCount).isEqualTo(0)
         assertThat(result.totalCount).isEqualTo(2)
         assertThat(result.wrongCount).isEqualTo(0)
+        assertThat(result.correctCount).isEqualTo(0)
     }
 
     @Test
@@ -76,6 +77,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.filledCount).isEqualTo(1)
         assertThat(result.totalCount).isEqualTo(2)
         assertThat(result.wrongCount).isEqualTo(0)
+        assertThat(result.correctCount).isEqualTo(1)
     }
 
     @Test
@@ -90,6 +92,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.filledCount).isEqualTo(2)
         assertThat(result.totalCount).isEqualTo(2)
         assertThat(result.wrongCount).isEqualTo(0)
+        assertThat(result.correctCount).isEqualTo(2)
     }
 
     @Test
@@ -104,6 +107,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.filledCount).isEqualTo(2)
         assertThat(result.totalCount).isEqualTo(2)
         assertThat(result.wrongCount).isEqualTo(2)
+        assertThat(result.correctCount).isEqualTo(0)
     }
 
     @Test
@@ -118,6 +122,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.filledCount).isEqualTo(0)
         assertThat(result.totalCount).isEqualTo(0)
         assertThat(result.wrongCount).isEqualTo(0)
+        assertThat(result.correctCount).isEqualTo(0)
     }
 
     @Test
@@ -132,6 +137,7 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.filledCount).isEqualTo(1)
         assertThat(result.totalCount).isEqualTo(1)
         assertThat(result.wrongCount).isEqualTo(0)
+        assertThat(result.correctCount).isEqualTo(1)
     }
 
     @Test
@@ -146,5 +152,6 @@ class SessionGridStateCheckAgainstTest {
         assertThat(result.filledCount).isEqualTo(2)
         assertThat(result.totalCount).isEqualTo(3)
         assertThat(result.wrongCount).isEqualTo(1)
+        assertThat(result.correctCount).isEqualTo(1)
     }
 }

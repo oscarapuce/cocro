@@ -64,6 +64,7 @@ data class SessionGridState(
             filledCount = filledCount,
             totalCount = totalCount,
             wrongCount = wrongCount,
+            correctCount = filledCount - wrongCount,
         )
     }
 
