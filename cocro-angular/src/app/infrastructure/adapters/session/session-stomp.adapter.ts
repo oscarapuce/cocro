@@ -4,11 +4,11 @@ import SockJS from 'sockjs-client';
 import { SessionSocketPort } from '@application/ports/session/session-socket.port';
 import { environment } from '@infrastructure/environment';
 import {
+  GridCheckedEvent,
   GridUpdatedEvent,
   ParticipantJoinedEvent,
   ParticipantLeftEvent,
   SessionEvent,
-  SessionStartedEvent,
   SessionWelcomeEvent,
   SyncRequiredEvent,
 } from '@domain/models/session-events.model';
@@ -87,8 +87,8 @@ export class SessionStompAdapter implements SessionSocketPort {
         const event = JSON.parse(msg.body) as
           | ParticipantJoinedEvent
           | ParticipantLeftEvent
-          | SessionStartedEvent
-          | GridUpdatedEvent;
+          | GridUpdatedEvent
+          | GridCheckedEvent;
         onEvent(event);
       },
     );

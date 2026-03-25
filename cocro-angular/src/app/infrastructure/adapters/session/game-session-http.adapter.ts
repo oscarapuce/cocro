@@ -3,11 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GameSessionPort } from '@application/ports/session/game-session.port';
 import {
-  CreateSessionRequest, SessionCreationResponse,
-  JoinSessionRequest, SessionJoinResponse,
-  LeaveSessionRequest, SessionLeaveResponse,
-  StartSessionRequest, StartSessionResponse,
-  SessionStateResponse
+  CreateSessionRequest,
+  JoinSessionRequest,
+  LeaveSessionRequest,
+  SessionLeaveResponse,
+  SessionFullResponse,
+  SessionStateResponse,
 } from '@domain/models/session.model';
 import { environment } from '@infrastructure/environment';
 
@@ -17,20 +18,16 @@ export class GameSessionHttpAdapter implements GameSessionPort {
 
   constructor(private http: HttpClient) {}
 
-  createSession(request: CreateSessionRequest): Observable<SessionCreationResponse> {
-    return this.http.post<SessionCreationResponse>(this.baseUrl, request);
+  createSession(dto: CreateSessionRequest): Observable<SessionFullResponse> {
+    return this.http.post<SessionFullResponse>(this.baseUrl, dto);
   }
 
-  joinSession(request: JoinSessionRequest): Observable<SessionJoinResponse> {
-    return this.http.post<SessionJoinResponse>(`${this.baseUrl}/join`, request);
+  joinSession(dto: JoinSessionRequest): Observable<SessionFullResponse> {
+    return this.http.post<SessionFullResponse>(`${this.baseUrl}/join`, dto);
   }
 
-  leaveSession(request: LeaveSessionRequest): Observable<SessionLeaveResponse> {
-    return this.http.post<SessionLeaveResponse>(`${this.baseUrl}/leave`, request);
-  }
-
-  startSession(request: StartSessionRequest): Observable<StartSessionResponse> {
-    return this.http.post<StartSessionResponse>(`${this.baseUrl}/start`, request);
+  leaveSession(dto: LeaveSessionRequest): Observable<SessionLeaveResponse> {
+    return this.http.post<SessionLeaveResponse>(`${this.baseUrl}/leave`, dto);
   }
 
   getState(shareCode: string): Observable<SessionStateResponse> {

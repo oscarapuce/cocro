@@ -1,18 +1,18 @@
 import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
-  CreateSessionRequest, SessionCreationResponse,
-  JoinSessionRequest, SessionJoinResponse,
-  LeaveSessionRequest, SessionLeaveResponse,
-  StartSessionRequest, StartSessionResponse,
-  SessionStateResponse
+  CreateSessionRequest,
+  JoinSessionRequest,
+  LeaveSessionRequest,
+  SessionLeaveResponse,
+  SessionFullResponse,
+  SessionStateResponse,
 } from '@domain/models/session.model';
 
 export interface GameSessionPort {
-  createSession(request: CreateSessionRequest): Observable<SessionCreationResponse>;
-  joinSession(request: JoinSessionRequest): Observable<SessionJoinResponse>;
-  leaveSession(request: LeaveSessionRequest): Observable<SessionLeaveResponse>;
-  startSession(request: StartSessionRequest): Observable<StartSessionResponse>;
+  createSession(dto: CreateSessionRequest): Observable<SessionFullResponse>;
+  joinSession(dto: JoinSessionRequest): Observable<SessionFullResponse>;
+  leaveSession(dto: LeaveSessionRequest): Observable<SessionLeaveResponse>;
   getState(shareCode: string): Observable<SessionStateResponse>;
 }
 
