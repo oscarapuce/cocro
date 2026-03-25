@@ -1,0 +1,15 @@
+cocro:
+  cors:
+    allowed-origins:
+      - "http://localhost:4200"
+  jwt:
+    issuer: "cocro-test"
+    secret: "dGVzdC1zZWNyZXQtMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIz"
+    expirationSeconds: 3600
+  session:
+    heartbeat:
+      grace-period-ms: 30000
+      check-interval-ms: 15000
+    flush:
+      threshold: 50
+      idle-check-ms: 60000
