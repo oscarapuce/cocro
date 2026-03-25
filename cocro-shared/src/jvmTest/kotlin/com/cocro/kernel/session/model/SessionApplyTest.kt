@@ -152,12 +152,12 @@ class SessionApplyTest {
     // -------------------------------------------------------------------------
 
     private fun Session.withStatus(status: SessionStatus): Session =
-        Session.rehydrate(id, shareCode, creatorId, gridId, status, participants, sessionGridState, createdAt, updatedAt, gridTemplate = null)
+        Session.rehydrate(id, shareCode, creatorId, gridId, status, participants, sessionGridState, createdAt, updatedAt, gridTemplate = gridTemplate)
 
     private fun Session.withAllParticipantsLeft(): Session =
         Session.rehydrate(
             id, shareCode, creatorId, gridId, status,
             participants.map { it.copy(status = InviteStatus.LEFT) },
-            sessionGridState, createdAt, updatedAt, gridTemplate = null,
+            sessionGridState, createdAt, updatedAt, gridTemplate = gridTemplate,
         )
 }
