@@ -3,7 +3,9 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.session.dto.GridCheckSuccess
+import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.port.SessionGridStateCache
+import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.session.enum.InviteStatus
@@ -19,6 +21,7 @@ class CheckGridUseCase(
     private val sessionRepository: SessionRepository,
     private val sessionGridStateCache: SessionGridStateCache,
     private val gridRepository: GridRepository,
+    private val sessionNotifier: SessionNotifier,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -74,6 +77,21 @@ class CheckGridUseCase(
         // 8. Domain check — pure comparison, no side effects
         val result = gridState.checkAgainst(referenceGrid)
 
+        // Flush state to Mongo on every check
+        sessionRepository.updateGridState(session.id, gridState)
+        sessionGridStateCache.markFlushed(session.id, gridState.revision.value)
+
+        // Broadcast check result to all participants
+        sessionNotifier.broadcast(
+            session.shareCode,
+            SessionEvent.GridChecked(
+                userId = user.userId(),
+                isComplete = result.isComplete,
+                correctCount = result.correctCount,
+                totalCount = result.totalCount,
+            ),
+        )
+
         logger.info(
             "Grid check session={} complete={} correct={} wrong={} filled={}/{}",
             shareCode, result.isComplete, result.isCorrect, result.wrongCount, result.filledCount, result.totalCount,
@@ -87,6 +105,7 @@ class CheckGridUseCase(
                 filledCount = result.filledCount,
                 totalCount = result.totalCount,
                 wrongCount = result.wrongCount,
+                correctCount = result.correctCount,
             ),
         )
     }

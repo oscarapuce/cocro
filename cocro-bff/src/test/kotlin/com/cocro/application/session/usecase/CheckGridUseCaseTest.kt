@@ -2,7 +2,9 @@ package com.cocro.application.session.usecase
 
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.grid.port.GridRepository
+import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.port.SessionGridStateCache
+import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.kernel.auth.enum.Role
 import com.cocro.kernel.auth.model.AuthenticatedUser
@@ -24,6 +26,7 @@ import com.cocro.kernel.grid.model.valueobject.GridWidth
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import java.util.UUID
@@ -34,8 +37,9 @@ class CheckGridUseCaseTest {
     private val sessionRepository: SessionRepository = mock()
     private val sessionGridStateCache: SessionGridStateCache = mock()
     private val gridRepository: GridRepository = mock()
+    private val sessionNotifier: SessionNotifier = mock()
 
-    private val useCase = CheckGridUseCase(currentUserProvider, sessionRepository, sessionGridStateCache, gridRepository)
+    private val useCase = CheckGridUseCase(currentUserProvider, sessionRepository, sessionGridStateCache, gridRepository, sessionNotifier)
 
     private val creatorId = UserId.new()
     private val participantId = UserId.new()
@@ -126,6 +130,17 @@ class CheckGridUseCaseTest {
         assertThat(success.filledCount).isEqualTo(0)
         assertThat(success.totalCount).isEqualTo(0)
         assertThat(success.wrongCount).isEqualTo(0)
+        assertThat(success.correctCount).isEqualTo(0)
+        verify(sessionRepository).updateGridState(session.id, session.sessionGridState)
+        verify(sessionNotifier).broadcast(
+            session.shareCode,
+            SessionEvent.GridChecked(
+                userId = participantId.toString(),
+                isComplete = true,
+                correctCount = 0,
+                totalCount = 0,
+            ),
+        )
     }
 
     @Test

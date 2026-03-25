@@ -34,6 +34,7 @@ data class GridCheckSuccess(
     val filledCount: Int,
     val totalCount: Int,
     val wrongCount: Int,
+    val correctCount: Int,
 )
 
 data class SessionFullDto(
