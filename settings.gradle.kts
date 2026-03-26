@@ -15,8 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "cocro"
 
-include(
-    ":cocro-shared",
-    ":cocro-bff",
-    ":cocro-cmp",
-)
+include(":cocro-bff")
