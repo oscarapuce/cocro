@@ -3,7 +3,7 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.session.dto.CreateSessionDto
-import com.cocro.application.session.port.HeartbeatTracker
+import com.cocro.application.session.dto.SessionCreationSuccess
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.service.SessionCodeGenerator
@@ -37,21 +37,18 @@ class CreateSessionUseCaseTest {
     private val sessionGridStateCache: SessionGridStateCache = mock()
     private val shareCodeGenerator: SessionCodeGenerator = mock()
     private val gridRepository: GridRepository = mock()
-    private val heartbeatTracker: HeartbeatTracker = mock()
-
     private val useCase = CreateSessionUseCase(
         currentUserProvider,
         sessionRepository,
         sessionGridStateCache,
         shareCodeGenerator,
         gridRepository,
-        heartbeatTracker,
     )
 
     private val authenticatedUser = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
 
     @Test
-    fun `should create session successfully`() {
+    fun `should return SessionCreationSuccess on valid input`() {
         // given
         val dto = CreateSessionDto(gridId = "GRID01")
         val shareCode = SessionShareCode("AB12")
@@ -87,8 +84,7 @@ class CreateSessionUseCaseTest {
 
         // then
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
-        val success = (result as CocroResult.Success).value
-        assertThat(success.status).isEqualTo("PLAYING")
+        val success = (result as CocroResult.Success<SessionCreationSuccess>).value
         assertThat(success.shareCode).isEqualTo("AB12")
         verify(sessionGridStateCache).initialize(session.id, session.sessionGridState)
     }
