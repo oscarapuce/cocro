@@ -178,14 +178,7 @@ data class Session private constructor(
         return copy(participants = updated, updatedAt = now)
     }
 
-    fun end(
-        actorId: UserId,
-        now: Instant = Instant.now(),
-    ): CocroResult<Session, SessionError> {
-        if (!isCreator(actorId)) {
-            return err(SessionError.NotCreator(creatorId.toString(), actorId.toString()))
-        }
-
+    fun end(now: Instant = Instant.now()): CocroResult<Session, SessionError> {
         if (status != SessionStatus.PLAYING) {
             return err(SessionError.InvalidStatusForAction(status, "end"))
         }
@@ -196,8 +189,6 @@ data class Session private constructor(
     fun interrupt(now: Instant = Instant.now()): Session = copy(status = SessionStatus.INTERRUPTED, updatedAt = now)
 
     // ---------- helpers ----------
-
-    private fun isCreator(actorId: UserId): Boolean = actorId == creatorId
 
     private fun ok(session: Session): CocroResult<Session, SessionError> = CocroResult.Success(session)
 
