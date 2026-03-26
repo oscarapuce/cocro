@@ -67,11 +67,11 @@ class JoinSessionUseCaseTest {
         // then
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         val success = (result as CocroResult.Success).value
-        assertThat(success.participantCount).isEqualTo(2)
+        assertThat(success.participantCount).isEqualTo(1)
         assertThat(success.shareCode).isEqualTo("AB12")
         verify(sessionNotifier).broadcast(
             session.shareCode,
-            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), participantCount = 2),
+            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), participantCount = 1),
         )
     }
 
@@ -125,12 +125,13 @@ class JoinSessionUseCaseTest {
 
     @Test
     fun `should return SessionFullDto when active participant joins again (idempotent)`() {
-        // given — creator is already a JOINED participant
+        // given — creator has already joined the session
+        val sessionWithCreator = session.join(creatorId)
         val dto = JoinSessionDto(shareCode = "AB12")
         val creatorUser = AuthenticatedUser(creatorId, setOf(Role.PLAYER))
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(creatorUser)
-        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
-        whenever(sessionGridStateCache.get(session.id)).thenReturn(null)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(sessionWithCreator)
+        whenever(sessionGridStateCache.get(sessionWithCreator.id)).thenReturn(null)
 
         // when
         val result = useCase.execute(dto)
@@ -145,7 +146,7 @@ class JoinSessionUseCaseTest {
     fun `should return error when session is full`() {
         // given
         val dto = JoinSessionDto(shareCode = "AB12")
-        val fullSession = (2..4).fold(session) { s, _ -> s.join(UserId.new()) }
+        val fullSession = (1..4).fold(session) { s, _ -> s.join(UserId.new()) }
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(fullSession)
 

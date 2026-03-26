@@ -278,6 +278,7 @@ class SessionWebSocketIT {
 
         val gridId = createTestGrid(creatorToken)
         val shareCode = createSession(gridId, creatorToken)
+        post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
         post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
 
         val received1 = LinkedBlockingQueue<Map<*, *>>()

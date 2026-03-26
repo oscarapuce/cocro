@@ -43,7 +43,7 @@ data class Session private constructor(
                 creatorId = creatorId,
                 gridId = gridId,
                 status = SessionStatus.PLAYING,
-                participants = listOf(Participant.creator(creatorId)),
+                participants = emptyList(),
                 sessionGridState = SessionGridState.initial(sessionId, gridId),
                 gridTemplate = gridTemplate,
                 createdAt = now,
@@ -63,9 +63,6 @@ data class Session private constructor(
             updatedAt: Instant,
             gridTemplate: GridTemplateSnapshot? = null,
         ): Session {
-            require(participants.any { it.userId == creatorId }) {
-                "Creator must be participant"
-            }
             require(participants.size <= ParticipantsRule.MAX_ACTIVE_PARTICIPANTS) {
                 "Too many participants"
             }

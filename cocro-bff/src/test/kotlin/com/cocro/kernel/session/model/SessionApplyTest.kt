@@ -49,8 +49,11 @@ class SessionApplyTest {
         }
 
         @Test
-        fun `should fail when user is already a participant`() {
-            val result = session.apply(SessionLifecycleCommand.Join(creatorId))
+        fun `should fail when user is already a JOINED participant`() {
+            val joiner = UserId.new()
+            val sessionWithJoiner = session.join(joiner)
+
+            val result = sessionWithJoiner.apply(SessionLifecycleCommand.Join(joiner))
 
             assertThat(result).isInstanceOf(CocroResult.Error::class.java)
             val errors = (result as CocroResult.Error).errors
@@ -59,7 +62,7 @@ class SessionApplyTest {
 
         @Test
         fun `should fail when session is full`() {
-            val fullSession = (1..3).fold(session) { s, _ -> s.join(UserId.new()) }
+            val fullSession = (1..4).fold(session) { s, _ -> s.join(UserId.new()) }
             val joiner = UserId.new()
 
             val result = fullSession.apply(SessionLifecycleCommand.Join(joiner))

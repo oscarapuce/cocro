@@ -4,7 +4,6 @@ import com.cocro.kernel.auth.model.valueobject.UserId
 import com.cocro.kernel.common.CocroResult
 import com.cocro.kernel.grid.model.GridTemplateSnapshot
 import com.cocro.kernel.grid.model.valueobject.GridShareCode
-import com.cocro.kernel.session.enum.InviteStatus
 import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
 import org.assertj.core.api.Assertions.assertThat
@@ -44,17 +43,14 @@ class SessionCreateTest {
     }
 
     @Test
-    fun `Session creator is auto-joined on create`() {
-        val creatorId = UserId.new()
+    fun `Session create produces empty participants list`() {
         val session = Session.create(
-            creatorId = creatorId,
+            creatorId = UserId.new(),
             shareCode = SessionShareCode("AB12"),
             gridId = GridShareCode("GRID01"),
             gridTemplate = minimalSnapshot(),
         )
-        assertThat(session.participants).anyMatch {
-            it.userId == creatorId && it.status == InviteStatus.JOINED
-        }
+        assertThat(session.participants).isEmpty()
     }
 
     @Test

@@ -21,7 +21,7 @@ class ParticipantsRuleTest {
     }
 
     @Test
-    fun `isValid should return false when list is empty`() {
+    fun `isValid should return true when list is empty`() {
         // given
         val participants = emptyList<Participant>()
 
@@ -29,7 +29,7 @@ class ParticipantsRuleTest {
         val result = ParticipantsRule.validate(*participants.toTypedArray())
 
         // then
-        assertThat(result).isFalse()
+        assertThat(result).isTrue()
     }
 
     @Test

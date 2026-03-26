@@ -162,7 +162,7 @@ class SessionLifecycleIT {
         // --- JOIN ---
         val joinResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Map::class.java)
         assertThat(joinResp.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(joinResp.body!!["participantCount"]).isEqualTo(2)
+        assertThat(joinResp.body!!["participantCount"]).isEqualTo(1)
 
         // --- RESYNC (grid updates happen via STOMP -- see SessionWebSocketIT) ---
         val stateResp = get("/api/sessions/$shareCode/state", joinerToken, SessionStateDto::class.java)
@@ -178,7 +178,7 @@ class SessionLifecycleIT {
         val gridId = createTestGrid(creatorToken)
         val shareCode = createSession(gridId, creatorToken)
 
-        repeat(3) {
+        repeat(4) {
             post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), tokenFor(), Any::class.java)
         }
 
@@ -228,7 +228,7 @@ class SessionLifecycleIT {
         // Guest joins with the token from /auth/guest
         val joinResp = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), guest.token, Map::class.java)
         assertThat(joinResp.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(joinResp.body!!["participantCount"]).isEqualTo(2)
+        assertThat(joinResp.body!!["participantCount"]).isEqualTo(1)
     }
 
     // -------------------------------------------------------------------------
@@ -269,6 +269,7 @@ class SessionLifecycleIT {
         val creatorToken = tokenFor()
         val gridId = createTestGrid(creatorToken)
         val shareCode = createSession(gridId, creatorToken)
+        post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), creatorToken, Any::class.java)
 
         val resp = post("/api/sessions/$shareCode/check", emptyMap<String, String>(), creatorToken, Map::class.java)
         assertThat(resp.statusCode).isEqualTo(HttpStatus.OK)

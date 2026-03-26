@@ -9,8 +9,7 @@ object ParticipantsRule : CocroRule<Participant>() {
     const val MAX_ACTIVE_PARTICIPANTS = 4
 
     override fun isValid(values: List<Participant>): Boolean =
-        values.isNotEmpty() &&
-            countActiveParticipants(values) <= MAX_ACTIVE_PARTICIPANTS
+        countActiveParticipants(values) <= MAX_ACTIVE_PARTICIPANTS
 
     fun canJoin(participants: List<Participant>): Boolean = countActiveParticipants(participants) < MAX_ACTIVE_PARTICIPANTS
 
