@@ -63,8 +63,8 @@ data class Session private constructor(
             updatedAt: Instant,
             gridTemplate: GridTemplateSnapshot? = null,
         ): Session {
-            require(participants.size <= ParticipantsRule.MAX_ACTIVE_PARTICIPANTS) {
-                "Too many participants"
+            require(ParticipantsRule.countActiveParticipants(participants) <= ParticipantsRule.MAX_ACTIVE_PARTICIPANTS) {
+                "Too many active participants"
             }
 
             return Session(
