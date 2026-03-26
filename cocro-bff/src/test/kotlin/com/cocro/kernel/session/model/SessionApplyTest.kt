@@ -85,31 +85,43 @@ class SessionApplyTest {
         }
 
         @Test
-        fun `should add participant when session is INTERRUPTED`() {
-            // given — session interrupted after creator left (creator is present but LEFT)
-            val interruptedSession = session.interrupt().let { s ->
-                Session.rehydrate(
-                    id = s.id,
-                    shareCode = s.shareCode,
-                    creatorId = s.creatorId,
-                    gridId = s.gridId,
-                    status = SessionStatus.INTERRUPTED,
-                    participants = s.participants.map { it.copy(status = InviteStatus.LEFT) },
-                    sessionGridState = s.sessionGridState,
-                    createdAt = s.createdAt,
-                    updatedAt = s.updatedAt,
-                    gridTemplate = s.gridTemplate,
-                )
-            }
-            val actorId = UserId.new()
+        fun `should allow join on INTERRUPTED session and resume to PLAYING`() {
+            val interrupted = session.withStatus(SessionStatus.INTERRUPTED)
+            val joiner = UserId.new()
 
-            // when
-            val result = interruptedSession.apply(SessionLifecycleCommand.Join(actorId))
+            val result = interrupted.apply(SessionLifecycleCommand.Join(joiner))
 
-            // then
             assertThat(result).isInstanceOf(CocroResult.Success::class.java)
-            val joined = (result as CocroResult.Success).value
-            assertThat(joined.participants).anyMatch { it.userId == actorId }
+            val updated = (result as CocroResult.Success).value
+            assertThat(updated.status).isEqualTo(SessionStatus.PLAYING)
+            assertThat(updated.participants).anyMatch { it.userId == joiner && it.status == InviteStatus.JOINED }
+        }
+
+        @Test
+        fun `should allow user with LEFT status to rejoin (flip in-place)`() {
+            val joiner = UserId.new()
+            val sessionAfterLeave = session.join(joiner).leave(joiner)
+
+            val result = sessionAfterLeave.apply(SessionLifecycleCommand.Join(joiner))
+
+            assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+            val updated = (result as CocroResult.Success).value
+            // In-place flip: exactly one entry for joiner, status JOINED
+            assertThat(updated.participants.filter { it.userId == joiner }).hasSize(1)
+            assertThat(updated.participants).anyMatch { it.userId == joiner && it.status == InviteStatus.JOINED }
+        }
+
+        @Test
+        fun `LEFT participant does not count toward capacity`() {
+            // Fill with 4, then one leaves — a new user can join
+            val ids = (1..4).map { UserId.new() }
+            val filled = ids.fold(session) { s, id -> s.join(id) }
+            val afterLeave = filled.leave(ids[0])
+
+            val joiner = UserId.new()
+            val result = afterLeave.apply(SessionLifecycleCommand.Join(joiner))
+
+            assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         }
 
     }

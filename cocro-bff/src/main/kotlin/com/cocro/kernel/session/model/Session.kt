@@ -94,13 +94,19 @@ data class Session private constructor(
         if (status !in setOf(SessionStatus.PLAYING, SessionStatus.INTERRUPTED)) {
             return err(SessionError.InvalidStatusForAction(status, "join"))
         }
-        if (participants.any { it.userId == actorId }) {
+        // Only JOINED participants block a re-join; LEFT participants may rejoin
+        if (participants.any { it.userId == actorId && it.status == InviteStatus.JOINED }) {
             return err(SessionError.AlreadyParticipant(actorId.toString(), shareCode.value))
         }
-        if (!ParticipantsRule.canJoin(participants)) {
+        // LEFT participant does not count toward capacity (they're rejoining, not adding a new slot)
+        val isRejoin = participants.any { it.userId == actorId && it.status == InviteStatus.LEFT }
+        if (!isRejoin && !ParticipantsRule.canJoin(participants)) {
             return err(SessionError.SessionFull)
         }
-        return ok(join(actorId))
+        val updated = join(actorId)
+        // Resume INTERRUPTED → PLAYING when first participant joins
+        val resumed = if (status == SessionStatus.INTERRUPTED) updated.copy(status = SessionStatus.PLAYING) else updated
+        return ok(resumed)
     }
 
     private fun applyLeave(actorId: UserId): CocroResult<Session, SessionError> {
@@ -160,11 +166,15 @@ data class Session private constructor(
     fun join(
         actorId: UserId,
         now: Instant = Instant.now(),
-    ): Session =
-        copy(
-            participants = participants + Participant.joined(actorId),
-            updatedAt = now,
-        )
+    ): Session {
+        val leftIndex = participants.indexOfFirst { it.userId == actorId && it.status == InviteStatus.LEFT }
+        val updatedParticipants = if (leftIndex >= 0) {
+            participants.mapIndexed { i, p -> if (i == leftIndex) p.copy(status = InviteStatus.JOINED) else p }
+        } else {
+            participants + Participant.joined(actorId)
+        }
+        return copy(participants = updatedParticipants, updatedAt = now)
+    }
 
     fun leave(
         actorId: UserId,

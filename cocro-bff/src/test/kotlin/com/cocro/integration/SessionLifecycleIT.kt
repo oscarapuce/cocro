@@ -193,7 +193,7 @@ class SessionLifecycleIT {
     }
 
     @Test
-    fun `leave then rejoin is rejected (AlreadyParticipant)`() {
+    fun `leave then rejoin is allowed (LEFT participant flips back to JOINED)`() {
         val creatorToken = tokenFor()
         val joinerToken = tokenFor()
         val gridId = createTestGrid(creatorToken)
@@ -201,9 +201,9 @@ class SessionLifecycleIT {
         post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
         post("/api/sessions/leave", LeaveSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
 
-        // Left participants cannot rejoin (status LEFT -- not re-joinable under current rules)
-        val rejoin = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Any::class.java)
-        assertThat(rejoin.statusCode).isEqualTo(HttpStatus.CONFLICT)
+        // LEFT participants may rejoin -- their entry is flipped in-place, no duplicate slot added
+        val rejoin = post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), joinerToken, Map::class.java)
+        assertThat(rejoin.statusCode).isEqualTo(HttpStatus.OK)
     }
 
     // -------------------------------------------------------------------------
