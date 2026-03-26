@@ -8,10 +8,6 @@ data class Participant(
     val status: InviteStatus,
 ) {
     companion object {
-        fun creator(userId: UserId): Participant = Participant(userId, InviteStatus.JOINED)
-
-        fun invited(userId: UserId): Participant = Participant(userId, InviteStatus.INVITED)
-
         fun joined(userId: UserId): Participant = Participant(userId, InviteStatus.JOINED)
     }
 }
