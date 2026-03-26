@@ -79,19 +79,6 @@ sealed interface SessionError : CocroError {
             }
     }
 
-    data class NotCreator(
-        val creatorId: String,
-        val actorId: String,
-    ) : SessionError {
-        override val errorCode = ErrorCode.SESSION_NOT_CREATOR
-
-        override fun context(): Map<String, String> =
-            mapOf(
-                "creatorId" to creatorId,
-                "actorId" to actorId,
-            )
-    }
-
     data class InvalidStatusForAction(
         val status: SessionStatus,
         val action: String,

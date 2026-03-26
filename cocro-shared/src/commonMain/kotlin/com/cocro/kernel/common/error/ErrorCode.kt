@@ -41,7 +41,6 @@ enum class ErrorCode(
     SESSION_NOT_FOUND("Session not found", 403),
     SESSION_INVALID_SHARE_CODE("Invalid session share code", 400),
     SESSION_CANNOT_CREATE_WHEN_UNAUTHORIZED("Cannot create (or join) session when not authenticated", 401),
-    SESSION_NOT_CREATOR("Only the session creator can perform this action", 403),
     SESSION_INVALID_STATUS_FOR_ACTION("Invalid session status for this action", 400),
     SESSION_ALREADY_PARTICIPANT("User is already a participant in this session", 409),
     SESSION_USER_NOT_IN_SESSION("User is not a participant in this session", 403),
