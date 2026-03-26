@@ -81,6 +81,34 @@ class SessionApplyTest {
             assertThat(errors).anyMatch { it is SessionError.InvalidStatusForAction }
         }
 
+        @Test
+        fun `should add participant when session is INTERRUPTED`() {
+            // given — session interrupted after creator left (creator is present but LEFT)
+            val interruptedSession = session.interrupt().let { s ->
+                Session.rehydrate(
+                    id = s.id,
+                    shareCode = s.shareCode,
+                    creatorId = s.creatorId,
+                    gridId = s.gridId,
+                    status = SessionStatus.INTERRUPTED,
+                    participants = s.participants.map { it.copy(status = InviteStatus.LEFT) },
+                    sessionGridState = s.sessionGridState,
+                    createdAt = s.createdAt,
+                    updatedAt = s.updatedAt,
+                    gridTemplate = s.gridTemplate,
+                )
+            }
+            val actorId = UserId.new()
+
+            // when
+            val result = interruptedSession.apply(SessionLifecycleCommand.Join(actorId))
+
+            // then
+            assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+            val joined = (result as CocroResult.Success).value
+            assertThat(joined.participants).anyMatch { it.userId == actorId }
+        }
+
     }
 
     // -------------------------------------------------------------------------

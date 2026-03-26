@@ -159,7 +159,7 @@ class JoinSessionUseCaseTest {
     }
 
     @Test
-    fun `should return error when session status is not CREATING or PLAYING`() {
+    fun `should return error when session status is ENDED`() {
         // given
         val dto = JoinSessionDto(shareCode = "AB12")
         val endedSession = Session.rehydrate(
