@@ -210,20 +210,20 @@ class CheckGridUseCaseTest {
         // given
         val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         val withParticipant = base.join(participantId)
-        // Session in CREATING status (the default after Session.create)
-        val creatingSession = Session.rehydrate(
+        // Session in ENDED status (not PLAYING, so InvalidStatusForAction is expected)
+        val endedSession = Session.rehydrate(
             id = base.id,
             shareCode = base.shareCode,
             creatorId = base.creatorId,
             gridId = base.gridId,
-            status = SessionStatus.CREATING,
+            status = SessionStatus.ENDED,
             participants = withParticipant.participants,
             sessionGridState = base.sessionGridState,
             createdAt = base.createdAt,
             updatedAt = base.updatedAt,
         )
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(participantUser)
-        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(creatingSession)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(endedSession)
 
         // when
         val result = useCase.execute("AB12")

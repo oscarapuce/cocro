@@ -39,18 +39,6 @@ class SessionApplyTest {
     inner class Join {
 
         @Test
-        fun `should add participant when session is CREATING`() {
-            val joiner = UserId.new()
-            val creating = session.withStatus(SessionStatus.CREATING)
-
-            val result = creating.apply(SessionLifecycleCommand.Join(joiner))
-
-            assertThat(result).isInstanceOf(CocroResult.Success::class.java)
-            val updated = (result as CocroResult.Success).value
-            assertThat(updated.participants).anyMatch { it.userId == joiner && it.status == InviteStatus.JOINED }
-        }
-
-        @Test
         fun `should add participant when session is PLAYING`() {
             val joiner = UserId.new()
             val playing = session.withStatus(SessionStatus.PLAYING)
@@ -93,15 +81,6 @@ class SessionApplyTest {
             assertThat(errors).anyMatch { it is SessionError.InvalidStatusForAction }
         }
 
-        @Test
-        fun `should fail when session is INTERRUPTED`() {
-            val interrupted = session.withStatus(SessionStatus.INTERRUPTED)
-
-            val result = interrupted.apply(SessionLifecycleCommand.Join(UserId.new()))
-
-            assertThat(result).isInstanceOf(CocroResult.Error::class.java)
-            assertThat((result as CocroResult.Error).errors).anyMatch { it is SessionError.InvalidStatusForAction }
-        }
     }
 
     // -------------------------------------------------------------------------

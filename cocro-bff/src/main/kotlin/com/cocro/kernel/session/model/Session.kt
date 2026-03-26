@@ -94,7 +94,7 @@ data class Session private constructor(
         }
 
     private fun applyJoin(actorId: UserId): CocroResult<Session, SessionError> {
-        if (status !in setOf(SessionStatus.CREATING, SessionStatus.PLAYING)) {
+        if (status !in setOf(SessionStatus.PLAYING, SessionStatus.INTERRUPTED)) {
             return err(SessionError.InvalidStatusForAction(status, "join"))
         }
         if (participants.any { it.userId == actorId }) {
@@ -189,7 +189,7 @@ data class Session private constructor(
             return err(SessionError.NotCreator(creatorId.toString(), actorId.toString()))
         }
 
-        if (status !in setOf(SessionStatus.CREATING, SessionStatus.PLAYING, SessionStatus.SCORING)) {
+        if (status != SessionStatus.PLAYING) {
             return err(SessionError.InvalidStatusForAction(status, "end"))
         }
 
