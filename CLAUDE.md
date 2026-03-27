@@ -78,3 +78,13 @@ cocro-angular/src/app/
 - Build: `cd cocro-angular && npx ng build`
 - Dev: `cd cocro-angular && npx ng serve` (port 4200)
 - Design: "L'Atelier du Cruciverbiste" — beige/paper + forest green, Séyès notebook style
+
+## Roadmap & Backlog
+
+- **v0.2.0 backlog**: [`docs/roadmap/v0.2.0-backlog.md`](docs/roadmap/v0.2.0-backlog.md)
+  — session management (list/delete), grid picker, WebSocket robustness, flow wiring.
+  Add items here naturally as new work is identified.
+
+## Domain package rename note
+
+`kernel/` references in this file are outdated — the package was renamed to `domain/` in commit `e60c60c`. All domain code is under `com.cocro.domain.*`.
