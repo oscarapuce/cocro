@@ -97,6 +97,27 @@ class CheckGridUseCase(
             shareCode, result.isComplete, result.isCorrect, result.wrongCount, result.filledCount, result.totalCount,
         )
 
+        // End-of-game: complete AND correct → end session
+        if (result.isComplete && result.isCorrect) {
+            when (val endResult = session.end()) {
+                is CocroResult.Success -> {
+                    sessionRepository.save(endResult.value)
+                    sessionNotifier.broadcast(
+                        session.shareCode,
+                        SessionEvent.SessionEnded(
+                            shareCode = shareCode,
+                            correctCount = result.correctCount,
+                            totalCount = result.totalCount,
+                        ),
+                    )
+                    logger.info("Session {} ended: grid complete and correct ({}/{})", shareCode, result.correctCount, result.totalCount)
+                }
+                is CocroResult.Error -> {
+                    logger.warn("Could not end session {}: {}", shareCode, endResult.errors)
+                }
+            }
+        }
+
         return CocroResult.Success(
             GridCheckSuccess(
                 shareCode = shareCode,

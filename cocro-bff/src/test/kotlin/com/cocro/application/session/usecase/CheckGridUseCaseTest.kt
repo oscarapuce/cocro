@@ -25,6 +25,8 @@ import com.cocro.kernel.grid.model.valueobject.GridTitle
 import com.cocro.kernel.grid.model.valueobject.GridWidth
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -140,6 +142,30 @@ class CheckGridUseCaseTest {
                 correctCount = 0,
                 totalCount = 0,
             ),
+        )
+    }
+
+    @Test
+    fun `should end session and broadcast SessionEnded when grid is complete and correct`() {
+        // given — empty referenceGrid → checkAgainst returns isComplete=true, isCorrect=true
+        val session = buildPlayingSession()
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(participantUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
+        whenever(sessionGridStateCache.get(session.id)).thenReturn(null)
+        whenever(gridRepository.findByShortId(session.sessionGridState.gridShareCode)).thenReturn(referenceGrid)
+
+        // when
+        val result = useCase.execute("AB12")
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+        val success = (result as CocroResult.Success).value
+        assertThat(success.isComplete).isTrue()
+        assertThat(success.isCorrect).isTrue()
+        verify(sessionRepository, atLeastOnce()).save(argThat<Session> { status == SessionStatus.ENDED })
+        verify(sessionNotifier).broadcast(
+            session.shareCode,
+            SessionEvent.SessionEnded(shareCode = "AB12", correctCount = 0, totalCount = 0),
         )
     }
 
