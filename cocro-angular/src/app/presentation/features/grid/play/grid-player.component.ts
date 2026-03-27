@@ -38,7 +38,7 @@ import { PlayInfoComponent } from './play-info/play-info.component';
 })
 export class GridPlayerComponent implements OnInit, OnDestroy {
   readonly shareCode = signal('');
-  readonly status = signal<SessionStatus>('CREATING');
+  readonly status = signal<SessionStatus>('PLAYING');
   readonly participantCount = signal(0);
   readonly revision = signal(0);
   readonly connected = signal(false);

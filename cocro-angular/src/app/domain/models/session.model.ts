@@ -1,7 +1,19 @@
 import { GridTemplateResponse } from './grid-template.model';
 
-export type SessionStatus = 'CREATING' | 'PLAYING' | 'SCORING' | 'ENDED' | 'INTERRUPTED';
+export type SessionStatus = 'PLAYING' | 'ENDED' | 'INTERRUPTED';
 export type CommandType = 'PLACE_LETTER' | 'CLEAR_CELL';
+
+export interface SessionCreatedResponse {
+  sessionId: string;
+  shareCode: string;
+}
+
+export interface GridCheckResponse {
+  isComplete: boolean;
+  isCorrect: boolean;
+  correctCount: number;
+  totalCount: number;
+}
 
 export interface CreateSessionRequest {
   gridId: string;

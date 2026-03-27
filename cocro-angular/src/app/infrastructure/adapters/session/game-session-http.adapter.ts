@@ -4,8 +4,10 @@ import { Observable } from 'rxjs';
 import { GameSessionPort } from '@application/ports/session/game-session.port';
 import {
   CreateSessionRequest,
+  GridCheckResponse,
   JoinSessionRequest,
   LeaveSessionRequest,
+  SessionCreatedResponse,
   SessionLeaveResponse,
   SessionFullResponse,
   SessionStateResponse,
@@ -18,8 +20,8 @@ export class GameSessionHttpAdapter implements GameSessionPort {
 
   constructor(private http: HttpClient) {}
 
-  createSession(dto: CreateSessionRequest): Observable<SessionFullResponse> {
-    return this.http.post<SessionFullResponse>(this.baseUrl, dto);
+  createSession(dto: CreateSessionRequest): Observable<SessionCreatedResponse> {
+    return this.http.post<SessionCreatedResponse>(this.baseUrl, dto);
   }
 
   joinSession(dto: JoinSessionRequest): Observable<SessionFullResponse> {
@@ -32,5 +34,13 @@ export class GameSessionHttpAdapter implements GameSessionPort {
 
   getState(shareCode: string): Observable<SessionStateResponse> {
     return this.http.get<SessionStateResponse>(`${this.baseUrl}/${shareCode}/state`);
+  }
+
+  syncSession(shareCode: string): Observable<SessionFullResponse> {
+    return this.http.post<SessionFullResponse>(`${this.baseUrl}/${shareCode}/sync`, {});
+  }
+
+  checkGrid(shareCode: string): Observable<GridCheckResponse> {
+    return this.http.post<GridCheckResponse>(`${this.baseUrl}/${shareCode}/check`, {});
   }
 }

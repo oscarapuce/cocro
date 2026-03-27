@@ -6,7 +6,9 @@ export type SessionEventType =
   | 'ParticipantLeft'
   | 'GridUpdated'
   | 'GridChecked'
-  | 'SyncRequired';
+  | 'SyncRequired'
+  | 'SessionEnded'
+  | 'SessionInterrupted';
 
 export interface SessionEvent {
   type: SessionEventType;
@@ -54,4 +56,16 @@ export interface GridCheckedEvent extends SessionEvent {
 export interface SyncRequiredEvent extends SessionEvent {
   type: 'SyncRequired';
   currentRevision: number;
+}
+
+export interface SessionEndedEvent extends SessionEvent {
+  type: 'SessionEnded';
+  shareCode: string;
+  correctCount: number;
+  totalCount: number;
+}
+
+export interface SessionInterruptedEvent extends SessionEvent {
+  type: 'SessionInterrupted';
+  shareCode: string;
 }
