@@ -72,7 +72,9 @@ class UpdateSessionGridUseCases(
             sessionGridStateCache.compareAndSet(session.id, currentState.revision.value, newState)
         } catch (e: IllegalStateException) {
             val currentRevision =
-                sessionGridStateCache.get(session.id)?.revision?.value ?: currentState.revision.value
+                sessionGridStateCache.get(session.id)?.revision?.value
+                    ?: sessionRepository.findByShareCode(sessionShareCode)?.sessionGridState?.revision?.value
+                    ?: currentState.revision.value
             logger.warn(
                 "CAS conflict for session={}, expectedRevision={}, currentRevision={}",
                 session.shareCode.value, currentState.revision.value, currentRevision,
