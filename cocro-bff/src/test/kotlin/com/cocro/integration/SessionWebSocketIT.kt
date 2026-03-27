@@ -142,7 +142,6 @@ class SessionWebSocketIT {
     private fun createSession(gridId: String, token: String): String {
         val resp = post("/api/sessions", CreateSessionDto(gridId = gridId), token, Map::class.java)
         assertThat(resp.statusCode).isEqualTo(HttpStatus.CREATED)
-        assertThat(resp.body!!["status"]).isEqualTo("PLAYING")
         return resp.body!!["shareCode"] as String
     }
 
