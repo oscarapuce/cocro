@@ -186,4 +186,64 @@ class JoinSessionUseCaseTest {
         val errors = (result as CocroResult.Error).errors
         assertThat(errors).anyMatch { it is SessionError.InvalidStatusForAction }
     }
+
+    @Test
+    fun `should join INTERRUPTED session successfully`() {
+        // given — session was interrupted and joiningUser was a LEFT participant
+        val sessionWithLeft = session.join(joiningUserId).leave(joiningUserId)
+        val interruptedSession = Session.rehydrate(
+            id = sessionWithLeft.id,
+            shareCode = sessionWithLeft.shareCode,
+            creatorId = sessionWithLeft.creatorId,
+            gridId = sessionWithLeft.gridId,
+            status = SessionStatus.INTERRUPTED,
+            participants = sessionWithLeft.participants,
+            sessionGridState = sessionWithLeft.sessionGridState,
+            createdAt = sessionWithLeft.createdAt,
+            updatedAt = sessionWithLeft.updatedAt,
+            gridTemplate = sessionWithLeft.gridTemplate,
+        )
+        val dto = JoinSessionDto(shareCode = "AB12")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(interruptedSession)
+        whenever(sessionRepository.save(any())).thenAnswer { it.arguments[0] as Session }
+        whenever(sessionGridStateCache.get(interruptedSession.id)).thenReturn(null)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+        val success = (result as CocroResult.Success).value
+        assertThat(success.shareCode).isEqualTo("AB12")
+        verify(sessionNotifier).broadcast(
+            interruptedSession.shareCode,
+            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), participantCount = 1),
+        )
+    }
+
+    @Test
+    fun `should rejoin session as previously LEFT participant`() {
+        // given — session has joiningUserId with status LEFT
+        val sessionWithLeft = session.join(joiningUserId).leave(joiningUserId)
+        val dto = JoinSessionDto(shareCode = "AB12")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(sessionWithLeft)
+        whenever(sessionRepository.save(any())).thenAnswer { it.arguments[0] as Session }
+        whenever(sessionGridStateCache.get(sessionWithLeft.id)).thenReturn(null)
+        whenever(heartbeatTracker.isAway(sessionWithLeft.id, joiningUserId)).thenReturn(false)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+        val success = (result as CocroResult.Success).value
+        assertThat(success.shareCode).isEqualTo("AB12")
+        assertThat(success.participantCount).isEqualTo(1)
+        verify(sessionNotifier).broadcast(
+            sessionWithLeft.shareCode,
+            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), participantCount = 1),
+        )
+    }
 }
