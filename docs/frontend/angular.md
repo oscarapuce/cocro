@@ -209,10 +209,10 @@ Blocks navigation if the user is not authenticated as PLAYER or ADMIN. Redirects
 ### Route Configuration
 
 ```typescript
-{ path: '',         component: LandingComponent },
+{ path: '',         loadComponent: () => LandingComponent },
 { path: 'auth',     loadChildren: () => authRoutes },
-{ path: 'home',     component: HomeComponent,          canActivate: [playerGuard] },
-{ path: 'lobby',    loadChildren: () => lobbyRoutes,   canActivate: [playerGuard] },
+{ path: 'home',     redirectTo: '' },
+{ path: 'lobby',    loadChildren: () => lobbyRoutes,   canActivate: [authGuard] },
 { path: 'grid',     loadChildren: () => editorRoutes,  canActivate: [playerGuard] },
 { path: 'play',     loadChildren: () => playRoutes,    canActivate: [authGuard] },
 { path: '**',       redirectTo: '' },
