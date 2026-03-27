@@ -29,6 +29,21 @@
         <cocro-card title="Informations">
           <cocro-play-info />
         </cocro-card>
+
+        <!-- Check grid button — only shown during PLAYING -->
+        @if (status() === 'PLAYING') {
+          <button class="btn-check" (click)="checkGrid()">Vérifier</button>
+        }
+
+        <!-- Check result -->
+        @if (checkResult()) {
+          <div class="check-result">
+            {{ checkResult()!.correctCount }} / {{ checkResult()!.totalCount }} correct
+            @if (checkResult()!.isComplete) {
+              <span class="complete">Grille complète !</span>
+            }
+          </div>
+        }
       </aside>
 
       <!-- Grid area -->
@@ -39,6 +54,21 @@
         <cocro-grid [disableKeyboard]="true" [cellColorClassFn]="getCellColorClass" />
       </div>
     </div>
+
+    <!-- ENDED state -->
+    @if (status() === 'ENDED') {
+      <div class="session-ended">
+        <h2>Félicitations !</h2>
+        <p>La grille est complète et correcte.</p>
+      </div>
+    }
+
+    <!-- INTERRUPTED state -->
+    @if (status() === 'INTERRUPTED') {
+      <div class="session-interrupted">
+        <p>Session interrompue — tous les participants ont quitté.</p>
+      </div>
+    }
   } @else {
     <div class="play-loading">Chargement de la grille…</div>
   }

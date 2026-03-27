@@ -12,11 +12,13 @@ import {
   GridUpdatedEvent,
   ParticipantJoinedEvent,
   ParticipantLeftEvent,
+  SessionEndedEvent,
+  SessionInterruptedEvent,
   SessionEvent,
   SessionWelcomeEvent,
   SyncRequiredEvent,
 } from '@domain/models/session-events.model';
-import { CellStateDto, SessionFullResponse, SessionStateResponse, SessionStatus } from '@domain/models/session.model';
+import { CellStateDto, GridCheckResponse, SessionFullResponse, SessionStatus } from '@domain/models/session.model';
 import { CardComponent } from '@presentation/shared/components/card/card.component';
 import { GridComponent } from '@presentation/shared/grid/grid-wrapper/grid.component';
 import { GlobalCluePreviewComponent } from '@presentation/features/grid/editor/global-clue-preview/global-clue-preview.component';
@@ -45,6 +47,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly gridLoaded = signal(false);
   readonly error = signal<string | null>(null);
+  readonly checkResult = signal<GridCheckedEvent | null>(null);
 
   private readonly letterAuthors = signal(new Map<string, 'me' | string>());
 
@@ -160,6 +163,20 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
     this.router.navigate(['/']);
   }
 
+  checkGrid(): void {
+    this.gameSession.checkGrid(this.shareCode()).subscribe({
+      next: (result: GridCheckResponse) => {
+        this.checkResult.set({
+          type: 'GridChecked',
+          userId: this.myUserId(),
+          isComplete: result.isComplete,
+          correctCount: result.correctCount,
+          totalCount: result.totalCount,
+        } as GridCheckedEvent);
+      },
+    });
+  }
+
   private handleEvent(event: SessionEvent): void {
     switch (event.type) {
       case 'SessionWelcome':
@@ -175,7 +192,13 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
         this.participantCount.set((event as ParticipantLeftEvent).participantCount);
         break;
       case 'GridChecked':
-        // GridChecked event received — result available in (event as GridCheckedEvent)
+        this.checkResult.set(event as GridCheckedEvent);
+        break;
+      case 'SessionEnded':
+        this.status.set('ENDED');
+        break;
+      case 'SessionInterrupted':
+        this.status.set('INTERRUPTED');
         break;
       case 'SyncRequired':
         this.resync((event as SyncRequiredEvent).currentRevision);
@@ -211,10 +234,12 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
 
   private resync(_targetRevision: number): void {
     this.letterAuthors.set(new Map());
-    this.gameSession.getState(this.shareCode()).subscribe({
-      next: (state: SessionStateResponse) => {
-        this.revision.set(state.revision);
-        state.cells.forEach((c: CellStateDto) => {
+    this.gameSession.syncSession(this.shareCode()).subscribe({
+      next: (full: SessionFullResponse) => {
+        this.revision.set(full.gridRevision);
+        this.participantCount.set(full.participantCount);
+        this.status.set(full.status);
+        full.cells.forEach((c: CellStateDto) => {
           if (c.letter) this.selector.setLetterAt(c.x, c.y, c.letter);
         });
       },
