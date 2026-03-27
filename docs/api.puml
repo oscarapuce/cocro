@@ -63,35 +63,29 @@ GRID --> C  : 200
 C  -> SEC  : POST /api/sessions\n{ gridId }
 SEC -> SC  : authenticated
 SC -> UC   : CreateSessionUseCase
-UC -> DB   : persist Session (status=CREATING)
-UC --> SC  : Success { shareCode }
-SC --> C   : 201 { shareCode }
+UC -> DB   : persist Session (status=PLAYING, participants=[])
+UC -> REDIS: init SessionGridState cache
+UC --> SC  : SessionCreationSuccess
+SC --> C   : 201 { sessionId, shareCode }
+
+note right of C
+  Creator must then call POST /join
+  to enter the session and get the full state.
+end note
 
 C  -> SEC  : POST /api/sessions/join\n{ shareCode }
 SEC -> SC  : authenticated
 SC -> UC   : JoinSessionUseCase
-UC -> DB   : add Participant (status=JOINED)
-UC --> SC  : Success { participantCount }
-SC --> C   : 200 { shareCode, participantCount }\nor 409 SessionFull / AlreadyParticipant
-
-C  -> SEC  : POST /api/sessions/start\n{ shareCode }
-SEC -> SC  : authenticated (creator only)
-SC -> UC   : StartSessionUseCase
-UC -> DB   : set Session.status = PLAYING
-UC --> SC  : Success
-SC --> C   : 200\nor 400 NotCreator / InvalidStatusForAction
+UC -> DB   : add/update Participant (status=JOINED)
+UC --> SC  : SessionFullDto
+SC --> C   : 200 { sessionId, shareCode, status,\n  participantCount, topicToSubscribe,\n  gridTemplate, gridRevision, cells[] }\nor 409 SessionFull / AlreadyParticipant\nor 400 InvalidStatusForAction (ENDED)
 
 C  -> SEC  : POST /api/sessions/leave\n{ shareCode }
 SEC -> SC  : authenticated
 SC -> UC   : LeaveSessionUseCase
-UC -> DB   : set Participant.status = LEFT
+UC -> DB   : set Participant.status = LEFT\n[if last participant → Session.interrupt()]
 UC --> SC  : Success
 SC --> C   : 200
-
-note right of C
-  Grid updates are WebSocket-only.
-  See "WebSocket — Grid Update" below.
-end note
 
 C  -> SEC  : GET /api/sessions/{shareCode}/state
 SEC -> SC  : authenticated
@@ -99,6 +93,27 @@ SC -> UC   : GetSessionStateUseCase
 UC -> REDIS: get cached SessionGridState\n(fallback → MongoDB)
 UC --> SC  : SessionGridStateDto
 SC --> C   : 200 { revision, cells[] }
+
+C  -> SEC  : POST /api/sessions/{shareCode}/sync
+SEC -> SC  : authenticated (JOINED participant only)
+SC -> UC   : SynchroniseSessionUseCase
+UC -> REDIS: flush to MongoDB
+UC --> SC  : SessionFullDto
+SC --> C   : 200 { sessionId, shareCode, status,\n  participantCount, gridTemplate,\n  gridRevision, cells[] }
+
+C  -> SEC  : POST /api/sessions/{shareCode}/check
+SEC -> SC  : authenticated (JOINED participant)
+SC -> UC   : CheckGridUseCase
+UC -> REDIS: flush + compare against reference Grid
+UC -> WSC  : broadcast GridChecked
+UC -> UC   : if isComplete && isCorrect:\n  Session.end() → broadcast SessionEnded
+UC --> SC  : GridCheckSuccess
+SC --> C   : 200 { isComplete, isCorrect,\n  filledCount, totalCount }
+
+note right of C
+  Grid updates are WebSocket-only.
+  See "WebSocket — Grid Update" below.
+end note
 
 ' ============================================================
 ' 4. WEBSOCKET / STOMP
@@ -141,25 +156,30 @@ WSC --> C  : broadcast to /topic/session/{shareCode}\nGridUpdated { actorId, pos
 
 note right of REDIS
   On CAS conflict:
-  StompSessionNotifier sends private
+  Catch exception → fetch authoritative revision
+  (cache → DB fallback)
+  notifyUser() sends private
   SyncRequired { currentRevision }
-  to the lagging client via:
+  to the conflicting client via:
   /user/queue/session
+  Returns ConcurrentModification (409)
 end note
 
 == WebSocket — Broadcast Events ==
 
 note over WSC
-  All broadcasts to /topic/session/{shareCode}:
+  Broadcasts to /topic/session/{shareCode}:
 
-  ParticipantJoined  { userId, participantCount }
-  ParticipantLeft    { userId, participantCount, reason }
-  SessionStarted     { participantCount }
-  GridUpdated        { actorId, posX, posY, commandType, letter }
+  ParticipantJoined   { userId, participantCount }
+  ParticipantLeft     { userId, participantCount, reason }
+  GridUpdated         { actorId, posX, posY, commandType, letter }
+  GridChecked         { isComplete, isCorrect, correctCount, totalCount }
+  SessionEnded        { shareCode, correctCount, totalCount }
+  SessionInterrupted  { shareCode }
 
   Private to user (/user/queue/session):
-  SessionWelcome     (via @SubscribeMapping)
-  SyncRequired       { currentRevision }
+  SessionWelcome      (via @SubscribeMapping)
+  SyncRequired        { currentRevision }
 end note
 
 ' ============================================================
@@ -168,12 +188,13 @@ end note
 == Background Schedulers ==
 
 note over REDIS, DB
-  HeartbeatTimeoutScheduler (every 15s)
+  HeartbeatTimeoutScheduler (every 15s, grace period 30s)
     For each tracked participant:
       if lastHeartbeat > 30s ago → LeaveSessionUseCase (reason=timeout)
       broadcasts ParticipantLeft { reason: "timeout" }
+      if last participant → broadcasts SessionInterrupted
 
-  SessionFlushScheduler (every 30s)
+  SessionFlushScheduler (every 60s)
     For each idle SessionGridState in Redis:
       flush updated state to MongoDB
 end note
