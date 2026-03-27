@@ -6,17 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Build
-./gradlew build
-./gradlew cocro-bff:build
-./gradlew cocro-shared:build
+cd cocro-bff && ./gradlew build
 
 # Run BFF application
-./gradlew cocro-bff:bootRun
+cd cocro-bff && ./gradlew bootRun
 
 # Test
-./gradlew test
-./gradlew cocro-bff:test
-./gradlew cocro-shared:test
+cd cocro-bff && ./gradlew test
+cd cocro-bff && TESTCONTAINERS_RYUK_DISABLED=true ./gradlew test --no-daemon
 
 # Start local infrastructure (MongoDB + Redis via Docker/Podman)
 bash scripts/compose-script.sh
@@ -24,18 +21,15 @@ bash scripts/compose-script.sh
 
 ## Architecture
 
-This is a Kotlin/Spring Boot collaborative crossword app with two Gradle modules:
+This is a Kotlin/Spring Boot collaborative crossword app. The `cocro-bff` directory is a standalone Gradle project (has its own `settings.gradle.kts` and Gradle wrapper).
 
-- **cocro-shared**: Kotlin multiplatform domain library (no framework dependencies). Contains all business logic, domain models, value objects, rules, and error types.
-- **cocro-bff**: Spring Boot 3.2 backend-for-frontend with REST and WebSocket (STOMP).
+- **cocro-bff**: Spring Boot 3.2 backend-for-frontend with REST and WebSocket (STOMP). Contains all business logic in `kernel/` (domain models, value objects, rules, error types).
 
 ### Layered Architecture (Clean/DDD)
 
 ```
-cocro-shared (kernel)
-└── domain: entities, value objects, sealed errors, CocroResult<T,E>
-
 cocro-bff
+├── kernel/         — domain entities, value objects, sealed errors, CocroResult<T,E>
 ├── application/    — use cases, DTOs, mappers, ports (interfaces)
 ├── infrastructure/ — MongoDB adapters, Redis cache, JWT, Spring Security
 └── presentation/   — REST controllers, WebSocket controllers, error mapping
@@ -45,7 +39,7 @@ The application layer has **no Spring dependencies** — only ports/interfaces. 
 
 ### Error Handling
 
-Business operations return `CocroResult<T, E>` (a sealed `Success`/`Error` type defined in `cocro-shared`). Use cases return this type; controllers unwrap it and map errors to HTTP responses via `ErrorMapper`.
+Business operations return `CocroResult<T, E>` (a sealed `Success`/`Error` type defined in `kernel/`). Use cases return this type; controllers unwrap it and map errors to HTTP responses via `ErrorMapper`.
 
 ### Real-time (WebSocket)
 
