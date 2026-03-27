@@ -65,7 +65,10 @@ fun SessionDocument.toDomain(): Session =
         shareCode = SessionShareCode(shareCode),
         creatorId = UserId.from(creatorId),
         gridId = GridShareCode(gridShortId),
-        status = SessionStatus.valueOf(status),
+        status = when (status) {
+            "CREATING", "SCORING" -> SessionStatus.PLAYING  // migration fallback
+            else -> SessionStatus.valueOf(status)
+        },
         participants = participants.map { it.toDomain() },
         sessionGridState = sessionGridState.toDomain(),
         createdAt = createdAt,

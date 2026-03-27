@@ -8,6 +8,7 @@ import com.cocro.application.session.usecase.CreateSessionUseCase
 import com.cocro.application.session.usecase.GetSessionStateUseCase
 import com.cocro.application.session.usecase.JoinSessionUseCase
 import com.cocro.application.session.usecase.LeaveSessionUseCase
+import com.cocro.application.session.usecase.SynchroniseSessionUseCase
 import com.cocro.presentation.rest.error.toResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -27,6 +28,7 @@ class SessionController(
     private val leaveSessionUseCase: LeaveSessionUseCase,
     private val getSessionStateUseCase: GetSessionStateUseCase,
     private val checkGridUseCase: CheckGridUseCase,
+    private val synchroniseSessionUseCase: SynchroniseSessionUseCase,
 ) {
     @PostMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
@@ -62,6 +64,15 @@ class SessionController(
         @PathVariable shareCode: String,
     ): ResponseEntity<*> =
         getSessionStateUseCase
+            .execute(shareCode)
+            .toResponseEntity(HttpStatus.OK)
+
+    @PostMapping("/{shareCode}/sync")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN', 'ANONYMOUS')")
+    fun synchroniseSession(
+        @PathVariable shareCode: String,
+    ): ResponseEntity<*> =
+        synchroniseSessionUseCase
             .execute(shareCode)
             .toResponseEntity(HttpStatus.OK)
 
