@@ -7,58 +7,66 @@ This file focuses on the session state machine and operational flows.
 ## State Machine
 
 ```
-CREATING ──[start]──► PLAYING
-                         │
-                      [all leave]
-                         │
-                         ▼
-                     INTERRUPTED
+                    ┌──[join]──►  PLAYING  ──[check correct]──► ENDED
+POST /api/sessions  │               │
+returns shareCode   │           [all leave / timeout]
+                    │               │
+                    └────────►  INTERRUPTED
 ```
 
 States:
 
 | State | Description |
 |-------|-------------|
-| `CREATING` | Session created, waiting for participants; grid not started |
-| `PLAYING` | Session started by creator; grid updates via WebSocket are accepted |
-| `INTERRUPTED` | All participants left; game paused (may be resumable in future) |
+| `PLAYING` | Session active; grid updates via WebSocket are accepted |
+| `INTERRUPTED` | All participants left (timeout or explicit leave); game paused |
+| `ENDED` | Grid was completed and validated as correct via `CheckGridUseCase` |
+
+> **Note:** `CREATING` and `SCORING` states have been removed. `POST /api/sessions` creates the session and returns a lightweight `SessionCreatedResponse { sessionId, shareCode }`. The creator then calls `POST /api/sessions/join` to enter the session and receive the full `SessionFullDto`.
 
 ## Transitions
 
 | From | Command | Actor constraint | To | Side effects |
 |------|---------|-----------------|-----|-------------|
-| `CREATING` | `Join` | any authenticated user | `CREATING` | `ParticipantJoined` broadcast |
-| `CREATING` | `Start` | creator only | `PLAYING` | `SessionStarted` broadcast |
-| `PLAYING` | `Leave` (last participant) | any participant | `INTERRUPTED` | `ParticipantLeft` broadcast |
+| (new) | `Join` | any authenticated user | `PLAYING` | `ParticipantJoined` broadcast |
+| `PLAYING` | `Join` | previously LEFT participant | `PLAYING` | `ParticipantJoined` broadcast |
+| `INTERRUPTED` | `Join` | any previously LEFT participant | `PLAYING` | `ParticipantJoined` broadcast |
 | `PLAYING` | `Leave` (not last) | any participant | `PLAYING` | `ParticipantLeft` broadcast |
-Domain commands are defined as `SessionLifecycleCommand` in `cocro-shared`. The `Session.apply(command)` function is a pure function returning `CocroResult<Session, SessionError>`.
+| `PLAYING` | `Leave` (last participant) | any participant | `INTERRUPTED` | `ParticipantLeft` + `SessionInterrupted` broadcast |
+| `PLAYING` | `end()` (grid complete+correct) | system (CheckGrid) | `ENDED` | `SessionEnded` broadcast |
+
+Domain commands are pure functions on the `Session` aggregate returning `CocroResult<Session, SessionError>`.
 
 ## REST Endpoints Summary
 
 ```
-POST /api/sessions                 → create session (PLAYER, ADMIN)
-POST /api/sessions/join            → join session (PLAYER, ADMIN, ANONYMOUS)
-POST /api/sessions/leave           → leave session (PLAYER, ADMIN, ANONYMOUS)
-POST /api/sessions/start           → start session (PLAYER, ADMIN — creator only)
+POST /api/sessions                 → create session, returns { sessionId, shareCode }
+POST /api/sessions/join            → join session, returns SessionFullDto
+POST /api/sessions/leave           → leave session
 GET  /api/sessions/{code}/state    → resync full grid state (PLAYER, ADMIN, ANONYMOUS)
-POST /api/sessions/{code}/check    → validate grid against reference (PLAYER, ADMIN, ANONYMOUS)
+POST /api/sessions/{code}/sync     → flush Redis→MongoDB and return SessionFullDto
+POST /api/sessions/{code}/check    → validate grid; triggers ENDED if complete+correct
 ```
 
 ## Grid Check Endpoint
 
-`POST /api/sessions/{shareCode}/check` — validates the current session grid state against the reference `Grid` stored in MongoDB. This endpoint is read-only and idempotent.
+`POST /api/sessions/{shareCode}/check` — validates the current session grid state against the reference `Grid` stored in MongoDB.
 
 Flow:
 
 1. Load `Session` from MongoDB by `shareCode`
 2. Read current `SessionGridState` from Redis cache (fallback: `session.sessionGridState`)
 3. Load reference `Grid` via `gridState.gridShareCode`
-4. Call `sessionGridState.checkAgainst(referenceGrid)` — pure domain function in `cocro-shared`
-5. Return `GridCheckSuccess { isComplete, isCorrect, filledCount, totalCount }`
+4. Call `sessionGridState.checkAgainst(referenceGrid)` — pure domain function
+5. Flush grid state to MongoDB + broadcast `GridChecked` event to all participants
+6. If `isComplete && isCorrect`: call `session.end()`, save, broadcast `SessionEnded`
+7. Return `GridCheckSuccess { isComplete, isCorrect, filledCount, totalCount }`
 
-No state transition is triggered. Clients may call this at any time during `PLAYING`.
+## Sync Endpoint
 
-> **Note:** `CheckGridUseCase` is read-only and does not trigger any state transition. The `GridCheckResult` is returned to the caller for display purposes only.
+`POST /api/sessions/{shareCode}/sync` — flushes the current Redis grid state to MongoDB and returns the full `SessionFullDto` (grid template + current cell state + participant count + status). Requires the caller to be a JOINED participant.
+
+Used by the client to resync after a `SyncRequired` event or after reconnecting.
 
 ## WebSocket Events
 
@@ -69,8 +77,10 @@ Events are defined as sealed `SessionEvent` in the BFF application layer, serial
 | `SessionWelcome` | private | `/user/queue/session` | Client subscribes to `/app/session/{code}/welcome` |
 | `ParticipantJoined` | broadcast | `/topic/session/{code}` | Successful `JoinSessionUseCase` |
 | `ParticipantLeft` | broadcast | `/topic/session/{code}` | `LeaveSessionUseCase` (manual or timeout) |
-| `SessionStarted` | broadcast | `/topic/session/{code}` | `StartSessionUseCase` |
 | `GridUpdated` | broadcast | `/topic/session/{code}` | Grid cell update via WebSocket command |
+| `GridChecked` | broadcast | `/topic/session/{code}` | `CheckGridUseCase` |
+| `SessionEnded` | broadcast | `/topic/session/{code}` | `CheckGridUseCase` when grid is complete+correct |
+| `SessionInterrupted` | broadcast | `/topic/session/{code}` | Last participant left (explicit or timeout) |
 | `SyncRequired` | private | `/user/queue/session` | CAS conflict on grid update — **defined but not yet sent** |
 
 ### SessionWelcome Pattern
@@ -107,7 +117,7 @@ Clients must send a heartbeat message to `/app/session/{code}/heartbeat` at leas
 
 1. **Active**: user is in Redis `session:{sessionId}:heartbeat:active` set
 2. **Away**: on STOMP disconnect, user moves to `session:{sessionId}:heartbeat:away` hash with timestamp
-3. **Timeout**: `HeartbeatTimeoutScheduler` runs every 15s; users in `away` for >30s are evicted via `LeaveSessionUseCase`
+3. **Timeout**: `HeartbeatTimeoutScheduler` runs every 15s; users in `away` for >30s are evicted — `Session.leave()` is called, and if the last participant times out the session moves to `INTERRUPTED`
 
 ### Reconnection within grace period
 
@@ -123,27 +133,10 @@ If the grace period has expired and the user was already evicted, `JoinSessionUs
 
 ## Planned Features (not yet implemented)
 
-### SCORING state
-
-A future `SCORING` state will be added to the session lifecycle. The intended flow:
-
-```
-PLAYING ──[check correct]──► SCORING ──► ENDED
-```
-
-- When `CheckGridUseCase` detects `isComplete && isCorrect`, it would trigger a `PLAYING → SCORING` transition on the `Session` aggregate
-- A new `SessionLifecycleCommand.Score` command would be added to `cocro-shared`
-- A `SessionCompleted` event would be broadcast to all participants
-- This is a **nice-to-have for MVP** — currently `CheckGridUseCase` is read-only
-
 ### SyncRequired event
 
 The `SyncRequired` event type is defined in `SessionEvent` but is not yet sent by `UpdateSessionGridUseCases`. Currently, a CAS conflict on `compareAndSet()` throws an exception that bubbles up unhandled. The intended behavior:
 
 - Catch the CAS conflict exception in `UpdateSessionGridUseCases`
 - Send `SyncRequired(currentRevision)` privately to the conflicting user
-- Client calls `GET /api/sessions/{code}/state` to resync
-
-### End session endpoint
-
-`Session.end()` exists in the domain model but no use case or controller exposes it. A future `POST /api/sessions/{code}/end` endpoint would allow the creator to manually end a session.
+- Client calls `POST /api/sessions/{code}/sync` to resync
