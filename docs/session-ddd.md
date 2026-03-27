@@ -21,7 +21,7 @@ following the layered DDD/Clean Architecture of the project.
 
 ## 1. Domain Model
 
-All domain types live in `cocro-shared` — no framework dependencies.
+All domain types live in `cocro-bff` under the `kernel` package — no framework dependencies.
 
 ### Session (Aggregate Root)
 
@@ -29,35 +29,38 @@ All domain types live in `cocro-shared` — no framework dependencies.
 Session
 ├── id: SessionId
 ├── shareCode: SessionShareCode        ← URL-safe join code
-├── gridId: GridId                     ← which crossword grid is played
+├── creatorId: UserId                  ← userId of the user who created the session
+├── gridId: GridShareCode              ← which crossword grid is played
+├── gridTemplate: GridTemplateSnapshot ← snapshot of the grid at session creation time
 ├── status: SessionStatus
 ├── participants: List<Participant>
 ├── sessionGridState: SessionGridState ← current grid content + revision
-└── createdAt: Instant
+└── createdAt / updatedAt: Instant
 ```
 
-A `Session` is the central aggregate. All mutations go through
-`Session.apply(SessionLifecycleCommand)` which returns a new `Session`
-(immutable style) or a domain error.
+A `Session` is the central aggregate. All mutations go through pure functions on `Session`
+(e.g. `session.join(userId)`, `session.leave(userId)`, `session.end()`) or through
+`Session.apply(SessionLifecycleCommand)` which return a new `Session` (immutable style)
+or a domain error.
 
 ### SessionStatus (state machine)
 
 ```
-CREATING  ──(start)──►  PLAYING  ──(all leave)──►  INTERRUPTED
-                            │
-                         (score)
-                            │
-                            ▼
-                         SCORING  ──►  ENDED
+POST /api/sessions ──► PLAYING ──[check correct]──► ENDED
+                          │
+                      [all leave / timeout]
+                          │
+                          ▼
+                      INTERRUPTED
 ```
 
-| Status       | Description                                  |
-|--------------|----------------------------------------------|
-| CREATING     | Session created, waiting for players to join |
-| PLAYING      | Session started by creator                   |
-| SCORING      | Scoring phase (future)                       |
-| ENDED        | Completed normally                           |
-| INTERRUPTED  | All active participants left                 |
+| Status       | Description                                                                 |
+|--------------|-----------------------------------------------------------------------------|
+| `PLAYING`    | Session active; grid updates via WebSocket are accepted                     |
+| `INTERRUPTED`| All active participants left (explicit leave or heartbeat timeout)           |
+| `ENDED`      | Grid was completed and validated as correct via `CheckGridUseCase`           |
+
+> **Note:** `CREATING` and `SCORING` states have been removed. Sessions are created in `PLAYING` status with an empty participant list. The creator must call `POST /api/sessions/join` to enter the session.
 
 ### SessionShareCode
 
@@ -71,37 +74,47 @@ Used as the primary join key and as the routing key for WebSocket topics.
 ### Create
 
 1. Creator calls `POST /api/sessions { gridId }`.
-2. `CreateSessionUseCase` validates the `gridId` format, generates a unique `SessionShareCode`, creates the `Session` with status `CREATING` and the creator as first participant (`InviteStatus.JOINED`).
-3. Session is persisted to MongoDB.
-4. Response: `{ shareCode }`.
+2. `CreateSessionUseCase` validates the `gridId` format, generates a unique `SessionShareCode`, creates the `Session` with status `PLAYING` and an **empty participant list**.
+3. Session is persisted to MongoDB. Redis grid state cache is initialized.
+4. Response: `SessionCreationSuccess { sessionId, shareCode }`.
+
+The creator must then call `POST /api/sessions/join` to join their own session.
 
 ### Join
 
 1. Player calls `POST /api/sessions/join { shareCode }`.
 2. `JoinSessionUseCase` loads the session, applies `SessionLifecycleCommand.Join(userId)`.
 3. Domain rules:
-   - Session must be in `CREATING` status.
-   - Participant must not already be `JOINED` or `LEFT`.
+   - Session must be in `PLAYING` or `INTERRUPTED` status.
+   - Participant must not already be `JOINED`.
    - Active participants (`JOINED`) must be < `ParticipantsRule.MAX_ACTIVE_PARTICIPANTS` (= **4**).
-4. On success: participant added with `InviteStatus.JOINED`, `ParticipantJoined` event broadcast.
-5. Errors: `SessionFull` (→ 409), `AlreadyParticipant` (→ 409), `InvalidStatusForAction` (→ 400).
-
-### Start
-
-1. Creator calls `POST /api/sessions/start { shareCode }`.
-2. `StartSessionUseCase` applies `SessionLifecycleCommand.Start(userId)`.
-3. Domain rules:
-   - Only the creator (`Participant.isCreator = true`) can start.
-   - Session must be in `CREATING` status.
-4. On success: `Session.status = PLAYING`, `SessionStarted` event broadcast.
+   - A previously `LEFT` participant may rejoin.
+4. On success: participant added/updated with `InviteStatus.JOINED`, `ParticipantJoined` event broadcast.
+5. Response: `SessionFullDto` (full session state including grid template and current cells).
 
 ### Leave
 
 1. Player calls `POST /api/sessions/leave { shareCode }`.
 2. `LeaveSessionUseCase` applies `SessionLifecycleCommand.Leave(userId)`.
 3. Participant's `InviteStatus` → `LEFT`.
-4. If no active participants remain → `Session.status = INTERRUPTED`.
-5. `ParticipantLeft { reason: "explicit" }` event broadcast.
+4. If no active participants remain and `status == PLAYING` → `Session.interrupt()` is called → `INTERRUPTED`.
+5. Events broadcast:
+   - `ParticipantLeft { userId, participantCount, reason: "explicit" }` to all
+   - `SessionInterrupted { shareCode }` if session became INTERRUPTED
+
+### Check Grid (end-of-game trigger)
+
+1. Any participant calls `POST /api/sessions/{shareCode}/check`.
+2. `CheckGridUseCase` compares current grid state against the reference grid.
+3. Flushes Redis → MongoDB and broadcasts `GridChecked` to all participants.
+4. If `isComplete && isCorrect`: calls `session.end()` → status `ENDED`, broadcasts `SessionEnded { shareCode, correctCount, totalCount }`.
+
+### Sync
+
+1. Participant calls `POST /api/sessions/{shareCode}/sync`.
+2. `SynchroniseSessionUseCase` verifies caller is a JOINED participant.
+3. Flushes Redis → MongoDB.
+4. Returns full `SessionFullDto`.
 
 ---
 
@@ -111,20 +124,19 @@ Used as the primary join key and as the routing key for WebSocket topics.
 
 ```
 SessionGridState
-├── revision: SessionGridRevision   ← monotonically increasing (Long)
-└── cells: Map<Position, SessionGridCellState>
+├── revision: SessionGridStateRevision  ← monotonically increasing (Long)
+└── cells: Map<CellPos, SessionGridCellState>
 ```
 
 `SessionGridCellState` is a sealed type:
-- `Letter(char: Char)` — a letter has been placed
-- `Empty` — the cell is clear
+- `Letter(value: String)` — a letter has been placed
 
 ### SessionGridCommand
 
 ```
 sealed class SessionGridCommand
-├── SetLetter(posX, posY, letter: Char)
-└── ClearCell(posX, posY)
+├── PlaceLetter(posX, posY, letter: String, actorId: UserId)
+└── ClearCell(posX, posY, actorId: UserId)
 ```
 
 `SessionGridState.apply(command)` returns a new `SessionGridState`
@@ -140,16 +152,15 @@ Grid updates are **WebSocket-only** — there is no REST endpoint for grid updat
 2. Applies the `SessionGridCommand`.
 3. Writes the new state back to Redis using CAS (compare-and-swap on revision).
 4. On success: broadcasts `GridUpdated` to `/topic/session/{shareCode}`.
-5. On CAS conflict (stale revision): sends private `SyncRequired { currentRevision }` to the sender.
+5. On CAS conflict (stale revision): sends private `SyncRequired { currentRevision }` to the sender (not yet implemented — currently raises an exception).
 
 ### Resync
 
-If a client receives `SyncRequired`, it calls:
+If a client receives `SyncRequired` or needs to rehydrate after reconnect, it calls:
 
-`GET /api/sessions/{shareCode}/state`
+`POST /api/sessions/{shareCode}/sync`
 
-`GetSessionStateUseCase` reads from Redis (or falls back to MongoDB)
-and returns `{ revision, cells[] }`.
+`SynchroniseSessionUseCase` flushes the Redis state to MongoDB and returns `SessionFullDto` (full grid template + current cells + revision + participant count + status).
 
 ---
 
@@ -158,18 +169,15 @@ and returns `{ revision, cells[] }`.
 ```
 Participant
 ├── userId: UserId
-├── isCreator: Boolean
-└── inviteStatus: InviteStatus
+└── status: InviteStatus
 ```
 
 ### InviteStatus
 
-| Status  | Meaning                               |
-|---------|---------------------------------------|
-| INVITED | Placeholder (future invite flow)      |
-| JOINED  | Active in the session                 |
-| LEFT    | Explicitly left or timed out          |
-| KICKED  | Removed by creator (future)           |
+| Status  | Meaning                                    |
+|---------|--------------------------------------------|
+| `JOINED`| Active in the session                      |
+| `LEFT`  | Explicitly left or timed out               |
 
 `ParticipantsRule.countActiveParticipants(participants)` counts only `JOINED`.
 `MAX_ACTIVE_PARTICIPANTS = 4`.
@@ -178,7 +186,7 @@ Participant
 
 ## 5. Error Model
 
-Business operations return `CocroResult<T, E>` (defined in `cocro-shared`):
+Business operations return `CocroResult<T, E>`:
 
 ```kotlin
 sealed class CocroResult<out T, out E> {
@@ -191,15 +199,16 @@ sealed class CocroResult<out T, out E> {
 
 | Error                  | HTTP | Meaning                                    |
 |------------------------|------|--------------------------------------------|
-| SessionNotFound        | 404  | No session with given shareCode            |
-| InvalidStatusForAction | 400  | Action not allowed in current status       |
-| NotCreator             | 403  | Only creator can perform this action       |
-| AlreadyParticipant     | 409  | User already joined (or left) this session |
-| SessionFull            | 409  | MAX_ACTIVE_PARTICIPANTS reached            |
-| InvalidShareCode       | 400  | Share code fails format validation         |
-| InvalidGridId          | 400  | Grid ID not found                          |
-| GridCellOutOfBounds    | 400  | (posX, posY) outside grid dimensions      |
-| InvalidLetter          | 400  | Letter value not allowed                   |
+| `SessionNotFound`      | 404  | No session with given shareCode            |
+| `InvalidStatusForAction`| 400 | Action not allowed in current status       |
+| `AlreadyParticipant`   | 409  | User already joined this session           |
+| `SessionFull`          | 409  | MAX_ACTIVE_PARTICIPANTS reached            |
+| `UserNotParticipant`   | 403  | User is not a joined participant           |
+| `InvalidShareCode`     | 400  | Share code fails format validation         |
+| `InvalidGridId`        | 400  | Grid ID not found                          |
+| `GridCellOutOfBounds`  | 400  | (posX, posY) outside grid dimensions      |
+| `InvalidLetter`        | 400  | Letter value not allowed                   |
+| `Unauthorized`         | 401  | User not authenticated                     |
 
 `ErrorMapper` in the presentation layer converts these to RFC 7807 problem responses.
 
@@ -210,14 +219,15 @@ sealed class CocroResult<out T, out E> {
 All use cases are in `cocro-bff/application/session/usecase/`.
 They have no Spring dependencies — only ports (interfaces).
 
-| Use Case                  | Port dependencies                                           |
-|---------------------------|-------------------------------------------------------------|
-| `CreateSessionUseCase`    | `SessionRepository`, `CurrentUserProvider`                  |
-| `JoinSessionUseCase`      | `SessionRepository`, `CurrentUserProvider`, `SessionNotifier` |
-| `LeaveSessionUseCase`     | `SessionRepository`, `CurrentUserProvider`, `SessionNotifier` |
-| `StartSessionUseCase`     | `SessionRepository`, `CurrentUserProvider`, `SessionNotifier` |
-| `UpdateSessionGridUseCase`| `SessionRepository`, `SessionGridStateCache`, `SessionNotifier`, `CurrentUserProvider` |
-| `GetSessionStateUseCase`  | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider` |
+| Use Case                      | Port dependencies                                                                       |
+|-------------------------------|-----------------------------------------------------------------------------------------|
+| `CreateSessionUseCase`        | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider`, `SessionCodeGenerator`, `GridRepository` |
+| `JoinSessionUseCase`          | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider`, `SessionNotifier`, `HeartbeatTracker` |
+| `LeaveSessionUseCase`         | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider`, `SessionNotifier`, `HeartbeatTracker` |
+| `SynchroniseSessionUseCase`   | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider`                     |
+| `CheckGridUseCase`            | `SessionRepository`, `SessionGridStateCache`, `SessionNotifier`, `GridRepository`       |
+| `UpdateSessionGridUseCase`    | `SessionRepository`, `SessionGridStateCache`, `SessionNotifier`, `CurrentUserProvider`  |
+| `GetSessionStateUseCase`      | `SessionRepository`, `SessionGridStateCache`                                            |
 
 ### Key Ports
 
@@ -228,6 +238,8 @@ They have no Spring dependencies — only ports (interfaces).
 | `SessionNotifier`       | Broadcast SessionEvent via STOMP                    |
 | `CurrentUserProvider`   | Read authenticated user from SecurityContextHolder  |
 | `HeartbeatTracker`      | Track last-seen timestamps in Redis                 |
+| `GridRepository`        | Load Grid from MongoDB (for CheckGrid)              |
+| `SessionCodeGenerator`  | Generate unique SessionShareCode                    |
 
 ---
 
@@ -239,7 +251,7 @@ They have no Spring dependencies — only ports (interfaces).
 - Auth: STOMP CONNECT frame with `Authorization: Bearer <token>` header
 - `StompAuthChannelInterceptor` (implements `ExecutorChannelInterceptor`):
   - **CONNECT** (`preSend`): validates JWT, stores `CocroAuthentication` and `shareCode` in WebSocket session attributes.
-  - **SEND/SUBSCRIBE** (`beforeHandle`): restores auth to `SecurityContextHolder` on the executor thread (thread-local — different from Tomcat thread where `preSend` runs).
+  - **SEND/SUBSCRIBE** (`beforeHandle`): restores auth to `SecurityContextHolder` on the executor thread.
   - **After handling** (`afterMessageHandled`): clears `SecurityContextHolder`.
 
 ### Welcome
@@ -258,39 +270,38 @@ SUBSCRIBE /app/session/{shareCode}/welcome
   "shareCode": "ABC123",
   "topicToSubscribe": "/topic/session/ABC123",
   "participantCount": 2,
-  "status": "CREATING",
+  "status": "PLAYING",
   "gridRevision": 0
 }
 ```
 
-The synchronous `@SubscribeMapping` pattern avoids the timing race
-that would occur with a `SessionConnectedEvent` approach
-(server fires the event before the client finishes subscribing).
+The synchronous `@SubscribeMapping` pattern avoids the timing race that would occur
+with a `SessionConnectedEvent` approach.
 
 ### Ongoing Events
 
 The client then subscribes to `/topic/session/{shareCode}` for broadcasts.
 
-| Event             | Direction  | Destination                  | Trigger                        |
-|-------------------|------------|------------------------------|--------------------------------|
-| `ParticipantJoined` | broadcast | `/topic/session/{shareCode}` | successful join                |
-| `ParticipantLeft`   | broadcast | `/topic/session/{shareCode}` | leave or heartbeat timeout     |
-| `SessionStarted`    | broadcast | `/topic/session/{shareCode}` | creator calls start            |
-| `GridUpdated`       | broadcast | `/topic/session/{shareCode}` | successful grid update         |
-| `SyncRequired`      | private   | `/user/queue/session`        | CAS conflict on grid update    |
-
-`SyncRequired` is sent privately via `SimpMessagingTemplate.convertAndSendToUser()`
-using the `DefaultSimpUserRegistry`, which resolves user → session via the
-`simpUser` session attribute set during CONNECT.
+| Event               | Direction  | Destination                  | Trigger                              |
+|---------------------|------------|------------------------------|--------------------------------------|
+| `ParticipantJoined` | broadcast  | `/topic/session/{shareCode}` | Successful join                      |
+| `ParticipantLeft`   | broadcast  | `/topic/session/{shareCode}` | Leave or heartbeat timeout           |
+| `GridUpdated`       | broadcast  | `/topic/session/{shareCode}` | Successful grid update               |
+| `GridChecked`       | broadcast  | `/topic/session/{shareCode}` | `CheckGridUseCase`                   |
+| `SessionEnded`      | broadcast  | `/topic/session/{shareCode}` | Grid complete+correct via CheckGrid  |
+| `SessionInterrupted`| broadcast  | `/topic/session/{shareCode}` | Last participant left/timed out      |
+| `SyncRequired`      | private    | `/user/queue/session`        | CAS conflict on grid update (future) |
 
 ### Jackson Serialization
 
-`SessionEvent` is a sealed Kotlin interface. Each subtype carries a `"type"` discriminator field:
+`SessionEvent` is a sealed Kotlin interface. Each subtype carries a `"type"` discriminator:
 
 ```kotlin
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(SessionEvent.SessionWelcome::class, name = "SessionWelcome"),
+    JsonSubTypes.Type(SessionEvent.GridChecked::class, name = "GridChecked"),
+    JsonSubTypes.Type(SessionEvent.SessionEnded::class, name = "SessionEnded"),
     // ...
 )
 sealed interface SessionEvent
@@ -305,6 +316,7 @@ sealed interface SessionEvent
 - Primary persistence for `Session`, `Grid`, `User`.
 - Documents in `cocro-bff/infrastructure/persistence/mongo/`.
 - Spring Data MongoDB repositories.
+- Migration fallback in `SessionDocumentMapper`: stored `"CREATING"` and `"SCORING"` values are mapped to `PLAYING` on read.
 
 ### Redis
 
@@ -314,12 +326,11 @@ Two responsibilities:
    - Key: `session:grid:{sessionId}`
    - Value: serialized `SessionGridState`
    - CAS via Lua script on `revision` field
-   - Flushed to MongoDB periodically by `SessionFlushScheduler`
+   - Flushed to MongoDB by `SessionFlushScheduler` and on participant changes
 
 2. **Heartbeat tracker** (`RedisHeartbeatTracker`):
    - Key: `heartbeat:{sessionId}:{userId}`
    - Value: last-seen timestamp
-   - TTL auto-expires after grace period
    - Read by `HeartbeatTimeoutScheduler`
 
 ### JWT
@@ -336,44 +347,43 @@ Both schedulers run inside the BFF application context (Spring `@Scheduled`).
 
 ### HeartbeatTimeoutScheduler
 
-- Runs every **15 seconds**
-- Grace period: **30 seconds**
-- For each tracked `(sessionId, userId)`: if `lastHeartbeat > 30s ago`
-  → calls `LeaveSessionUseCase` with `reason = "timeout"`
-  → broadcasts `ParticipantLeft { reason: "timeout" }`
-- Clients are expected to send a heartbeat (STOMP frame or REST ping)
-  at least every 30 seconds to stay active.
+- Runs every **15 seconds** (configurable via `cocro.session.heartbeat.check-interval-ms`)
+- Grace period: **30 seconds** (configurable via `cocro.session.heartbeat.grace-period-ms`)
+- For each tracked session: users away > 30s are evicted via `session.leave(userId)`
+- If the last participant times out → `session.interrupt()` → broadcasts `SessionInterrupted`
+- Broadcasts `ParticipantLeft { reason: "timeout" }` for each evicted user
 
 ### SessionFlushScheduler
 
-- Runs every **30 seconds**
-- Scans Redis for session grid states that have been modified since last flush
+- Runs every **60 seconds** (configurable via `cocro.session.flush.interval-ms`)
+- Scans Redis for session grid states modified since last flush
 - Writes updated `SessionGridState` to MongoDB
-- Ensures durability without blocking the hot update path
 
 ---
 
 ## Summary — Happy Path (Creator + 1 Player)
 
 ```
-Creator                              Player
-  |                                    |
-  |-- POST /api/sessions -----------> |
-  |<- 201 { shareCode }               |
-  |                                    |
-  |                                    |-- POST /api/sessions/join -->
-  |                                    |<- 200 { participantCount: 2 }
+Creator                                    Player
+  |                                          |
+  |-- POST /api/sessions -----------------> |
+  |<- 201 { sessionId, shareCode }          |
+  |                                          |
+  |-- POST /api/sessions/join ------------> |
+  |<- 200 SessionFullDto                    |
+  |                                          |
+  |                                          |-- POST /api/sessions/join -->
+  |                                          |<- 200 SessionFullDto (ParticipantJoined broadcast)
   |
-  |-- POST /api/sessions/start -----> (broadcasts SessionStarted)
+  |-- WS CONNECT (JWT + shareCode)          |-- WS CONNECT (JWT + shareCode)
+  |-- SUBSCRIBE /app/.../welcome            |-- SUBSCRIBE /app/.../welcome
+  |<- SessionWelcome                        |<- SessionWelcome
+  |-- SUBSCRIBE /topic/session/...          |-- SUBSCRIBE /topic/session/...
   |
-  |-- WS CONNECT (JWT + shareCode)    |-- WS CONNECT (JWT + shareCode)
-  |-- SUBSCRIBE /app/.../welcome      |-- SUBSCRIBE /app/.../welcome
-  |<- SessionWelcome                  |<- SessionWelcome
-  |-- SUBSCRIBE /topic/session/...    |-- SUBSCRIBE /topic/session/...
+  |-- SEND /app/.../grid ──────────────────► (broadcasts GridUpdated to both)
+  |<- GridUpdated                           |<- GridUpdated
   |
-  |-- SEND /app/.../grid -----------> (broadcasts GridUpdated)
-  |<- GridUpdated                    |<- GridUpdated
-  |
-  |-- GET /api/sessions/.../state --> (resync after SyncRequired)
-  |<- { revision, cells[] }
+  |-- POST /api/sessions/{code}/check ────► (broadcasts GridChecked to both)
+  |  if complete+correct:                    (broadcasts SessionEnded to both)
+  |<- GridCheckSuccess { isComplete, isCorrect, ... }
 ```

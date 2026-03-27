@@ -3,19 +3,20 @@
 ## Project Layout
 
 ```
-cocro-shared (kernel) — Kotlin Multiplatform, no framework
-  kernel/auth/     — User, UserId, AuthenticatedUser, AuthError
-  kernel/grid/     — Grid aggregate, Cell sealed (LetterCell/ClueCell/BlackCell), Letter, GridShareCode
-  kernel/session/  — Session aggregate, SessionGridState, SessionGridCommand, SessionError
-  kernel/common/   — CocroResult<T,E>, CocroError, ErrorCode
-
 cocro-bff (Spring Boot 3.2)
+  kernel/          — domain model, value objects, rules, errors (no framework deps)
+    kernel/auth/     — User, UserId, AuthenticatedUser, AuthError
+    kernel/grid/     — Grid aggregate, Cell sealed (LetterCell/ClueCell/BlackCell), Letter, GridShareCode
+    kernel/session/  — Session aggregate, SessionGridState, SessionGridCommand, SessionError
+    kernel/common/   — CocroResult<T,E>, CocroError, ErrorCode
   application/     — use cases, DTOs, mappers, ports (interfaces only — NO Spring deps)
   infrastructure/  — MongoDB adapters, Redis cache, JWT, Spring Security, schedulers
   presentation/    — REST controllers, WebSocket controllers, ErrorMapper
 ```
 
-`cocro-shared` has zero framework dependencies. It is consumed by both `cocro-bff` (JVM) and the Compose Multiplatform app (Android/iOS). All business logic, domain models, value objects, rules, and error types live here.
+The `kernel` package has zero framework dependencies. All business logic, domain models, value objects, rules, and error types live here.
+
+> **Note:** `cocro-shared` (Kotlin Multiplatform) was absorbed into `cocro-bff` as a plain Kotlin package during the session lifecycle refactoring. The module no longer exists as a separate Gradle project.
 
 ## CocroResult
 
@@ -84,11 +85,10 @@ class JoinSessionUseCase(
 Domain mutations never happen directly in use cases. They go through sealed `XxxCommand` types defined in `cocro-shared`. The aggregate's `apply()` function is a pure function — it returns a new aggregate (or error) without side effects.
 
 ```kotlin
-// cocro-shared
+// cocro-bff/kernel
 sealed interface SessionLifecycleCommand {
     data class Join(val actorId: UserId) : SessionLifecycleCommand
     data class Leave(val actorId: UserId) : SessionLifecycleCommand
-    data class Start(val actorId: UserId) : SessionLifecycleCommand
 }
 
 // Usage in use case:
