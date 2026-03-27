@@ -131,12 +131,11 @@ If a user reconnects (new STOMP CONNECT + join) within the 30s grace period:
 
 If the grace period has expired and the user was already evicted, `JoinSessionUseCase` treats them as a new join and performs the full `Join` command + broadcast.
 
-## Planned Features (not yet implemented)
+## CAS Conflict Handling
 
-### SyncRequired event
+When `compareAndSet()` detects a revision conflict in `UpdateSessionGridUseCases`, the exception is caught and:
 
-The `SyncRequired` event type is defined in `SessionEvent` but is not yet sent by `UpdateSessionGridUseCases`. Currently, a CAS conflict on `compareAndSet()` throws an exception that bubbles up unhandled. The intended behavior:
-
-- Catch the CAS conflict exception in `UpdateSessionGridUseCases`
-- Send `SyncRequired(currentRevision)` privately to the conflicting user
-- Client calls `POST /api/sessions/{code}/sync` to resync
+1. The current revision is fetched from cache (or DB as fallback)
+2. `SyncRequired(currentRevision)` is sent privately to the conflicting user via `sessionNotifier.notifyUser()`
+3. The use case returns `CocroResult.Error(SessionError.ConcurrentModification)` (409)
+4. Client receives `SyncRequired` and calls `POST /api/sessions/{code}/sync` to rehydrate
