@@ -26,6 +26,18 @@ Connect the existing GridEditor to a usable flow: after creating or editing a gr
 
 ---
 
+## Hard Prerequisites
+
+### Idempotent `POST /api/sessions/join`
+
+The session-launch flow (`/grid/mine` → "Lancer une session" → `/play/:shareCode`) relies on `GridPlayerComponent.ngOnInit()` calling `POST /api/sessions/join` on page load. Currently this returns 409 if the user is already JOINED. **This must be fixed before the session-launch flow can work.**
+
+**Required change:** `JoinSessionUseCase` must detect that the requesting user is already a `JOINED` participant and return `200 + SessionFullDto` instead of `SessionError.AlreadyParticipant`. The 409 path is only reached by third parties trying to join a full session.
+
+This prerequisite is tracked in the v0.2.0 backlog but is **required for v0.1.0** of this feature.
+
+---
+
 ## Architecture
 
 ### Approach chosen: Standalone hub (Option A)
@@ -39,10 +51,23 @@ New `/grid/mine` page added alongside existing routes. Lobby untouched. Editor e
 ### 1. `GridRepository` port — new method
 
 ```kotlin
-fun findByCreatorId(creatorId: UserId): List<Grid>
+fun findByAuthor(author: UserId): List<Grid>
 ```
 
-Implemented in `MongoGridRepository` using a query by `creatorId` field on the `GridDocument`.
+The creator is stored at `Grid.metadata.author` (type `UserId`) → mapped to `GridMetadataDocument.author` (String). The Spring Data derived query method is `findByMetadataAuthor(author: String): List<GridDocument>`.
+
+**Files to update:**
+- `GridRepository.kt` (port interface) — add `findByAuthor`
+- `SpringDataGridRepository.kt` — add `findByMetadataAuthor`
+- `MongoGridRepositoryAdapter.kt` — implement `findByAuthor` by calling `springDataRepo.findByMetadataAuthor(author.toString()).map { it.toDomain() }`
+- `GridDocument.kt` — add `@CompoundIndex(name = "metadata_author_idx", def = "{'metadata.author': 1}")`
+
+Add a `@CompoundIndex` on `GridDocument` to index the nested `metadata.author` path. `@Indexed` on the embedded `GridMetadataDocument.author` field has no effect since embedded documents are not `@Document` classes.
+
+```kotlin
+// GridDocument.kt — add to existing @CompoundIndex list
+@CompoundIndex(name = "metadata_author_idx", def = "{'metadata.author': 1}")
+```
 
 ### 2. `GridSummaryDto`
 
@@ -56,10 +81,13 @@ data class GridSummaryDto(
     val height: Int,
     val difficulty: String,
     val createdAt: Instant,
+    val updatedAt: Instant,
 )
 ```
 
 ### 3. `GetMyGridsUseCase`
+
+`@PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")` on the controller endpoint guarantees the user is authenticated before this use case runs. `currentUserOrNull()!!` is safe here — a null return would mean Spring Security failed to reject an unauthenticated request, which is a framework bug.
 
 ```kotlin
 @Service
@@ -68,15 +96,79 @@ class GetMyGridsUseCase(
     private val gridRepository: GridRepository,
 ) {
     fun execute(): CocroResult<List<GridSummaryDto>, GridError> {
-        val user = currentUserProvider.currentUserOrNull()
-            ?: return CocroResult.Error(listOf(GridError.UnauthorizedGridCreation))
-        val grids = gridRepository.findByCreatorId(user.userId)
+        val user = currentUserProvider.currentUserOrNull()!!
+        val grids = gridRepository.findByAuthor(user.userId)
         return CocroResult.Success(grids.map { it.toSummaryDto() })
     }
 }
 ```
 
-### 4. `GridController` — two new endpoints
+### 4. `GridFullDto` — response DTO for `GET /api/grids/{shortId}`
+
+Returns enough data to re-hydrate the editor. Matches the Angular `Grid` interface field for field.
+
+**Important:** The existing `CellDto` is the *write* shape (flat: `letter: String?`, `separator: SeparatorType?`) used when Angular submits grids to the BFF. The Angular *read* shape (`Cell`) nests the letter: `letter: { value, separator, number }`. The BFF must return the nested shape so `GridHttpAdapter.getGrid()` (which deserializes directly to `Grid`) works without any mapping.
+
+Define dedicated read DTOs:
+
+```kotlin
+data class GridFullDto(
+    val gridId: String,           // shortId
+    val title: String,
+    val width: Int,
+    val height: Int,
+    val difficulty: String,
+    val description: String?,
+    val reference: String?,
+    val author: String,
+    val cells: List<GridFullCellDto>,
+    val globalClue: GlobalClueDto?,
+)
+
+data class GridFullCellDto(
+    val x: Int,
+    val y: Int,
+    val type: CellType,           // serialized by Jackson as "LETTER", "CLUE_SINGLE", etc.
+    val letter: GridFullLetterDto?,
+    val clues: List<ClueDto>?,    // reuses existing ClueDto(direction, text)
+)
+
+data class GridFullLetterDto(
+    val value: String,
+    val separator: SeparatorType, // serialized by Jackson as "NONE", "LEFT", etc.
+    val number: Int?,
+)
+
+data class GlobalClueDto(
+    val label: String,
+    val wordLengths: List<Int>,
+)
+```
+
+### 5. `GetGridUseCase`
+
+`GridShareCode` has no nullable factory method — its constructor throws `IllegalArgumentException` on invalid input. Use `GridShareCodeRule.validate()` to guard before constructing (same pattern as validation layers elsewhere):
+
+```kotlin
+@Service
+class GetGridUseCase(
+    private val gridRepository: GridRepository,
+) {
+    fun execute(shortId: String): CocroResult<GridFullDto, GridError> {
+        if (!GridShareCodeRule.validate(shortId)) {
+            return CocroResult.Error(listOf(GridError.InvalidGridId(shortId)))
+        }
+        val shareCode = GridShareCode(shortId)
+        val grid = gridRepository.findByShortId(shareCode)
+            ?: return CocroResult.Error(listOf(GridError.GridNotFound(shortId)))
+        return CocroResult.Success(grid.toFullDto())
+    }
+}
+```
+
+Authorization: any authenticated user may read a grid (`isAuthenticated()`).
+
+### 6. `GridController` — two new endpoints
 
 ```kotlin
 @GetMapping("/mine")
@@ -89,12 +181,6 @@ fun getMyGrids(): ResponseEntity<*> =
 fun getGrid(@PathVariable shortId: String): ResponseEntity<*> =
     getGridUseCase.execute(shortId).toResponseEntity(HttpStatus.OK)
 ```
-
-`GetGridUseCase` is a thin use case: find by shortId, map to a full response DTO, return 404 if not found.
-
-### Response DTO for GET /api/grids/{shortId}
-
-Returns enough data to re-hydrate the editor: all cells, clues, title, dimensions, global clue. Reuses or extends existing grid mapping logic.
 
 ---
 
@@ -111,6 +197,7 @@ export interface GridSummary {
   height: number;
   difficulty: string;
   createdAt: string;
+  updatedAt: string;
 }
 ```
 
@@ -173,9 +260,7 @@ Two action buttons:
 The session launch sequence in `MyGridsComponent`:
 1. `CreateSessionUseCase.execute(gridId)` → `POST /api/sessions` → `{ shareCode }`
 2. `router.navigate(['/play', shareCode])`
-3. `GridPlayerComponent.ngOnInit()` calls `POST /api/sessions/join` (idempotent — see note below)
-
-> **Note on idempotent join:** `POST /api/sessions/join` currently returns 409 if already JOINED. For the session-launch flow to work without a second call, either: (a) the BFF makes join idempotent (return 200+SessionFullDto if already JOINED), or (b) `GridPlayerComponent` handles 409 by falling back to `GET /state`. Option (a) is preferred and tracked separately.
+3. `GridPlayerComponent.ngOnInit()` calls `POST /api/sessions/join` (now idempotent — see Hard Prerequisites)
 
 ### `GridEditorComponent` — edit mode
 
@@ -198,6 +283,8 @@ export const EDITOR_ROUTES: Routes = [
   { path: '',                redirectTo: 'mine', pathMatch: 'full' },
 ];
 ```
+
+> **Note on redirect change:** The default `/grid` route currently redirects to `create`. This spec changes it to `mine` — navigating to `/grid` will now land on the hub instead of the editor.
 
 ### Bug fix
 
@@ -230,9 +317,10 @@ export const EDITOR_ROUTES: Routes = [
 ## Testing
 
 ### BFF
-- `GetMyGridsUseCase`: returns empty list when no grids, returns only current user's grids
+- `GetMyGridsUseCase`: returns empty list when no grids, returns only current user's grids (not other users')
 - `GridController` GET /mine: 401 if unauthenticated, 200 with list
-- `GridController` GET /{shortId}: 200 with data, 404 if not found
+- `GridController` GET /{shortId}: 200 with data, 404 if not found, 400 if invalid shortId
+- `JoinSessionUseCase` idempotent: 200+SessionFullDto if already JOINED (not 409)
 
 ### Angular
 - `MyGridsComponent`: renders grid cards, shows empty state, handles error
