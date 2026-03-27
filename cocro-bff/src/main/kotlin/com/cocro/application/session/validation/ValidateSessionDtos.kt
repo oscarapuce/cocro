@@ -5,7 +5,7 @@ import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.LeaveSessionDto
 import com.cocro.application.session.dto.UpdateSessionGridDto
 import com.cocro.application.session.validation.dsl.engine.validateSession
-import com.cocro.kernel.session.error.SessionError
+import com.cocro.domain.session.error.SessionError
 
 internal fun validateCreateSessionDto(dto: CreateSessionDto): List<SessionError> = validateSession {
     gridId(dto.gridId) { required() }

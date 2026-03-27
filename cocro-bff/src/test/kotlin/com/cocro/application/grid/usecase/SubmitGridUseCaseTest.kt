@@ -5,13 +5,13 @@ import com.cocro.application.grid.dto.CellDto
 import com.cocro.application.grid.dto.SubmitGridDto
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.grid.service.GridIdGenerator
-import com.cocro.kernel.auth.enum.Role
-import com.cocro.kernel.auth.model.AuthenticatedUser
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.grid.enums.CellType
-import com.cocro.kernel.grid.error.GridError
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
+import com.cocro.domain.auth.enum.Role
+import com.cocro.domain.auth.model.AuthenticatedUser
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.common.CocroResult
+import com.cocro.domain.grid.enums.CellType
+import com.cocro.domain.grid.error.GridError
+import com.cocro.domain.grid.model.valueobject.GridShareCode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -100,7 +100,7 @@ class SubmitGridUseCaseTest {
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
         whenever(gridIdGenerator.generateId()).thenReturn(shareCode)
         whenever(gridRepository.findByHashLetters(any())).thenAnswer {
-            val grid = mock<com.cocro.kernel.grid.model.Grid>()
+            val grid = mock<com.cocro.domain.grid.model.Grid>()
             whenever(grid.hashLetters).thenReturn(it.arguments[0] as Long)
             whenever(grid.shortId).thenReturn(GridShareCode("OTHER1"))
             grid
@@ -156,7 +156,7 @@ class SubmitGridUseCaseTest {
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
         whenever(gridIdGenerator.generateId()).thenReturn(GridShareCode("ABCDEF"))
         whenever(gridRepository.findByHashLetters(any())).thenReturn(null)
-        whenever(gridRepository.save(any())).thenAnswer { it.arguments[0] as com.cocro.kernel.grid.model.Grid }
+        whenever(gridRepository.save(any())).thenAnswer { it.arguments[0] as com.cocro.domain.grid.model.Grid }
 
         val dto = validDtoWithNumberedCells(listOf(2, 1))
         val result = useCase.execute(dto)

@@ -1,19 +1,19 @@
 package com.cocro.application.session.mapper
 
-import com.cocro.kernel.grid.enums.ClueDirection
-import com.cocro.kernel.grid.enums.SeparatorType
-import com.cocro.kernel.grid.model.Cell
-import com.cocro.kernel.grid.model.CellPos
-import com.cocro.kernel.grid.model.Clue
-import com.cocro.kernel.grid.model.Grid
-import com.cocro.kernel.grid.model.GridMetadata
-import com.cocro.kernel.grid.model.Letter
-import com.cocro.kernel.grid.model.valueobject.ClueText
-import com.cocro.kernel.grid.model.valueobject.GridHeight
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
-import com.cocro.kernel.grid.model.valueobject.GridTitle
-import com.cocro.kernel.grid.model.valueobject.GridWidth
-import com.cocro.kernel.grid.model.valueobject.LetterValue
+import com.cocro.domain.grid.enums.ClueDirection
+import com.cocro.domain.grid.enums.SeparatorType
+import com.cocro.domain.grid.model.Cell
+import com.cocro.domain.grid.model.CellPos
+import com.cocro.domain.grid.model.Clue
+import com.cocro.domain.grid.model.Grid
+import com.cocro.domain.grid.model.GridMetadata
+import com.cocro.domain.grid.model.Letter
+import com.cocro.domain.grid.model.valueobject.ClueText
+import com.cocro.domain.grid.model.valueobject.GridHeight
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.grid.model.valueobject.GridTitle
+import com.cocro.domain.grid.model.valueobject.GridWidth
+import com.cocro.domain.grid.model.valueobject.LetterValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -27,7 +27,7 @@ class GridTemplateMapperTest {
         shortId = gridId,
         title = GridTitle("Ma Grille"),
         metadata = GridMetadata(
-            author = com.cocro.kernel.auth.model.valueobject.UserId.new(),
+            author = com.cocro.domain.auth.model.valueobject.UserId.new(),
             reference = "REF-XYZ",
             description = "Description de test",
             difficulty = "3",

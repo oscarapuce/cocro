@@ -5,11 +5,11 @@ import com.cocro.application.session.dto.SessionFullDto
 import com.cocro.application.session.mapper.toSessionFullDto
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
-import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.session.enum.InviteStatus
-import com.cocro.kernel.session.error.SessionError
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
-import com.cocro.kernel.session.rule.ParticipantsRule
+import com.cocro.domain.common.CocroResult
+import com.cocro.domain.session.enum.InviteStatus
+import com.cocro.domain.session.error.SessionError
+import com.cocro.domain.session.model.valueobject.SessionShareCode
+import com.cocro.domain.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

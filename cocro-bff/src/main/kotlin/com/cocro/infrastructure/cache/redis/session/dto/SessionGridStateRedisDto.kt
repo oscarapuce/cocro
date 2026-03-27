@@ -1,11 +1,11 @@
 package com.cocro.infrastructure.cache.redis.session.dto
 
-import com.cocro.kernel.grid.model.CellPos
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
-import com.cocro.kernel.session.model.state.SessionGridCellState
-import com.cocro.kernel.session.model.state.SessionGridState
-import com.cocro.kernel.session.model.state.SessionGridStateRevision
-import com.cocro.kernel.session.model.valueobject.SessionId
+import com.cocro.domain.grid.model.CellPos
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.session.model.state.SessionGridCellState
+import com.cocro.domain.session.model.state.SessionGridState
+import com.cocro.domain.session.model.state.SessionGridStateRevision
+import com.cocro.domain.session.model.valueobject.SessionId
 import java.util.UUID
 
 /**

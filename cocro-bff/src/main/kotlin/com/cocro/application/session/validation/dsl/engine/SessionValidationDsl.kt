@@ -1,6 +1,6 @@
 package com.cocro.application.session.validation.dsl.engine
 
-import com.cocro.kernel.session.error.SessionError
+import com.cocro.domain.session.error.SessionError
 
 internal class SessionValidationDsl(private val engine: SessionValidationEngine) {
     fun shareCode(value: String?, block: ShareCodeDsl.() -> Unit) = ShareCodeDsl(engine, value).block()

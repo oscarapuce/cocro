@@ -6,18 +6,18 @@ import com.cocro.infrastructure.persistence.mongo.grid.document.CellDocument
 import com.cocro.infrastructure.persistence.mongo.session.document.ParticipantDocument
 import com.cocro.infrastructure.persistence.mongo.session.document.SessionDocument
 import com.cocro.infrastructure.persistence.mongo.session.document.SessionGridStateDocument
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.grid.model.CellPos
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
-import com.cocro.kernel.session.Participant
-import com.cocro.kernel.session.enum.InviteStatus
-import com.cocro.kernel.session.enum.SessionStatus
-import com.cocro.kernel.session.model.Session
-import com.cocro.kernel.session.model.state.SessionGridCellState
-import com.cocro.kernel.session.model.state.SessionGridState
-import com.cocro.kernel.session.model.state.SessionGridStateRevision
-import com.cocro.kernel.session.model.valueobject.SessionId
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.grid.model.CellPos
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.session.Participant
+import com.cocro.domain.session.enum.InviteStatus
+import com.cocro.domain.session.enum.SessionStatus
+import com.cocro.domain.session.model.Session
+import com.cocro.domain.session.model.state.SessionGridCellState
+import com.cocro.domain.session.model.state.SessionGridState
+import com.cocro.domain.session.model.state.SessionGridStateRevision
+import com.cocro.domain.session.model.valueobject.SessionId
+import com.cocro.domain.session.model.valueobject.SessionShareCode
 
 fun Session.toDocument(): SessionDocument =
     SessionDocument(

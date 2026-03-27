@@ -6,18 +6,18 @@ import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
-import com.cocro.kernel.auth.enum.Role
-import com.cocro.kernel.auth.model.AuthenticatedUser
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.grid.model.GridTemplateSnapshot
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
-import com.cocro.kernel.session.enum.SessionStatus
-import com.cocro.kernel.session.error.SessionError
-import com.cocro.kernel.session.model.Session
-import com.cocro.kernel.session.model.state.SessionGridState
-import com.cocro.kernel.session.model.valueobject.SessionId
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.domain.auth.enum.Role
+import com.cocro.domain.auth.model.AuthenticatedUser
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.common.CocroResult
+import com.cocro.domain.grid.model.GridTemplateSnapshot
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.session.enum.SessionStatus
+import com.cocro.domain.session.error.SessionError
+import com.cocro.domain.session.model.Session
+import com.cocro.domain.session.model.state.SessionGridState
+import com.cocro.domain.session.model.valueobject.SessionId
+import com.cocro.domain.session.model.valueobject.SessionShareCode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -231,10 +231,10 @@ class UpdateSessionGridUseCasesTest {
         val session = buildPlayingSession()
         // Seed the cache with a state at revision 1 (simulates a concurrent update already committed)
         val conflictingCache = ConflictingSessionGridStateCache()
-        val command = com.cocro.kernel.session.model.state.SessionGridCommand.SetLetter(
+        val command = com.cocro.domain.session.model.state.SessionGridCommand.SetLetter(
             sessionId = session.id,
             actorId = creatorId,
-            position = com.cocro.kernel.grid.model.CellPos(0, 0),
+            position = com.cocro.domain.grid.model.CellPos(0, 0),
             letter = 'Z',
         )
         val stateAtRevisionOne = session.sessionGridState.apply(command)

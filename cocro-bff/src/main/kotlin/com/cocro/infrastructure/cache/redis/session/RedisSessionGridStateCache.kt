@@ -4,8 +4,8 @@ import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.infrastructure.cache.redis.session.dto.SessionGridStateRedisDto
 import com.cocro.infrastructure.cache.redis.session.dto.toDomain
 import com.cocro.infrastructure.cache.redis.session.dto.toRedisDto
-import com.cocro.kernel.session.model.state.SessionGridState
-import com.cocro.kernel.session.model.valueobject.SessionId
+import com.cocro.domain.session.model.state.SessionGridState
+import com.cocro.domain.session.model.valueobject.SessionId
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.slf4j.LoggerFactory

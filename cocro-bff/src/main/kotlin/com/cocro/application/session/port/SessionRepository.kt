@@ -1,9 +1,9 @@
 package com.cocro.application.session.port
 
-import com.cocro.kernel.session.model.Session
-import com.cocro.kernel.session.model.state.SessionGridState
-import com.cocro.kernel.session.model.valueobject.SessionId
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.domain.session.model.Session
+import com.cocro.domain.session.model.state.SessionGridState
+import com.cocro.domain.session.model.valueobject.SessionId
+import com.cocro.domain.session.model.valueobject.SessionShareCode
 
 interface SessionRepository {
     fun save(session: Session): Session

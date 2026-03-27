@@ -1,8 +1,8 @@
 package com.cocro.infrastructure.cache.redis.session
 
 import com.cocro.application.session.port.SessionGridStateCache
-import com.cocro.kernel.session.model.state.SessionGridState
-import com.cocro.kernel.session.model.valueobject.SessionId
+import com.cocro.domain.session.model.state.SessionGridState
+import com.cocro.domain.session.model.valueobject.SessionId
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 

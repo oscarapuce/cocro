@@ -4,21 +4,21 @@ import com.cocro.application.grid.dto.CellDto
 import com.cocro.application.grid.dto.ClueDto
 import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.dto.SubmitGridDto
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.grid.enums.CellType
-import com.cocro.kernel.grid.enums.SeparatorType
-import com.cocro.kernel.grid.model.Cell
-import com.cocro.kernel.grid.model.CellPos
-import com.cocro.kernel.grid.model.Clue
-import com.cocro.kernel.grid.model.Grid
-import com.cocro.kernel.grid.model.GridMetadata
-import com.cocro.kernel.grid.model.Letter
-import com.cocro.kernel.grid.model.valueobject.ClueText
-import com.cocro.kernel.grid.model.valueobject.GridHeight
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
-import com.cocro.kernel.grid.model.valueobject.GridTitle
-import com.cocro.kernel.grid.model.valueobject.GridWidth
-import com.cocro.kernel.grid.model.valueobject.LetterValue
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.grid.enums.CellType
+import com.cocro.domain.grid.enums.SeparatorType
+import com.cocro.domain.grid.model.Cell
+import com.cocro.domain.grid.model.CellPos
+import com.cocro.domain.grid.model.Clue
+import com.cocro.domain.grid.model.Grid
+import com.cocro.domain.grid.model.GridMetadata
+import com.cocro.domain.grid.model.Letter
+import com.cocro.domain.grid.model.valueobject.ClueText
+import com.cocro.domain.grid.model.valueobject.GridHeight
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.grid.model.valueobject.GridTitle
+import com.cocro.domain.grid.model.valueobject.GridWidth
+import com.cocro.domain.grid.model.valueobject.LetterValue
 import java.util.UUID
 
 private val VALID_DIFFICULTIES = setOf("NONE", "0", "1", "2", "3", "4", "5", "0-1", "1-2", "2-3", "3-4", "4-5")

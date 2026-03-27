@@ -3,8 +3,8 @@ package com.cocro.infrastructure.persistence.mongo.grid.repository
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.infrastructure.persistence.mongo.grid.mapper.toDocument
 import com.cocro.infrastructure.persistence.mongo.grid.mapper.toDomain
-import com.cocro.kernel.grid.model.Grid
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
+import com.cocro.domain.grid.model.Grid
+import com.cocro.domain.grid.model.valueobject.GridShareCode
 import org.springframework.stereotype.Repository
 
 @Repository

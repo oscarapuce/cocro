@@ -2,8 +2,8 @@ package com.cocro.application.grid.validation
 
 import com.cocro.application.grid.dto.SubmitGridDto
 import com.cocro.application.grid.validation.dsl.engine.validateGrid
-import com.cocro.kernel.grid.enums.CellType
-import com.cocro.kernel.grid.error.GridError
+import com.cocro.domain.grid.enums.CellType
+import com.cocro.domain.grid.error.GridError
 
 internal fun validateSubmitGrid(dto: SubmitGridDto): List<GridError> =
     validateGrid(dto) {

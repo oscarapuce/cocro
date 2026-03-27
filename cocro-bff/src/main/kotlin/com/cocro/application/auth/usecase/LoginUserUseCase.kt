@@ -6,10 +6,10 @@ import com.cocro.application.auth.mapper.toAuthSuccess
 import com.cocro.application.auth.port.PasswordHasher
 import com.cocro.application.auth.port.TokenIssuer
 import com.cocro.application.auth.port.UserRepository
-import com.cocro.kernel.auth.error.AuthError
-import com.cocro.kernel.auth.model.valueobject.Username
-import com.cocro.kernel.auth.rule.UsernameRule
-import com.cocro.kernel.common.CocroResult
+import com.cocro.domain.auth.error.AuthError
+import com.cocro.domain.auth.model.valueobject.Username
+import com.cocro.domain.auth.rule.UsernameRule
+import com.cocro.domain.common.CocroResult
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

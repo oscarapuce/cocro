@@ -1,12 +1,12 @@
 package com.cocro.infrastructure.persistence.mongo.user.mapper
 
 import com.cocro.infrastructure.persistence.mongo.user.document.UserDocument
-import com.cocro.kernel.auth.enum.Role
-import com.cocro.kernel.auth.model.User
-import com.cocro.kernel.auth.model.valueobject.Email
-import com.cocro.kernel.auth.model.valueobject.PasswordHash
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.auth.model.valueobject.Username
+import com.cocro.domain.auth.enum.Role
+import com.cocro.domain.auth.model.User
+import com.cocro.domain.auth.model.valueobject.Email
+import com.cocro.domain.auth.model.valueobject.PasswordHash
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.auth.model.valueobject.Username
 import java.util.UUID
 
 fun User.toDocument(): UserDocument =

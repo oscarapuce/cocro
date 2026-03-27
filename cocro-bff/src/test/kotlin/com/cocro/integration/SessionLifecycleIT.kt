@@ -9,11 +9,11 @@ import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.LeaveSessionDto
 import com.cocro.application.session.dto.SessionStateDto
 import com.cocro.infrastructure.security.jwt.JwtTokenIssuer
-import com.cocro.kernel.auth.enum.Role
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.grid.enums.CellType
-import com.cocro.kernel.grid.enums.ClueDirection
-import com.cocro.kernel.grid.enums.SeparatorType
+import com.cocro.domain.auth.enum.Role
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.grid.enums.CellType
+import com.cocro.domain.grid.enums.ClueDirection
+import com.cocro.domain.grid.enums.SeparatorType
 import com.redis.testcontainers.RedisContainer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

@@ -1,7 +1,7 @@
 package com.cocro.application.auth.port
 
-import com.cocro.kernel.auth.model.User
-import com.cocro.kernel.auth.model.valueobject.Username
+import com.cocro.domain.auth.model.User
+import com.cocro.domain.auth.model.valueobject.Username
 
 interface UserRepository {
     fun findByUsername(username: Username): User?

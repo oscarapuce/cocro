@@ -10,10 +10,10 @@ import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.service.SessionCodeGenerator
 import com.cocro.application.session.validation.validateCreateSessionDto
-import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
-import com.cocro.kernel.session.error.SessionError
-import com.cocro.kernel.session.model.Session
+import com.cocro.domain.common.CocroResult
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.session.error.SessionError
+import com.cocro.domain.session.model.Session
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

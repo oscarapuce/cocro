@@ -8,15 +8,15 @@ import com.cocro.application.session.dto.SessionJoinSuccess
 import com.cocro.application.session.dto.SessionLeaveSuccess
 import com.cocro.application.session.dto.StartSessionSuccess
 import com.cocro.application.session.dto.UpdateSessionGridDto
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.grid.model.CellPos
-import com.cocro.kernel.session.enum.CommandType
-import com.cocro.kernel.session.model.Session
-import com.cocro.kernel.session.model.state.SessionGridCellState
-import com.cocro.kernel.session.model.state.SessionGridCommand
-import com.cocro.kernel.session.model.state.SessionGridState
-import com.cocro.kernel.session.model.valueobject.SessionId
-import com.cocro.kernel.session.rule.ParticipantsRule
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.grid.model.CellPos
+import com.cocro.domain.session.enum.CommandType
+import com.cocro.domain.session.model.Session
+import com.cocro.domain.session.model.state.SessionGridCellState
+import com.cocro.domain.session.model.state.SessionGridCommand
+import com.cocro.domain.session.model.state.SessionGridState
+import com.cocro.domain.session.model.valueobject.SessionId
+import com.cocro.domain.session.rule.ParticipantsRule
 
 internal fun Session.toSessionCreationSuccess(): SessionCreationSuccess =
     SessionCreationSuccess(

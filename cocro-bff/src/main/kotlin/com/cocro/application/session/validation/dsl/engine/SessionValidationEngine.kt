@@ -1,9 +1,9 @@
 package com.cocro.application.session.validation.dsl.engine
 
-import com.cocro.kernel.grid.rule.GridShareCodeRule
-import com.cocro.kernel.session.enum.CommandType
-import com.cocro.kernel.session.error.SessionError
-import com.cocro.kernel.session.rule.SessionShareCodeRule
+import com.cocro.domain.grid.rule.GridShareCodeRule
+import com.cocro.domain.session.enum.CommandType
+import com.cocro.domain.session.error.SessionError
+import com.cocro.domain.session.rule.SessionShareCodeRule
 
 internal class SessionValidationEngine {
     val errors = mutableListOf<SessionError>()

@@ -1,8 +1,8 @@
 package com.cocro.application.session.port
 
 import com.cocro.application.session.dto.notification.SessionEvent
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.session.model.valueobject.SessionShareCode
 
 interface SessionNotifier {
     /** Broadcast an event to all subscribers of a session topic. */

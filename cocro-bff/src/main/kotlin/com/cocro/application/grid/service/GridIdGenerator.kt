@@ -2,8 +2,8 @@ package com.cocro.application.grid.service
 
 import com.cocro.application.common.service.AlphaNumCodeGenerator
 import com.cocro.application.grid.port.GridRepository
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
-import com.cocro.kernel.grid.rule.GridShareCodeRule
+import com.cocro.domain.grid.model.valueobject.GridShareCode
+import com.cocro.domain.grid.rule.GridShareCodeRule
 import org.springframework.stereotype.Service
 
 @Service

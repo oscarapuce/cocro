@@ -2,7 +2,7 @@ package com.cocro.application.grid.validation.dsl.engine
 
 import com.cocro.application.grid.dto.CellDto
 import com.cocro.application.grid.dto.GridDto
-import com.cocro.kernel.grid.error.GridError
+import com.cocro.domain.grid.error.GridError
 
 internal class GridValidationDsl(
     private val engine: GridValidationEngine,

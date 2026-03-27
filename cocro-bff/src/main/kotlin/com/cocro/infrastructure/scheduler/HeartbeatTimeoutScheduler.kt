@@ -5,8 +5,8 @@ import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.dto.notification.SessionEvent
-import com.cocro.kernel.session.enum.SessionStatus
-import com.cocro.kernel.session.rule.ParticipantsRule
+import com.cocro.domain.session.enum.SessionStatus
+import com.cocro.domain.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled

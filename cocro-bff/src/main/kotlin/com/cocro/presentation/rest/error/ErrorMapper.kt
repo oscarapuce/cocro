@@ -1,7 +1,7 @@
 package com.cocro.presentation.rest.error
 
-import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.common.error.CocroError
+import com.cocro.domain.common.CocroResult
+import com.cocro.domain.common.error.CocroError
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 

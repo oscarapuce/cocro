@@ -6,12 +6,12 @@ import com.cocro.application.session.dto.GridTemplateDto
 import com.cocro.infrastructure.persistence.mongo.session.document.GridTemplateCellClueDocument
 import com.cocro.infrastructure.persistence.mongo.session.document.GridTemplateCellDocument
 import com.cocro.infrastructure.persistence.mongo.session.document.GridTemplateDocument
-import com.cocro.kernel.grid.model.Cell
-import com.cocro.kernel.grid.model.Grid
-import com.cocro.kernel.grid.model.GridTemplateCellClueSnapshot
-import com.cocro.kernel.grid.model.GridTemplateCellSnapshot
-import com.cocro.kernel.grid.model.GridTemplateSnapshot
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
+import com.cocro.domain.grid.model.Cell
+import com.cocro.domain.grid.model.Grid
+import com.cocro.domain.grid.model.GridTemplateCellClueSnapshot
+import com.cocro.domain.grid.model.GridTemplateCellSnapshot
+import com.cocro.domain.grid.model.GridTemplateSnapshot
+import com.cocro.domain.grid.model.valueobject.GridShareCode
 
 
 internal fun Grid.toGridTemplateDto(): GridTemplateDto = GridTemplateDto(

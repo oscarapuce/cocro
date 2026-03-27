@@ -1,7 +1,7 @@
 package com.cocro.application.grid.validation.dsl.engine
 
 import com.cocro.application.common.validation.Presence
-import com.cocro.kernel.grid.enums.CellType
+import com.cocro.domain.grid.enums.CellType
 
 class GridIdDsl(
     private val engine: GridValidationEngine,

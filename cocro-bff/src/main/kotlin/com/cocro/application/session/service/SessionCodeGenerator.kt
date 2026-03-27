@@ -2,8 +2,8 @@ package com.cocro.application.session.service
 
 import com.cocro.application.common.service.AlphaNumCodeGenerator
 import com.cocro.application.session.port.SessionRepository
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
-import com.cocro.kernel.session.rule.SessionShareCodeRule
+import com.cocro.domain.session.model.valueobject.SessionShareCode
+import com.cocro.domain.session.rule.SessionShareCodeRule
 import org.springframework.stereotype.Component
 
 @Component

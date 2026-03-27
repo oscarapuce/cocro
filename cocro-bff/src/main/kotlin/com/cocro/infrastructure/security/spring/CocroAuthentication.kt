@@ -1,6 +1,6 @@
 package com.cocro.infrastructure.security.spring
 
-import com.cocro.kernel.auth.model.AuthenticatedUser
+import com.cocro.domain.auth.model.AuthenticatedUser
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority

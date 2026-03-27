@@ -6,9 +6,9 @@ import com.cocro.application.grid.mapper.toDomain
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.grid.service.GridIdGenerator
 import com.cocro.application.grid.validation.validateSubmitGrid
-import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.grid.error.GridError
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
+import com.cocro.domain.common.CocroResult
+import com.cocro.domain.grid.error.GridError
+import com.cocro.domain.grid.model.valueobject.GridShareCode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

@@ -6,10 +6,10 @@ import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.usecase.UpdateSessionGridUseCases
 import com.cocro.infrastructure.security.spring.CocroAuthentication
-import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
-import com.cocro.kernel.session.rule.ParticipantsRule
-import com.cocro.kernel.session.rule.SessionShareCodeRule
+import com.cocro.domain.common.CocroResult
+import com.cocro.domain.session.model.valueobject.SessionShareCode
+import com.cocro.domain.session.rule.ParticipantsRule
+import com.cocro.domain.session.rule.SessionShareCodeRule
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping

@@ -1,10 +1,10 @@
 package com.cocro.application.auth.validation
 
 import com.cocro.application.auth.dto.RegisterUserCommandDto
-import com.cocro.kernel.auth.error.AuthError
-import com.cocro.kernel.auth.rule.EmailRule
-import com.cocro.kernel.auth.rule.PasswordRule
-import com.cocro.kernel.auth.rule.UsernameRule
+import com.cocro.domain.auth.error.AuthError
+import com.cocro.domain.auth.rule.EmailRule
+import com.cocro.domain.auth.rule.PasswordRule
+import com.cocro.domain.auth.rule.UsernameRule
 
 internal fun validateRegisterCommand(dto: RegisterUserCommandDto): List<AuthError> {
     var errors = emptyList<AuthError>()

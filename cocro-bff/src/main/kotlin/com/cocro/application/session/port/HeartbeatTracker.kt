@@ -1,7 +1,7 @@
 package com.cocro.application.session.port
 
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.session.model.valueobject.SessionId
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.session.model.valueobject.SessionId
 
 interface HeartbeatTracker {
 

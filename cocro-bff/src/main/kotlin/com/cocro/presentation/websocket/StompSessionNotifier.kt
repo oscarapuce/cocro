@@ -2,8 +2,8 @@ package com.cocro.presentation.websocket
 
 import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.port.SessionNotifier
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.session.model.valueobject.SessionShareCode
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component

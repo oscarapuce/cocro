@@ -4,15 +4,15 @@ import com.cocro.application.common.validation.Presence
 import com.cocro.application.common.validation.RuleDsl
 import com.cocro.application.grid.dto.CellDto
 import com.cocro.application.grid.dto.GridDto
-import com.cocro.kernel.common.rule.SafeStringRule
-import com.cocro.kernel.grid.enums.CellType
-import com.cocro.kernel.grid.error.GridError
-import com.cocro.kernel.grid.model.CellPos
-import com.cocro.kernel.grid.rule.GridHeightRule
-import com.cocro.kernel.grid.rule.GridShareCodeRule
-import com.cocro.kernel.grid.rule.GridTitleRule
-import com.cocro.kernel.grid.rule.GridWidthRule
-import com.cocro.kernel.grid.rule.LetterRule
+import com.cocro.domain.common.rule.SafeStringRule
+import com.cocro.domain.grid.enums.CellType
+import com.cocro.domain.grid.error.GridError
+import com.cocro.domain.grid.model.CellPos
+import com.cocro.domain.grid.rule.GridHeightRule
+import com.cocro.domain.grid.rule.GridShareCodeRule
+import com.cocro.domain.grid.rule.GridTitleRule
+import com.cocro.domain.grid.rule.GridWidthRule
+import com.cocro.domain.grid.rule.LetterRule
 
 class GridValidationEngine(
     private val dto: GridDto,

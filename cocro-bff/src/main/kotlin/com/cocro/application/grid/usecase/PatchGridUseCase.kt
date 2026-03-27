@@ -5,9 +5,9 @@ import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.mapper.applyPatchTo
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.grid.validation.validatePatchGrid
-import com.cocro.kernel.common.CocroResult
-import com.cocro.kernel.grid.error.GridError
-import com.cocro.kernel.grid.model.valueobject.GridShareCode
+import com.cocro.domain.common.CocroResult
+import com.cocro.domain.grid.error.GridError
+import com.cocro.domain.grid.model.valueobject.GridShareCode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

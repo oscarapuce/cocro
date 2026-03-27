@@ -2,8 +2,8 @@ package com.cocro.application.auth.usecase
 
 import com.cocro.application.auth.port.TokenIssuer
 import com.cocro.infrastructure.util.SpiceNameGenerator
-import com.cocro.kernel.auth.enum.Role
-import com.cocro.kernel.auth.model.valueobject.UserId
+import com.cocro.domain.auth.enum.Role
+import com.cocro.domain.auth.model.valueobject.UserId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

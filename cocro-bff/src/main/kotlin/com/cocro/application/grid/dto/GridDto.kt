@@ -1,8 +1,8 @@
 package com.cocro.application.grid.dto
 
-import com.cocro.kernel.grid.enums.CellType
-import com.cocro.kernel.grid.enums.ClueDirection
-import com.cocro.kernel.grid.enums.SeparatorType
+import com.cocro.domain.grid.enums.CellType
+import com.cocro.domain.grid.enums.ClueDirection
+import com.cocro.domain.grid.enums.SeparatorType
 
 interface GridDto {
     val gridId: String?

@@ -5,9 +5,9 @@ import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.infrastructure.security.spring.CocroAuthentication
-import com.cocro.kernel.session.model.valueobject.SessionShareCode
-import com.cocro.kernel.session.rule.ParticipantsRule
-import com.cocro.kernel.session.rule.SessionShareCodeRule
+import com.cocro.domain.session.model.valueobject.SessionShareCode
+import com.cocro.domain.session.rule.ParticipantsRule
+import com.cocro.domain.session.rule.SessionShareCodeRule
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor

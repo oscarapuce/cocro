@@ -1,7 +1,7 @@
 package com.cocro.application.session.port
 
-import com.cocro.kernel.session.model.state.SessionGridState
-import com.cocro.kernel.session.model.valueobject.SessionId
+import com.cocro.domain.session.model.state.SessionGridState
+import com.cocro.domain.session.model.valueobject.SessionId
 
 interface SessionGridStateCache {
 

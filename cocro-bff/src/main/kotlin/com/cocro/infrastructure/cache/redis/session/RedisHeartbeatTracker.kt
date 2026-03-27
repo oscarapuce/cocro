@@ -1,8 +1,8 @@
 package com.cocro.infrastructure.cache.redis.session
 
 import com.cocro.application.session.port.HeartbeatTracker
-import com.cocro.kernel.auth.model.valueobject.UserId
-import com.cocro.kernel.session.model.valueobject.SessionId
+import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.session.model.valueobject.SessionId
 import org.slf4j.LoggerFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component

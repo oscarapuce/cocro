@@ -7,11 +7,11 @@ import com.cocro.application.auth.port.PasswordHasher
 import com.cocro.application.auth.port.TokenIssuer
 import com.cocro.application.auth.port.UserRepository
 import com.cocro.application.auth.validation.validateRegisterCommand
-import com.cocro.kernel.auth.error.AuthError
-import com.cocro.kernel.auth.model.User
-import com.cocro.kernel.auth.model.valueobject.Email
-import com.cocro.kernel.auth.model.valueobject.Username
-import com.cocro.kernel.common.CocroResult
+import com.cocro.domain.auth.error.AuthError
+import com.cocro.domain.auth.model.User
+import com.cocro.domain.auth.model.valueobject.Email
+import com.cocro.domain.auth.model.valueobject.Username
+import com.cocro.domain.common.CocroResult
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
