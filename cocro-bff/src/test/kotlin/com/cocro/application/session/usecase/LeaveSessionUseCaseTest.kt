@@ -138,4 +138,27 @@ class LeaveSessionUseCaseTest {
         assertThat(errors).anyMatch { it is SessionError.UserNotParticipant }
         verify(sessionRepository, never()).save(any())
     }
+
+    @Test
+    fun `should broadcast SessionInterrupted when last participant leaves`() {
+        // given
+        val dto = LeaveSessionDto(shareCode = "AB12")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(participantUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
+        whenever(sessionRepository.save(any())).thenAnswer { it.arguments[0] as Session }
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+        verify(sessionNotifier).broadcast(
+            session.shareCode,
+            SessionEvent.ParticipantLeft(userId = participantId.toString(), participantCount = 0, reason = "explicit"),
+        )
+        verify(sessionNotifier).broadcast(
+            session.shareCode,
+            SessionEvent.SessionInterrupted(shareCode = session.shareCode.toString()),
+        )
+    }
 }
