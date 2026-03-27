@@ -2,7 +2,7 @@ package com.cocro.domain.session.rule
 
 import com.cocro.domain.common.rule.CocroRule
 import com.cocro.domain.session.Participant
-import com.cocro.domain.session.enum.InviteStatus
+import com.cocro.domain.session.enum.ParticipantStatus
 
 object ParticipantsRule : CocroRule<Participant>() {
     override val arity: Int = -1
@@ -13,5 +13,5 @@ object ParticipantsRule : CocroRule<Participant>() {
 
     fun canJoin(participants: List<Participant>): Boolean = countActiveParticipants(participants) < MAX_ACTIVE_PARTICIPANTS
 
-    fun countActiveParticipants(participants: List<Participant>): Int = participants.count { it.status == InviteStatus.JOINED }
+    fun countActiveParticipants(participants: List<Participant>): Int = participants.count { it.status == ParticipantStatus.JOINED }
 }

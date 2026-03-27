@@ -5,7 +5,7 @@ import com.cocro.domain.common.CocroResult
 import com.cocro.domain.grid.model.GridTemplateSnapshot
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.Participant
-import com.cocro.domain.session.enum.InviteStatus
+import com.cocro.domain.session.enum.ParticipantStatus
 import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.state.SessionGridState
@@ -95,11 +95,11 @@ data class Session private constructor(
             return err(SessionError.InvalidStatusForAction(status, "join"))
         }
         // Only JOINED participants block a re-join; LEFT participants may rejoin
-        if (participants.any { it.userId == actorId && it.status == InviteStatus.JOINED }) {
+        if (participants.any { it.userId == actorId && it.status == ParticipantStatus.JOINED }) {
             return err(SessionError.AlreadyParticipant(actorId.toString(), shareCode.value))
         }
         // LEFT participant does not count toward capacity (they're rejoining, not adding a new slot)
-        val isRejoin = participants.any { it.userId == actorId && it.status == InviteStatus.LEFT }
+        val isRejoin = participants.any { it.userId == actorId && it.status == ParticipantStatus.LEFT }
         if (!isRejoin && !ParticipantsRule.canJoin(participants)) {
             return err(SessionError.SessionFull)
         }
@@ -110,7 +110,7 @@ data class Session private constructor(
     }
 
     private fun applyLeave(actorId: UserId): CocroResult<Session, SessionError> {
-        if (!participants.any { it.userId == actorId && it.status == InviteStatus.JOINED }) {
+        if (!participants.any { it.userId == actorId && it.status == ParticipantStatus.JOINED }) {
             return err(SessionError.UserNotParticipant(actorId.toString(), shareCode.value))
         }
         return ok(leave(actorId))
@@ -167,9 +167,9 @@ data class Session private constructor(
         actorId: UserId,
         now: Instant = Instant.now(),
     ): Session {
-        val leftIndex = participants.indexOfFirst { it.userId == actorId && it.status == InviteStatus.LEFT }
+        val leftIndex = participants.indexOfFirst { it.userId == actorId && it.status == ParticipantStatus.LEFT }
         val updatedParticipants = if (leftIndex >= 0) {
-            participants.mapIndexed { i, p -> if (i == leftIndex) p.copy(status = InviteStatus.JOINED) else p }
+            participants.mapIndexed { i, p -> if (i == leftIndex) p.copy(status = ParticipantStatus.JOINED) else p }
         } else {
             participants + Participant.joined(actorId)
         }
@@ -182,7 +182,7 @@ data class Session private constructor(
     ): Session {
         val updated =
             participants.map { p ->
-                if (p.userId == actorId) p.copy(status = InviteStatus.LEFT) else p
+                if (p.userId == actorId) p.copy(status = ParticipantStatus.LEFT) else p
             }
 
         return copy(participants = updated, updatedAt = now)

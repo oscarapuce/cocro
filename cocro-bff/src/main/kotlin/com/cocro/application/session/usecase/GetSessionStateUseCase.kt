@@ -6,7 +6,7 @@ import com.cocro.application.session.dto.SessionStateDto
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.domain.common.CocroResult
-import com.cocro.domain.session.enum.InviteStatus
+import com.cocro.domain.session.enum.ParticipantStatus
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.state.SessionGridCellState
 import com.cocro.domain.session.model.valueobject.SessionShareCode
@@ -37,7 +37,7 @@ class GetSessionStateUseCase(
                     return CocroResult.Error(listOf(SessionError.SessionNotFound(shareCode)))
                 }
 
-        if (!session.participants.any { it.userId == user.userId && it.status == InviteStatus.JOINED }) {
+        if (!session.participants.any { it.userId == user.userId && it.status == ParticipantStatus.JOINED }) {
             logger.warn("State resync rejected: user {} is not a participant of session {}", user.userId(), shareCode)
             return CocroResult.Error(listOf(SessionError.UserNotParticipant(user.userId(), shareCode)))
         }

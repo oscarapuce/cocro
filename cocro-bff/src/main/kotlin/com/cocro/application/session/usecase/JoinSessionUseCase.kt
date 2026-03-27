@@ -14,7 +14,7 @@ import com.cocro.domain.common.CocroResult
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.SessionLifecycleCommand
 import com.cocro.domain.session.model.valueobject.SessionShareCode
-import com.cocro.domain.session.enum.InviteStatus
+import com.cocro.domain.session.enum.ParticipantStatus
 import com.cocro.domain.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -72,7 +72,7 @@ class JoinSessionUseCase(
                     // IDEMPOTENT REJOIN: active (JOINED) participant navigating to /play returns full dto
                     if (result.errors.singleOrNull() is SessionError.AlreadyParticipant) {
                         val isActive = session.participants.any {
-                            it.userId == user.userId && it.status == InviteStatus.JOINED
+                            it.userId == user.userId && it.status == ParticipantStatus.JOINED
                         }
                         if (isActive) {
                             logger.info(

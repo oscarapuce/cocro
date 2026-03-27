@@ -44,7 +44,6 @@ enum class ErrorCode(
     SESSION_INVALID_STATUS_FOR_ACTION("Invalid session status for this action", 400),
     SESSION_ALREADY_PARTICIPANT("User is already a participant in this session", 409),
     SESSION_USER_NOT_IN_SESSION("User is not a participant in this session", 403),
-    SESSION_NOT_INVITED("User is not invited to this session", 403),
     SESSION_GRID_NOT_SELECTED("No grid selected for this session", 400),
     SESSION_INVALID_COMMAND("Invalid command", 400),
     SESSION_NOT_ENOUGH_PARTICIPANTS("At least one participant is required to start the session", 400),

@@ -118,14 +118,6 @@ sealed interface SessionError : CocroError {
         override fun context(): Map<String, String> = mapOf("userId" to userId)
     }
 
-    data class NotInvited(
-        val userId: String,
-    ) : SessionError {
-        override val errorCode = ErrorCode.SESSION_NOT_INVITED
-
-        override fun context(): Map<String, String> = mapOf("userId" to userId)
-    }
-
     object GridNotSelected : SessionError {
         override val errorCode = ErrorCode.SESSION_GRID_NOT_SELECTED
     }

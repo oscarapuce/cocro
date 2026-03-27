@@ -10,7 +10,7 @@ import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.grid.model.CellPos
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.Participant
-import com.cocro.domain.session.enum.InviteStatus
+import com.cocro.domain.session.enum.ParticipantStatus
 import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.model.Session
 import com.cocro.domain.session.model.state.SessionGridCellState
@@ -79,7 +79,7 @@ fun SessionDocument.toDomain(): Session =
 fun ParticipantDocument.toDomain(): Participant =
     Participant(
         userId = UserId(userId),
-        status = InviteStatus.valueOf(status),
+        status = ParticipantStatus.valueOf(status),
     )
 
 fun SessionGridStateDocument.toDomain(): SessionGridState =

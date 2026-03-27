@@ -4,7 +4,7 @@ import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.common.CocroResult
 import com.cocro.domain.grid.model.GridTemplateSnapshot
 import com.cocro.domain.grid.model.valueobject.GridShareCode
-import com.cocro.domain.session.enum.InviteStatus
+import com.cocro.domain.session.enum.ParticipantStatus
 import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.valueobject.SessionShareCode
@@ -94,7 +94,7 @@ class SessionApplyTest {
             assertThat(result).isInstanceOf(CocroResult.Success::class.java)
             val updated = (result as CocroResult.Success).value
             assertThat(updated.status).isEqualTo(SessionStatus.PLAYING)
-            assertThat(updated.participants).anyMatch { it.userId == joiner && it.status == InviteStatus.JOINED }
+            assertThat(updated.participants).anyMatch { it.userId == joiner && it.status == ParticipantStatus.JOINED }
         }
 
         @Test
@@ -108,7 +108,7 @@ class SessionApplyTest {
             val updated = (result as CocroResult.Success).value
             // In-place flip: exactly one entry for joiner, status JOINED
             assertThat(updated.participants.filter { it.userId == joiner }).hasSize(1)
-            assertThat(updated.participants).anyMatch { it.userId == joiner && it.status == InviteStatus.JOINED }
+            assertThat(updated.participants).anyMatch { it.userId == joiner && it.status == ParticipantStatus.JOINED }
         }
 
         @Test
@@ -143,7 +143,7 @@ class SessionApplyTest {
             assertThat(result).isInstanceOf(CocroResult.Success::class.java)
             val updated = (result as CocroResult.Success).value
             assertThat(updated.participants)
-                .anyMatch { it.userId == participant && it.status == InviteStatus.LEFT }
+                .anyMatch { it.userId == participant && it.status == ParticipantStatus.LEFT }
         }
 
         @Test
