@@ -141,4 +141,8 @@ sealed interface SessionError : CocroError {
 
         override fun context(): Map<String, String> = mapOf("gridCode" to gridCode)
     }
+
+    object ConcurrentModification : SessionError {
+        override val errorCode = ErrorCode.SESSION_GRID_CONCURRENT_MODIFICATION
+    }
 }

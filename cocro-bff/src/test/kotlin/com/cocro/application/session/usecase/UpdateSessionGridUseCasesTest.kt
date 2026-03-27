@@ -26,6 +26,34 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
 /**
+ * Fake in-memory cache that throws [IllegalStateException] on every [compareAndSet] call,
+ * simulating a CAS revision conflict.
+ */
+private class ConflictingSessionGridStateCache : SessionGridStateCache {
+    private val states = mutableMapOf<String, SessionGridState>()
+
+    override fun get(sessionId: SessionId): SessionGridState? = states[sessionId.toString()]
+
+    override fun compareAndSet(sessionId: SessionId, expectedRevision: Long, newState: SessionGridState): Long {
+        error("Revision conflict: expected $expectedRevision but was ${states[sessionId.toString()]?.revision?.value}")
+    }
+
+    override fun initialize(sessionId: SessionId, state: SessionGridState) {
+        states[sessionId.toString()] = state
+    }
+
+    override fun getLastFlushedRevision(sessionId: SessionId): Long = 0L
+
+    override fun markFlushed(sessionId: SessionId, revision: Long) {}
+
+    override fun getActiveSessions(): Set<SessionId> = emptySet()
+
+    fun seedState(sessionId: SessionId, state: SessionGridState) {
+        states[sessionId.toString()] = state
+    }
+}
+
+/**
  * Fake in-memory cache that avoids Mockito value-class unboxing issues.
  */
 private class FakeSessionGridStateCache : SessionGridStateCache {
@@ -196,5 +224,36 @@ class UpdateSessionGridUseCasesTest {
 
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         assertThat((result as CocroResult.Success).value.commandType).isEqualTo("ERASE_LETTER")
+    }
+
+    @Test
+    fun `should send SyncRequired to user when CAS conflict occurs`() {
+        val session = buildPlayingSession()
+        // Seed the cache with a state at revision 1 (simulates a concurrent update already committed)
+        val conflictingCache = ConflictingSessionGridStateCache()
+        val command = com.cocro.kernel.session.model.state.SessionGridCommand.SetLetter(
+            sessionId = session.id,
+            actorId = creatorId,
+            position = com.cocro.kernel.grid.model.CellPos(0, 0),
+            letter = 'Z',
+        )
+        val stateAtRevisionOne = session.sessionGridState.apply(command)
+        conflictingCache.initialize(session.id, session.sessionGridState)
+        conflictingCache.seedState(session.id, stateAtRevisionOne)
+
+        val useCase = UpdateSessionGridUseCases(currentUserProvider, sessionRepository, conflictingCache, sessionNotifier, 50L)
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
+
+        val dto = UpdateSessionGridDto(shareCode = "AB12", posX = 1, posY = 0, commandType = "PLACE_LETTER", letter = 'A')
+
+        val result = useCase.execute(dto)
+
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        assertThat((result as CocroResult.Error).errors).contains(SessionError.ConcurrentModification)
+        verify(sessionNotifier).notifyUser(
+            creatorId,
+            SessionEvent.SyncRequired(currentRevision = stateAtRevisionOne.revision.value),
+        )
     }
 }

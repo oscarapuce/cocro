@@ -68,7 +68,18 @@ class UpdateSessionGridUseCases(
         val newState = currentState.apply(command)
 
         // CACHE UPDATE (atomic, throws on revision conflict)
-        sessionGridStateCache.compareAndSet(session.id, currentState.revision.value, newState)
+        try {
+            sessionGridStateCache.compareAndSet(session.id, currentState.revision.value, newState)
+        } catch (e: IllegalStateException) {
+            val currentRevision =
+                sessionGridStateCache.get(session.id)?.revision?.value ?: currentState.revision.value
+            logger.warn(
+                "CAS conflict for session={}, expectedRevision={}, currentRevision={}",
+                session.shareCode.value, currentState.revision.value, currentRevision,
+            )
+            sessionNotifier.notifyUser(user.userId, SessionEvent.SyncRequired(currentRevision = currentRevision))
+            return CocroResult.Error(listOf(SessionError.ConcurrentModification))
+        }
 
         // THRESHOLD FLUSH: persist to MongoDB every N revisions
         val lastFlushed = sessionGridStateCache.getLastFlushedRevision(session.id)
