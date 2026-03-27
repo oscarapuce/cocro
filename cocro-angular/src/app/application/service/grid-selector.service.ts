@@ -90,6 +90,22 @@ export class GridSelectorService {
     this.setLetterAt(x, y, '');
   }
 
+  /** Clears all letters from letter cells in the grid. Used for resync. */
+  clearAllLetters(): void {
+    const g = this.grid();
+    let updated = g;
+    for (let i = 0; i < g.cells.length; i++) {
+      const cell = g.cells[i];
+      if (isCellLetter(cell) && cell.letter?.number) {
+        const cleared = writeLetterInCell(cell, '');
+        updated = withUpdatedCell(updated, cleared);
+      }
+    }
+    if (updated !== g) {
+      this.grid.set(updated);
+    }
+  }
+
   handleBackspace(): void {
     this.eraseLetter();
     this.goToNextCell(false);

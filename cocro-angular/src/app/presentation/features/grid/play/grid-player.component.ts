@@ -239,6 +239,8 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
         this.revision.set(full.gridRevision);
         this.participantCount.set(full.participantCount);
         this.status.set(full.status);
+        // Clear all letters before applying synced state to prevent stale letters
+        this.selector.clearAllLetters();
         full.cells.forEach((c: CellStateDto) => {
           if (c.letter) this.selector.setLetterAt(c.x, c.y, c.letter);
         });
