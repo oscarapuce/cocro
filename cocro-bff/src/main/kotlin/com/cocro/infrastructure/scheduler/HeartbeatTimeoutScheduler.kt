@@ -5,6 +5,7 @@ import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.dto.notification.SessionEvent
+import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -66,6 +67,17 @@ class HeartbeatTimeoutScheduler(
                         reason = "timeout",
                     ),
                 )
+            }
+
+            // Detect: all timed-out → INTERRUPTED
+            if (activeCount == 0 && saved.status == SessionStatus.PLAYING) {
+                val interrupted = saved.interrupt()
+                sessionRepository.save(interrupted)
+                sessionNotifier.broadcast(
+                    interrupted.shareCode,
+                    SessionEvent.SessionInterrupted(shareCode = interrupted.shareCode.value),
+                )
+                logger.info("Session {} interrupted: all participants timed out", sessionId.value)
             }
         }
     }

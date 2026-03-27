@@ -11,6 +11,7 @@ import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.validation.validateLeaveSessionDto
 import com.cocro.kernel.common.CocroResult
+import com.cocro.kernel.session.enum.SessionStatus
 import com.cocro.kernel.session.error.SessionError
 import com.cocro.kernel.session.model.SessionLifecycleCommand
 import com.cocro.kernel.session.model.valueobject.SessionShareCode
@@ -66,6 +67,18 @@ class LeaveSessionUseCase(
         sessionGridStateCache.get(session.id)?.let { gridState ->
             sessionRepository.updateGridState(session.id, gridState)
             sessionGridStateCache.markFlushed(session.id, gridState.revision.value)
+        }
+
+        // Detect: last active participant left → INTERRUPTED
+        val activeCount = ParticipantsRule.countActiveParticipants(updatedSession.participants)
+        if (activeCount == 0 && updatedSession.status == SessionStatus.PLAYING) {
+            val interrupted = updatedSession.interrupt()
+            sessionRepository.save(interrupted)
+            sessionNotifier.broadcast(
+                interrupted.shareCode,
+                SessionEvent.SessionInterrupted(shareCode = interrupted.shareCode.value),
+            )
+            logger.info("Session {} interrupted: all participants left", sessionShareCode.value)
         }
 
         // HEARTBEAT CLEANUP
