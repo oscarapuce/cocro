@@ -2,10 +2,10 @@ import { Component, computed, HostListener, inject, OnDestroy, OnInit, signal } 
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@infrastructure/auth/auth.service';
 import { SESSION_SOCKET_PORT } from '@application/ports/session/session-socket.port';
-import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
 import { JoinSessionUseCase } from '@application/use-cases/join-session.use-case';
 import { SyncSessionUseCase } from '@application/use-cases/sync-session.use-case';
 import { LeaveSessionUseCase } from '@application/use-cases/leave-session.use-case';
+import { CheckGridUseCase } from '@application/use-cases/check-grid.use-case';
 import { LetterAuthorService } from '@application/service/letter-author.service';
 import { GridSelectorService } from '@application/service/grid-selector.service';
 import { createEmptyGrid } from '@domain/services/grid-utils.service';
@@ -67,7 +67,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   private readonly joinSession = inject(JoinSessionUseCase);
   private readonly syncSession = inject(SyncSessionUseCase);
   private readonly leaveSession = inject(LeaveSessionUseCase);
-  private readonly gameSession = inject(GAME_SESSION_PORT);
+  private readonly checkGridUseCase = inject(CheckGridUseCase);
   readonly selector = inject(GridSelectorService);
   private readonly router = inject(Router);
 
@@ -172,7 +172,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   }
 
   checkGrid(): void {
-    this.gameSession.checkGrid(this.shareCode()).subscribe({
+    this.checkGridUseCase.execute(this.shareCode()).subscribe({
       next: (result: GridCheckResponse) => {
         this.checkResult.set({
           type: 'GridChecked',
