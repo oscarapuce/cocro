@@ -98,3 +98,32 @@ export function getDirectionFromSurroundingClue(cell: Cell, grid: Grid): Directi
 
   return 'NONE';
 }
+
+export interface GlobalCluePreviewCell {
+  letter: string;
+  index: number;
+}
+
+export function buildGlobalCluePreview(grid: Grid): GlobalCluePreviewCell[][] {
+  const wordLengths = grid.globalClue?.wordLengths;
+  if (!wordLengths?.length) return [];
+
+  const letterByNumber = new Map<number, string>();
+  for (const cell of grid.cells) {
+    if (cell.letter?.number != null && cell.letter.value) {
+      letterByNumber.set(cell.letter.number, cell.letter.value);
+    }
+  }
+
+  const words: GlobalCluePreviewCell[][] = [];
+  let offset = 0;
+  for (const length of wordLengths) {
+    const word: GlobalCluePreviewCell[] = [];
+    for (let i = 1; i <= length; i++) {
+      word.push({ letter: letterByNumber.get(offset + i) ?? '', index: offset + i });
+    }
+    offset += length;
+    words.push(word);
+  }
+  return words;
+}

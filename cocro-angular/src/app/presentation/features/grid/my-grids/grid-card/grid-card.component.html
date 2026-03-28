@@ -1,0 +1,18 @@
+<div class="grid-card">
+  <div class="grid-card__header">
+    <h3 class="grid-card__title">{{ grid.title }}</h3>
+    <span class="grid-card__badge">{{ grid.difficulty }}</span>
+  </div>
+  <div class="grid-card__meta">
+    <span>{{ grid.width }} × {{ grid.height }}</span>
+    <span>Créée le {{ grid.createdAt | date:'dd/MM/yyyy' }}</span>
+  </div>
+  <div class="grid-card__actions">
+    <cocro-button variant="primary" size="sm" (click)="launchSession.emit()">
+      Lancer une session
+    </cocro-button>
+    <cocro-button variant="secondary" size="sm" (click)="edit.emit()">
+      Éditer
+    </cocro-button>
+  </div>
+</div>

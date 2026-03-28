@@ -7,6 +7,7 @@ import {
   isOutOfBounds,
   isValidSize,
   getDirectionFromSurroundingClue,
+  buildGlobalCluePreview,
   MIN_GRID_WIDTH,
   MIN_GRID_HEIGHT,
   MAX_GRID_WIDTH,
@@ -148,6 +149,42 @@ describe('grid-utils', () => {
     it('should return false for sizes above maximum', () => {
       expect(isValidSize(MAX_GRID_WIDTH + 1, MAX_GRID_HEIGHT)).toBe(false);
       expect(isValidSize(MAX_GRID_WIDTH, MAX_GRID_HEIGHT + 1)).toBe(false);
+    });
+  });
+
+  describe('buildGlobalCluePreview', () => {
+    it('should return empty array when no globalClue', () => {
+      expect(buildGlobalCluePreview(grid)).toEqual([]);
+    });
+
+    it('should return empty array when wordLengths is empty', () => {
+      const g: Grid = { ...grid, globalClue: { label: 'Enigma', wordLengths: [] } };
+      expect(buildGlobalCluePreview(g)).toEqual([]);
+    });
+
+    it('should build preview words from numbered cells', () => {
+      const g = createEmptyGrid('1', 'Test', 3, 3);
+      g.cells[0] = { x: 0, y: 0, type: 'LETTER', letter: { value: 'A', separator: 'NONE', number: 1 } };
+      g.cells[1] = { x: 1, y: 0, type: 'LETTER', letter: { value: 'B', separator: 'NONE', number: 2 } };
+      g.cells[2] = { x: 2, y: 0, type: 'LETTER', letter: { value: 'C', separator: 'NONE', number: 3 } };
+
+      const result = buildGlobalCluePreview({ ...g, globalClue: { label: 'Test', wordLengths: [2, 1] } });
+
+      expect(result).toEqual([
+        [{ letter: 'A', index: 1 }, { letter: 'B', index: 2 }],
+        [{ letter: 'C', index: 3 }],
+      ]);
+    });
+
+    it('should return empty string for missing numbered cells', () => {
+      const g = createEmptyGrid('1', 'Test', 3, 3);
+      g.cells[0] = { x: 0, y: 0, type: 'LETTER', letter: { value: 'X', separator: 'NONE', number: 1 } };
+
+      const result = buildGlobalCluePreview({ ...g, globalClue: { label: 'Test', wordLengths: [2] } });
+
+      expect(result).toEqual([
+        [{ letter: 'X', index: 1 }, { letter: '', index: 2 }],
+      ]);
     });
   });
 

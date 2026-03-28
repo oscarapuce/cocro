@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CoCroBffApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="dev" />
+    <option name="MAIN_CLASS_NAME" value="com.cocro.CoCroBffApplicationKt" />
+    <module name="cocro-bff.main" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/cocro-bff" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.cocro.CoCroBffApplicationKt" />
+    <envs>
+      <env name="SPRING_OUTPUT_ANSI_ENABLED" value="always" />
+    </envs>
+  </configuration>
+</component>
+

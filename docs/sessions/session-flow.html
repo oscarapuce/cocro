@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>CoCro — Session Flow</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+
+  .page { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+  h1 { font-size: 28px; margin-bottom: 8px; color: #1a1a1a; }
+  .subtitle { color: #666; margin-bottom: 40px; font-size: 14px; }
+
+  section { margin-bottom: 40px; background: #fff; border-radius: 12px; padding: 28px 32px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  section h2 { font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  section h2 .emoji { font-size: 22px; }
+
+  /* ── State machine ── */
+  #sm { background: #f0f7ff; }
+  #sm h2 { color: #1864ab; }
+
+  /* ── States ── */
+  .states { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .state-box {
+    padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 15px;
+    border: 2px solid;
+  }
+  .state-new    { background: #e9ecef; border-color: #868e96; color: #495057; font-style: italic; font-weight: 400; }
+  .state-playing{ background: #d3f9d8; border-color: #2f9e44; color: #2f9e44; }
+  .state-int    { background: #ffe8cc; border-color: #e8590c; color: #e8590c; }
+  .state-ended  { background: #dbe4ff; border-color: #4263eb; color: #4263eb; }
+  .arrow { color: #868e96; font-size: 20px; }
+
+  .transitions { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .transitions th { background: #e7f5ff; color: #1864ab; text-align: left; padding: 8px 12px; font-weight: 600; }
+  .transitions td { padding: 8px 12px; border-bottom: 1px solid #e9ecef; vertical-align: top; }
+  .transitions tr:last-child td { border-bottom: none; }
+  .transitions tr:hover td { background: #f8f9fa; }
+
+  /* ── REST ── */
+  #rest { background: #f0f7ff; }
+  #rest h2 { color: #1864ab; }
+
+  .endpoint-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .endpoint-table th { background: #1864ab; color: #fff; text-align: left; padding: 10px 14px; font-weight: 600; }
+  .endpoint-table td { padding: 10px 14px; border-bottom: 1px solid #e9ecef; vertical-align: top; }
+  .endpoint-table tr:last-child td { border-bottom: none; }
+  .endpoint-table tr:hover td { background: #f8f9fa; }
+
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; color: #fff; font-family: monospace;
+  }
+  .badge-post { background: #2f9e44; }
+  .badge-get  { background: #1971c2; }
+
+  code { background: #f1f3f5; padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: 'Menlo', 'Monaco', monospace; }
+  .note-warn { color: #c92a2a; font-weight: 600; }
+  .note-dim  { color: #868e96; }
+
+  /* ── WebSocket ── */
+  #ws { background: #f3f0ff; }
+  #ws h2 { color: #5f3dc4; }
+
+  .ws-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .ws-card { background: #ede9fe; border: 1px solid #9775fa; border-radius: 8px; padding: 16px; }
+  .ws-card h3 { font-size: 13px; color: #5f3dc4; margin-bottom: 10px; border-bottom: 1px solid #c5b8fc; padding-bottom: 6px; }
+  .ws-card p, .ws-card li { font-size: 12px; color: #343a40; line-height: 1.7; }
+  .ws-card ul { padding-left: 16px; }
+
+  /* ── Events ── */
+  #events { background: #f8f9fa; }
+  #events h2 { color: #343a40; }
+
+  .event-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .event-chip {
+    background: #fff; border: 1px solid #dee2e6; border-radius: 8px;
+    padding: 10px 14px; min-width: 200px;
+  }
+  .event-chip .name { font-size: 13px; font-weight: 700; color: #343a40; margin-bottom: 4px; }
+  .event-chip .payload { font-size: 11px; color: #868e96; font-family: monospace; }
+  .event-chip.private { border-color: #fcc419; background: #fff9db; }
+  .event-chip.private .name { color: #e67700; }
+
+  /* ── Heartbeat & CAS ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  #hb { background: #fff9db; }
+  #hb h2 { color: #e67700; }
+  #cas { background: #fff9db; }
+  #cas h2 { color: #e67700; }
+
+  .hb-flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .hb-state {
+    padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; border: 2px solid;
+  }
+  .hb-active  { background: #d3f9d8; border-color: #2f9e44; color: #2f9e44; }
+  .hb-away    { background: #fff3bf; border-color: #fcc419; color: #e67700; }
+  .hb-evicted { background: #ffe8cc; border-color: #e8590c; color: #e8590c; }
+  .hb-left    { background: #ffd8d8; border-color: #c92a2a; color: #c92a2a; }
+  .hb-arrow   { color: #868e96; font-size: 16px; }
+  .hb-label   { font-size: 10px; color: #868e96; }
+
+  .cas-steps { counter-reset: cas; }
+  .cas-step { display: flex; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+  .cas-step::before {
+    counter-increment: cas;
+    content: counter(cas);
+    background: #e67700; color: #fff;
+    border-radius: 50%; width: 20px; height: 20px; min-width: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+
+  /* ── Blindspots ── */
+  #blindspots { background: #fff3cd; border: 2px solid #ffc107; }
+  #blindspots h2 { color: #856404; }
+
+  .bs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .bs-card { background: #fffbf0; border: 1px solid #ffd43b; border-radius: 8px; padding: 14px 16px; }
+  .bs-card h3 { font-size: 13px; font-weight: 700; color: #856404; margin-bottom: 6px; }
+  .bs-card p  { font-size: 12px; color: #495057; line-height: 1.6; }
+
+  /* ── Mermaid ── */
+  .mermaid-wrap { overflow-x: auto; }
+  .mermaid { text-align: center; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>CoCro — Session Flow</h1>
+  <p class="subtitle">Généré le 2026-03-27 · <code>docs/session-flow.html</code></p>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- §1 STATE MACHINE                              -->
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="sm">
+    <h2><span class="emoji">🔄</span> Session State Machine</h2>
+
+    <div class="states">
+      <div class="state-box state-new">(new)</div>
+      <span class="arrow">──join──▶</span>
+      <div class="state-box state-playing">PLAYING</div>
+      <span class="arrow">◀──rejoin──</span>
+      <div class="state-box state-int">INTERRUPTED</div>
+    </div>
+    <div class="states" style="margin-bottom:0">
+      <div class="state-box state-playing">PLAYING</div>
+      <span class="arrow">──check ✓──▶</span>
+      <div class="state-box state-ended">ENDED</div>
+    </div>
+
+    <br>
+
+    <div class="mermaid-wrap">
+      <pre class="mermaid">
+stateDiagram-v2
+    direction LR
+    [*] --> PLAYING : join
+    PLAYING --> INTERRUPTED : last leave / timeout
+    INTERRUPTED --> PLAYING : rejoin (prev. LEFT only)
+    PLAYING --> ENDED : check complete+correct
+    ENDED --> [*]
+      </pre>
+    </div>
+
+    <br>
+    <table class="transitions">
+      <thead><tr><th>From</th><th>Command</th><th>Contrainte</th><th>To</th><th>Side effects</th></tr></thead>
+      <tbody>
+        <tr><td>(new)</td><td><code>join</code></td><td>tout utilisateur authentifié</td><td class="state-playing" style="color:#2f9e44;font-weight:700">PLAYING</td><td>broadcast <code>ParticipantJoined</code></td></tr>
+        <tr><td>PLAYING</td><td><code>join</code></td><td>participant previously LEFT</td><td style="color:#2f9e44;font-weight:700">PLAYING</td><td>broadcast <code>ParticipantJoined</code></td></tr>
+        <tr><td>INTERRUPTED</td><td><code>join</code></td><td>participant previously LEFT <span class="note-warn">⚠️</span></td><td style="color:#2f9e44;font-weight:700">PLAYING</td><td>broadcast <code>ParticipantJoined</code></td></tr>
+        <tr><td>PLAYING</td><td><code>leave</code> (pas le dernier)</td><td>tout participant JOINED</td><td style="color:#2f9e44;font-weight:700">PLAYING</td><td>broadcast <code>ParticipantLeft</code></td></tr>
+        <tr><td>PLAYING</td><td><code>leave</code> (dernier)</td><td>tout participant JOINED</td><td style="color:#e8590c;font-weight:700">INTERRUPTED</td><td>broadcast <code>ParticipantLeft</code> + <code>SessionInterrupted</code></td></tr>
+        <tr><td>PLAYING</td><td><code>end()</code></td><td>système (CheckGrid)</td><td style="color:#4263eb;font-weight:700">ENDED</td><td>broadcast <code>SessionEnded</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- §2 REST ENDPOINTS                             -->
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="rest">
+    <h2><span class="emoji">📡</span> REST Endpoints</h2>
+    <table class="endpoint-table">
+      <thead><tr><th>Méthode</th><th>Endpoint</th><th>Body</th><th>Retourne</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/sessions</code></td>
+          <td><code>{ gridId }</code></td>
+          <td><code>201 { sessionId, shareCode }</code></td>
+          <td class="note-dim">Crée la session (PLAYING, sans participants)</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/sessions/join</code></td>
+          <td><code>{ shareCode }</code></td>
+          <td><code>200 SessionFullDto</code><br><small style="color:#868e96">sessionId, shareCode, status, participantCount,<br>topicToSubscribe, gridTemplate, gridRevision, cells[]</small></td>
+          <td><span class="note-warn">⚠️ Le créateur doit appeler ça aussi</span><br><span class="note-dim">409 si SessionFull / AlreadyParticipant<br>400 si ENDED</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/sessions/leave</code></td>
+          <td><code>{ shareCode }</code></td>
+          <td><code>200</code></td>
+          <td class="note-dim">Dernier participant → INTERRUPTED<br>+ broadcast SessionInterrupted</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-get">GET</span></td>
+          <td><code>/api/sessions/{code}/state</code></td>
+          <td>—</td>
+          <td><code>SessionGridStateDto</code><br><small style="color:#868e96">{ revision, cells[] }</small></td>
+          <td class="note-dim">Cache Redis → fallback MongoDB<br>Tout utilisateur authentifié</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/sessions/{code}/sync</code></td>
+          <td>—</td>
+          <td><code>SessionFullDto</code></td>
+          <td class="note-dim">Participant JOINED uniquement<br>Flush Redis → MongoDB</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-post">POST</span></td>
+          <td><code>/api/sessions/{code}/check</code></td>
+          <td>—</td>
+          <td><code>GridCheckSuccess</code><br><small style="color:#868e96">{ isComplete, isCorrect, filledCount, totalCount }</small></td>
+          <td class="note-dim">Participant JOINED uniquement<br>Flush + validation → peut déclencher SessionEnded</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- §3 WEBSOCKET                                  -->
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="ws">
+    <h2><span class="emoji">🔌</span> WebSocket / STOMP</h2>
+    <div class="ws-grid">
+      <div class="ws-card">
+        <h3>① Connexion</h3>
+        <p>WS handshake sur <code>/ws</code></p>
+        <p>STOMP CONNECT :<br>
+           <code>{ Authorization: Bearer &lt;token&gt;,<br>&nbsp;&nbsp;shareCode: &lt;code&gt; }</code></p>
+        <p>← STOMP CONNECTED</p>
+      </div>
+      <div class="ws-card">
+        <h3>② Subscribe (dans afterConnected)</h3>
+        <ul>
+          <li>Subscribe <code>/app/session/{code}/welcome</code><br>← <code>SessionWelcome</code> (privé, synchrone)</li>
+          <li>Subscribe <code>/topic/session/{code}</code><br>← tous les événements broadcast</li>
+        </ul>
+      </div>
+      <div class="ws-card">
+        <h3>③ Envoyer des commandes</h3>
+        <p>SEND <code>/app/session/{code}/grid</code><br>
+          <code>{ posX, posY, commandType, letter? }</code><br>
+          → broadcast <code>GridUpdated</code><br>
+          → ou <code>SyncRequired</code> si conflit CAS</p>
+        <br>
+        <p>SEND <code>/app/session/{code}/heartbeat</code><br>
+          (toutes les ≤30s pour rester ACTIVE)</p>
+      </div>
+      <div class="ws-card">
+        <h3>④ Événements privés</h3>
+        <p><code>/user/queue/session</code></p>
+        <br>
+        <p><strong>SessionWelcome</strong><br>
+          <code>{ shareCode, topicToSubscribe,<br>
+          &nbsp;&nbsp;participantCount, status,<br>
+          &nbsp;&nbsp;gridRevision }</code></p>
+        <br>
+        <p><strong>SyncRequired</strong><br>
+          <code>{ currentRevision }</code><br>
+          → client doit appeler POST /sync</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- §4 EVENTS                                     -->
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="events">
+    <h2><span class="emoji">📨</span> Broadcast Events → <code>/topic/session/{shareCode}</code></h2>
+    <div class="event-grid">
+      <div class="event-chip">
+        <div class="name">ParticipantJoined</div>
+        <div class="payload">{ userId, participantCount }</div>
+      </div>
+      <div class="event-chip">
+        <div class="name">ParticipantLeft</div>
+        <div class="payload">{ userId, participantCount, reason }</div>
+      </div>
+      <div class="event-chip">
+        <div class="name">GridUpdated</div>
+        <div class="payload">{ actorId, posX, posY, commandType, letter }</div>
+      </div>
+      <div class="event-chip">
+        <div class="name">GridChecked</div>
+        <div class="payload">{ isComplete, isCorrect, correctCount, totalCount }</div>
+      </div>
+      <div class="event-chip">
+        <div class="name">SessionEnded</div>
+        <div class="payload">{ shareCode, correctCount, totalCount }</div>
+      </div>
+      <div class="event-chip">
+        <div class="name">SessionInterrupted</div>
+        <div class="payload">{ shareCode }</div>
+      </div>
+      <div class="event-chip private">
+        <div class="name">SessionWelcome (privé)</div>
+        <div class="payload">{ shareCode, topicToSubscribe, participantCount, status, gridRevision }</div>
+      </div>
+      <div class="event-chip private">
+        <div class="name">SyncRequired (privé)</div>
+        <div class="payload">{ currentRevision }</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- §5 HEARTBEAT + CAS                            -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="two-col">
+    <section id="hb">
+      <h2><span class="emoji">💓</span> Heartbeat &amp; Reconnexion</h2>
+      <div class="hb-flow">
+        <div class="hb-state hb-active">ACTIVE</div>
+        <div>
+          <div class="hb-arrow">──disconnect──▶</div>
+          <div class="hb-label" style="text-align:center">STOMP déco</div>
+        </div>
+        <div class="hb-state hb-away">AWAY</div>
+        <div>
+          <div class="hb-arrow">──&gt;30s──▶</div>
+          <div class="hb-label" style="text-align:center">scheduler 15s</div>
+        </div>
+        <div class="hb-state hb-evicted">EVICTED</div>
+        <div>
+          <div class="hb-arrow">──▶</div>
+        </div>
+        <div class="hb-state hb-left">LEFT</div>
+      </div>
+      <p style="font-size:13px;color:#868e96;margin-bottom:10px">
+        Reconnexion &lt;30s (grace period) : AWAY → ACTIVE, <strong>pas de broadcast</strong>, transparent pour les autres participants.
+      </p>
+      <p style="font-size:13px;color:#495057">
+        Le client doit envoyer un heartbeat toutes les ≤30s sur<br>
+        <code>/app/session/{code}/heartbeat</code>
+      </p>
+    </section>
+
+    <section id="cas">
+      <h2><span class="emoji">⚡</span> CAS Conflict (grid update)</h2>
+      <div class="cas-steps">
+        <div class="cas-step">Client envoie une mise à jour grid</div>
+        <div class="cas-step"><code>compareAndSet()</code> détecte un conflit de révision</div>
+        <div class="cas-step">BFF récupère la révision courante (Redis → MongoDB fallback)</div>
+        <div class="cas-step">Envoie <code>SyncRequired { currentRevision }</code> (privé)</div>
+        <div class="cas-step">Retourne <code>409 ConcurrentModification</code></div>
+        <div class="cas-step">Client appelle <code>POST /sync</code> → réhydrate la grille</div>
+        <div class="cas-step">Client reprend l'édition depuis la bonne révision</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- §6 BLINDSPOTS                                 -->
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="blindspots">
+    <h2><span class="emoji">⚠️</span> Blindspots &amp; Gaps potentiels</h2>
+    <div class="bs-grid">
+      <div class="bs-card">
+        <h3>1. INTERRUPTED — nouveaux participants bloqués</h3>
+        <p>Seuls les participants <em>previously-LEFT</em> peuvent rejoindre une session INTERRUPTED. Un nouvel utilisateur qui n'a jamais rejoint ne peut pas entrer. Comportement non documenté côté client.</p>
+      </div>
+      <div class="bs-card">
+        <h3>2. Sessions immortelles</h3>
+        <p>Les sessions INTERRUPTED persistent indéfiniment en MongoDB + Redis. Pas de TTL, pas de job de nettoyage. Une session abandonnée depuis des mois reste en base.</p>
+      </div>
+      <div class="bs-card">
+        <h3>3. POST /sync → participant JOINED requis</h3>
+        <p>Si un user reconnecte (STOMP CONNECT) mais n'a pas encore appelé POST /join, il ne peut pas appeler POST /sync. La séquence CONNECT → /join → sync doit être strictement respectée.</p>
+      </div>
+      <div class="bs-card">
+        <h3>4. Créateur doit appeler POST /join séparément</h3>
+        <p>POST /api/sessions crée la session mais n'ajoute pas le créateur comme participant. Il doit immédiatement appeler POST /join — un pattern UX à deux appels peu intuitif.</p>
+      </div>
+      <div class="bs-card">
+        <h3>5. SyncRequired sans retry</h3>
+        <p>SyncRequired est envoyé une seule fois en message STOMP privé. Si le client le rate (onglet caché, micro-déconnexion), pas de mécanisme de rattrapage — il dérive silencieusement.</p>
+      </div>
+      <div class="bs-card">
+        <h3>6. GridEditor (Phase 4) absent</h3>
+        <p>La création de grilles n'est pas encore implémentée dans cocro-angular. Seules les grilles insérées via API/DB fonctionnent. Le flux complet de bout en bout est incomplet.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose' });
+</script>
+</body>
+</html>
