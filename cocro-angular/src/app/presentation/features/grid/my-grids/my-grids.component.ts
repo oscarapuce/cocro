@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { GetMyGridsUseCase } from '@application/use-cases/get-my-grids.use-case';
 import { CreateSessionUseCase } from '@application/use-cases/create-session.use-case';
@@ -14,7 +14,7 @@ import { ButtonComponent } from '@presentation/shared/components/button/button.c
   templateUrl: './my-grids.component.html',
   styleUrls: ['./my-grids.component.scss'],
 })
-export class MyGridsComponent {
+export class MyGridsComponent implements OnInit {
   private readonly getMyGrids = inject(GetMyGridsUseCase);
   private readonly createSession = inject(CreateSessionUseCase);
   private readonly router = inject(Router);
@@ -25,7 +25,7 @@ export class MyGridsComponent {
   readonly error = signal('');
   readonly launching = signal<string | null>(null);
 
-  constructor() {
+  ngOnInit(): void {
     this.loadGrids();
   }
 
