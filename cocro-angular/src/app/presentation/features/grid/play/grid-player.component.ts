@@ -3,6 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@infrastructure/auth/auth.service';
 import { SESSION_SOCKET_PORT } from '@application/ports/session/session-socket.port';
 import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
+import { JoinSessionUseCase } from '@application/use-cases/join-session.use-case';
+import { SyncSessionUseCase } from '@application/use-cases/sync-session.use-case';
+import { LeaveSessionUseCase } from '@application/use-cases/leave-session.use-case';
+import { LetterAuthorService } from '@application/service/letter-author.service';
 import { GridSelectorService } from '@application/service/grid-selector.service';
 import { createEmptyGrid } from '@domain/services/grid-utils.service';
 import { mapGridTemplateToGrid } from '@infrastructure/adapters/session/grid-template.mapper';
@@ -49,10 +53,10 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly checkResult = signal<GridCheckedEvent | null>(null);
 
-  private readonly letterAuthors = signal(new Map<string, 'me' | string>());
+  private readonly letterAuthors = inject(LetterAuthorService);
 
   readonly getCellColorClass = (x: number, y: number): string => {
-    const author = this.letterAuthors().get(`${x},${y}`);
+    const author = this.letterAuthors.getAuthor(x, y);
     if (!author) return '';
     return author === 'me' ? 'letter--mine' : 'letter--other';
   };
@@ -60,6 +64,9 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
   private readonly sessionSocket = inject(SESSION_SOCKET_PORT);
+  private readonly joinSession = inject(JoinSessionUseCase);
+  private readonly syncSession = inject(SyncSessionUseCase);
+  private readonly leaveSession = inject(LeaveSessionUseCase);
   private readonly gameSession = inject(GAME_SESSION_PORT);
   readonly selector = inject(GridSelectorService);
   private readonly router = inject(Router);
@@ -78,7 +85,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.gameSession.joinSession({ shareCode }).subscribe({
+    this.joinSession.execute(shareCode).subscribe({
       next: (fullDto: SessionFullResponse) => {
         this.selector.initGrid(mapGridTemplateToGrid(fullDto.gridTemplate));
         fullDto.cells.forEach((c: CellStateDto) => {
@@ -105,6 +112,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sessionSocket.disconnect();
     this.selector.initGrid(createEmptyGrid('0', '', 10, 10));
+    this.letterAuthors.clearAll();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -143,7 +151,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
       case 'Delete':
         this.selector.clearLetterAt(x, y);
         this.sessionSocket.sendGridUpdate(this.shareCode(), { posX: x, posY: y, commandType: 'CLEAR_CELL' });
-        this.letterAuthors.update(m => { const n = new Map(m); n.delete(`${x},${y}`); return n; });
+        this.letterAuthors.clearAuthor(x, y);
         event.preventDefault();
         break;
       default:
@@ -151,14 +159,14 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
           const letter = event.key.toUpperCase();
           this.selector.inputLetter(letter);
           this.sessionSocket.sendGridUpdate(this.shareCode(), { posX: x, posY: y, commandType: 'PLACE_LETTER', letter });
-          this.letterAuthors.update(m => { const n = new Map(m); n.set(`${x},${y}`, 'me'); return n; });
+          this.letterAuthors.setAuthor(x, y, 'me');
           event.preventDefault();
         }
     }
   }
 
   leave(): void {
-    this.gameSession.leaveSession({ shareCode: this.shareCode() }).subscribe();
+    this.leaveSession.execute(this.shareCode()).subscribe();
     this.sessionSocket.disconnect();
     this.router.navigate(['/']);
   }
@@ -217,29 +225,20 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
     this.revision.set(this.revision() + 1);
     if (event.commandType === 'PLACE_LETTER' && event.letter) {
       this.selector.setLetterAt(event.posX, event.posY, event.letter);
-      this.letterAuthors.update(m => {
-        const n = new Map(m);
-        n.set(`${event.posX},${event.posY}`, event.actorId);
-        return n;
-      });
+      this.letterAuthors.setAuthor(event.posX, event.posY, event.actorId);
     } else if (event.commandType === 'CLEAR_CELL') {
       this.selector.clearLetterAt(event.posX, event.posY);
-      this.letterAuthors.update(m => {
-        const n = new Map(m);
-        n.delete(`${event.posX},${event.posY}`);
-        return n;
-      });
+      this.letterAuthors.clearAuthor(event.posX, event.posY);
     }
   }
 
   private resync(_targetRevision: number): void {
-    this.letterAuthors.set(new Map());
-    this.gameSession.syncSession(this.shareCode()).subscribe({
+    this.letterAuthors.clearAll();
+    this.syncSession.execute(this.shareCode()).subscribe({
       next: (full: SessionFullResponse) => {
         this.revision.set(full.gridRevision);
         this.participantCount.set(full.participantCount);
         this.status.set(full.status);
-        // Clear all letters before applying synced state to prevent stale letters
         this.selector.clearAllLetters();
         full.cells.forEach((c: CellStateDto) => {
           if (c.letter) this.selector.setLetterAt(c.x, c.y, c.letter);
