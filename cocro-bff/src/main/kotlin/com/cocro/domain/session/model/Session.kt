@@ -2,6 +2,7 @@ package com.cocro.domain.session.model
 
 import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.common.CocroResult
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.GridTemplateSnapshot
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.Participant
@@ -18,7 +19,7 @@ import com.cocro.domain.session.model.SessionLifecycleCommand
 data class Session private constructor(
     val id: SessionId,
     val shareCode: SessionShareCode,
-    val creatorId: UserId,
+    val author: Author,
     val gridId: GridShareCode,
     val status: SessionStatus,
     val participants: List<Participant>,
@@ -27,9 +28,12 @@ data class Session private constructor(
     val createdAt: Instant,
     val updatedAt: Instant,
 ) {
+    // Rétro-compat helper
+    val creatorId: UserId get() = author.id
+
     companion object {
         fun create(
-            creatorId: UserId,
+            author: Author,
             shareCode: SessionShareCode,
             gridId: GridShareCode,
             gridTemplate: GridTemplateSnapshot,
@@ -40,7 +44,7 @@ data class Session private constructor(
             return Session(
                 id = sessionId,
                 shareCode = shareCode,
-                creatorId = creatorId,
+                author = author,
                 gridId = gridId,
                 status = SessionStatus.PLAYING,
                 participants = emptyList(),
@@ -54,7 +58,7 @@ data class Session private constructor(
         fun rehydrate(
             id: SessionId,
             shareCode: SessionShareCode,
-            creatorId: UserId,
+            author: Author,
             gridId: GridShareCode,
             status: SessionStatus,
             participants: List<Participant>,
@@ -70,7 +74,7 @@ data class Session private constructor(
             return Session(
                 id,
                 shareCode,
-                creatorId,
+                author,
                 gridId,
                 status,
                 participants,

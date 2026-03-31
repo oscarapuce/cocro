@@ -17,32 +17,32 @@
 | B4 | `cocro-bff/src/main/kotlin/com/cocro/presentation/rest/session/SessionController.kt` | **MODIFY** | Ajouter le endpoint `GET /api/sessions/{shareCode}/grid-template` + injection du `GetSessionGridTemplateUseCase`. |
 | B5 | `cocro-bff/src/test/kotlin/com/cocro/application/session/usecase/GetSessionGridTemplateUseCaseTest.kt` | **CREATE** | Tests unitaires : unauthorized, session not found, grid not found, succes avec verification que les lettres sont videes et que separator/number/clues sont preserves. |
 
-### Angular — cocro-angular
+### Angular — cocro-web
 
 | # | Chemin | Action | Description |
 |---|--------|--------|-------------|
-| A1 | `cocro-angular/src/app/presentation/shared/grid/grid-wrapper/grid.component.ts` | **MODIFY** | Ajouter `@Input() disableKeyboard = false`. Dans `handleKey()`, early return si `disableKeyboard === true`. |
-| A2 | `cocro-angular/src/app/application/service/grid-selector.service.ts` | **MODIFY** | Ajouter `setLetterAt(x, y, letter)` et `clearLetterAt(x, y)` : mettent a jour la grille sans deplacer le curseur. |
-| A3 | `cocro-angular/src/app/domain/models/grid-template.model.ts` | **CREATE** | Interface `GridTemplateResponse` alignee sur le DTO BFF (reponse JSON brute). |
-| A4 | `cocro-angular/src/app/application/ports/session/session-grid-template.port.ts` | **CREATE** | Port `SessionGridTemplatePort` avec `getGridTemplate(shareCode: string): Observable<GridTemplateResponse>` + `InjectionToken SESSION_GRID_TEMPLATE_PORT`. |
-| A5 | `cocro-angular/src/app/infrastructure/adapters/session/session-grid-template-http.adapter.ts` | **CREATE** | Adapter HTTP implementant `SessionGridTemplatePort` : `GET /api/sessions/{shareCode}/grid-template`. |
-| A6 | `cocro-angular/src/app/infrastructure/adapters/session/grid-template.mapper.ts` | **CREATE** | Fonction `mapGridTemplateToGrid(dto: GridTemplateResponse): Grid` : convertit la reponse BFF en modele Angular `Grid` avec `letter.value = ''` pour toutes les `LetterCell`. |
-| A7 | `cocro-angular/src/app/presentation/features/game/board/game-board.component.ts` | **MODIFY** | Refactoring majeur : injection de `GridSelectorService` et `SESSION_GRID_TEMPLATE_PORT`, chargement grid-template + overlay state, keyboard handler propre, signal `letterAuthors`, gestion loading/error. |
-| A8 | `cocro-angular/src/app/presentation/features/game/board/game-board.component.html` | **MODIFY** | Remplacement du rendu custom par `<cocro-grid [disableKeyboard]="true" />`, ajout section metadonnees (titre, auteur, difficulte, description, reference, enigme globale), indicateur participants. |
-| A9 | `cocro-angular/src/app/presentation/features/game/board/game-board.component.scss` | **MODIFY** | Styles pour la section metadonnees, ajustement layout autour de `cocro-grid`, conservation des styles de selection/lettres via CSS classes au niveau host. |
-| A10 | `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.ts` | **MODIFY** | Ajouter `@Input() colorClass: string = ''` pour permettre la differenciation visuelle me/other. |
-| A11 | `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.html` | **MODIFY** | Appliquer `[class]="colorClass"` sur l'element affichant la lettre. |
-| A12 | `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss` | **MODIFY** | Ajouter classes `.letter--mine` (couleur encre/vert foret) et `.letter--other` (brun/sepia). |
-| A13 | `cocro-angular/src/app/presentation/shared/grid/cell-wrapper/grid-cell.component.ts` | **MODIFY** | Ajouter un `@Input() letterColorClass: string = ''` passe au `cocro-letter-input`. |
-| A14 | `cocro-angular/src/app/presentation/shared/grid/cell-wrapper/grid-cell.component.html` | **MODIFY** | Passer `[colorClass]="letterColorClass"` a `<cocro-letter-input>`. |
-| A15 | `cocro-angular/src/app/presentation/shared/grid/grid-wrapper/grid.component.html` | **MODIFY** | Passer `[letterColorClass]` a chaque `<cocro-grid-cell>`, calcule via un callback/signal optionnel. |
-| A16 | `cocro-angular/src/app/presentation/shared/grid/grid-wrapper/grid.component.ts` | **MODIFY** | (en plus de A1) Ajouter `@Input() cellColorClassFn: ((x: number, y: number) => string) | null = null` pour la delegation de la colorisation. |
+| A1 | `cocro-web/src/app/presentation/shared/grid/grid-wrapper/grid.component.ts` | **MODIFY** | Ajouter `@Input() disableKeyboard = false`. Dans `handleKey()`, early return si `disableKeyboard === true`. |
+| A2 | `cocro-web/src/app/application/service/grid-selector.service.ts` | **MODIFY** | Ajouter `setLetterAt(x, y, letter)` et `clearLetterAt(x, y)` : mettent a jour la grille sans deplacer le curseur. |
+| A3 | `cocro-web/src/app/domain/models/grid-template.model.ts` | **CREATE** | Interface `GridTemplateResponse` alignee sur le DTO BFF (reponse JSON brute). |
+| A4 | `cocro-web/src/app/application/ports/session/session-grid-template.port.ts` | **CREATE** | Port `SessionGridTemplatePort` avec `getGridTemplate(shareCode: string): Observable<GridTemplateResponse>` + `InjectionToken SESSION_GRID_TEMPLATE_PORT`. |
+| A5 | `cocro-web/src/app/infrastructure/adapters/session/session-grid-template-http.adapter.ts` | **CREATE** | Adapter HTTP implementant `SessionGridTemplatePort` : `GET /api/sessions/{shareCode}/grid-template`. |
+| A6 | `cocro-web/src/app/infrastructure/adapters/session/grid-template.mapper.ts` | **CREATE** | Fonction `mapGridTemplateToGrid(dto: GridTemplateResponse): Grid` : convertit la reponse BFF en modele Angular `Grid` avec `letter.value = ''` pour toutes les `LetterCell`. |
+| A7 | `cocro-web/src/app/presentation/features/game/board/game-board.component.ts` | **MODIFY** | Refactoring majeur : injection de `GridSelectorService` et `SESSION_GRID_TEMPLATE_PORT`, chargement grid-template + overlay state, keyboard handler propre, signal `letterAuthors`, gestion loading/error. |
+| A8 | `cocro-web/src/app/presentation/features/game/board/game-board.component.html` | **MODIFY** | Remplacement du rendu custom par `<cocro-grid [disableKeyboard]="true" />`, ajout section metadonnees (titre, auteur, difficulte, description, reference, enigme globale), indicateur participants. |
+| A9 | `cocro-web/src/app/presentation/features/game/board/game-board.component.scss` | **MODIFY** | Styles pour la section metadonnees, ajustement layout autour de `cocro-grid`, conservation des styles de selection/lettres via CSS classes au niveau host. |
+| A10 | `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.ts` | **MODIFY** | Ajouter `@Input() colorClass: string = ''` pour permettre la differenciation visuelle me/other. |
+| A11 | `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.html` | **MODIFY** | Appliquer `[class]="colorClass"` sur l'element affichant la lettre. |
+| A12 | `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss` | **MODIFY** | Ajouter classes `.letter--mine` (couleur encre/vert foret) et `.letter--other` (brun/sepia). |
+| A13 | `cocro-web/src/app/presentation/shared/grid/cell-wrapper/grid-cell.component.ts` | **MODIFY** | Ajouter un `@Input() letterColorClass: string = ''` passe au `cocro-letter-input`. |
+| A14 | `cocro-web/src/app/presentation/shared/grid/cell-wrapper/grid-cell.component.html` | **MODIFY** | Passer `[colorClass]="letterColorClass"` a `<cocro-letter-input>`. |
+| A15 | `cocro-web/src/app/presentation/shared/grid/grid-wrapper/grid.component.html` | **MODIFY** | Passer `[letterColorClass]` a chaque `<cocro-grid-cell>`, calcule via un callback/signal optionnel. |
+| A16 | `cocro-web/src/app/presentation/shared/grid/grid-wrapper/grid.component.ts` | **MODIFY** | (en plus de A1) Ajouter `@Input() cellColorClassFn: ((x: number, y: number) => string) | null = null` pour la delegation de la colorisation. |
 
 ### Provisioning Angular (DI)
 
 | # | Chemin | Action | Description |
 |---|--------|--------|-------------|
-| A17 | `cocro-angular/src/app/presentation/features/game/game.routes.ts` | **MODIFY** | Ajouter le provider `{ provide: SESSION_GRID_TEMPLATE_PORT, useClass: SessionGridTemplateHttpAdapter }` dans les routes du module game. |
+| A17 | `cocro-web/src/app/presentation/features/game/game.routes.ts` | **MODIFY** | Ajouter le provider `{ provide: SESSION_GRID_TEMPLATE_PORT, useClass: SessionGridTemplateHttpAdapter }` dans les routes du module game. |
 
 ---
 
@@ -145,29 +145,29 @@
 ### Phase 2 : Angular — GridComponent et GridSelectorService
 
 - [ ] **STEP 6 : Ajouter `disableKeyboard` a `GridComponent`**
-  - Fichier : `A1` — `cocro-angular/.../grid-wrapper/grid.component.ts`
+  - Fichier : `A1` — `cocro-web/.../grid-wrapper/grid.component.ts`
   - Ajouter : `@Input() disableKeyboard = false;`
   - Modifier `handleKey()` : ajouter `if (this.disableKeyboard) return;` en premiere ligne.
   - Impact : zero regression sur l'editeur (qui ne passe pas le flag).
 
 - [ ] **STEP 7 : Ajouter `cellColorClassFn` a `GridComponent`**
-  - Fichier : `A16` — `cocro-angular/.../grid-wrapper/grid.component.ts`
+  - Fichier : `A16` — `cocro-web/.../grid-wrapper/grid.component.ts`
   - Ajouter : `@Input() cellColorClassFn: ((x: number, y: number) => string) | null = null;`
-  - Fichier : `A15` — `cocro-angular/.../grid-wrapper/grid.component.html`
+  - Fichier : `A15` — `cocro-web/.../grid-wrapper/grid.component.html`
   - Passer a chaque `<cocro-grid-cell>` : `[letterColorClass]="cellColorClassFn ? cellColorClassFn(cell.x, cell.y) : ''"`
 
 - [ ] **STEP 8 : Propager `letterColorClass` dans `GridCellComponent`**
-  - Fichier : `A13` — `cocro-angular/.../cell-wrapper/grid-cell.component.ts`
+  - Fichier : `A13` — `cocro-web/.../cell-wrapper/grid-cell.component.ts`
   - Ajouter : `@Input() letterColorClass = '';`
-  - Fichier : `A14` — `cocro-angular/.../cell-wrapper/grid-cell.component.html`
+  - Fichier : `A14` — `cocro-web/.../cell-wrapper/grid-cell.component.html`
   - Modifier : `<cocro-letter-input [letter]="cell.letter" [active]="selected()" [colorClass]="letterColorClass"/>`
 
 - [ ] **STEP 9 : Ajouter `colorClass` a `LetterInputComponent`**
-  - Fichier : `A10` — `cocro-angular/.../inputs/letter/letter-input.component.ts`
+  - Fichier : `A10` — `cocro-web/.../inputs/letter/letter-input.component.ts`
   - Ajouter : `@Input() colorClass = '';`
-  - Fichier : `A11` — `cocro-angular/.../inputs/letter/letter-input.component.html`
+  - Fichier : `A11` — `cocro-web/.../inputs/letter/letter-input.component.html`
   - Modifier l'input : ajouter `[class]="colorClass"` sur l'element `<input>` ou sur le wrapper.
-  - Fichier : `A12` — `cocro-angular/.../inputs/letter/letter-input.component.scss`
+  - Fichier : `A12` — `cocro-web/.../inputs/letter/letter-input.component.scss`
   - Ajouter :
     ```scss
     .letter--mine {
@@ -181,7 +181,7 @@
     ```
 
 - [ ] **STEP 10 : Ajouter `setLetterAt` et `clearLetterAt` a `GridSelectorService`**
-  - Fichier : `A2` — `cocro-angular/.../service/grid-selector.service.ts`
+  - Fichier : `A2` — `cocro-web/.../service/grid-selector.service.ts`
   - Ajouter :
     ```typescript
     setLetterAt(x: number, y: number, letter: string): void {
@@ -200,7 +200,7 @@
 ### Phase 3 : Angular — Port, Adapter, Mapper pour grid-template
 
 - [ ] **STEP 11 : Creer `GridTemplateResponse` (modele)**
-  - Fichier : `A3` — `cocro-angular/.../domain/models/grid-template.model.ts`
+  - Fichier : `A3` — `cocro-web/.../domain/models/grid-template.model.ts`
   - Interface :
     ```typescript
     export interface GridTemplateResponse {
@@ -232,7 +232,7 @@
     ```
 
 - [ ] **STEP 12 : Creer le port `SessionGridTemplatePort`**
-  - Fichier : `A4` — `cocro-angular/.../application/ports/session/session-grid-template.port.ts`
+  - Fichier : `A4` — `cocro-web/.../application/ports/session/session-grid-template.port.ts`
   - ```typescript
     export interface SessionGridTemplatePort {
       getGridTemplate(shareCode: string): Observable<GridTemplateResponse>;
@@ -242,7 +242,7 @@
     ```
 
 - [ ] **STEP 13 : Creer l'adapter HTTP**
-  - Fichier : `A5` — `cocro-angular/.../infrastructure/adapters/session/session-grid-template-http.adapter.ts`
+  - Fichier : `A5` — `cocro-web/.../infrastructure/adapters/session/session-grid-template-http.adapter.ts`
   - ```typescript
     @Injectable({ providedIn: 'root' })
     export class SessionGridTemplateHttpAdapter implements SessionGridTemplatePort {
@@ -255,7 +255,7 @@
     ```
 
 - [ ] **STEP 14 : Creer le mapper `GridTemplateResponse -> Grid`**
-  - Fichier : `A6` — `cocro-angular/.../infrastructure/adapters/session/grid-template.mapper.ts`
+  - Fichier : `A6` — `cocro-web/.../infrastructure/adapters/session/grid-template.mapper.ts`
   - Logique :
     ```typescript
     export function mapGridTemplateToGrid(dto: GridTemplateResponse): Grid {
@@ -297,13 +297,13 @@
     ```
 
 - [ ] **STEP 15 : Configurer le provider dans les routes game**
-  - Fichier : `A17` — `cocro-angular/.../features/game/game.routes.ts`
+  - Fichier : `A17` — `cocro-web/.../features/game/game.routes.ts`
   - Ajouter le provider pour `SESSION_GRID_TEMPLATE_PORT` -> `SessionGridTemplateHttpAdapter`
 
 ### Phase 4 : Angular — Refactoring du GameBoardComponent
 
 - [ ] **STEP 16 : Refactorer `GameBoardComponent` (logique TS)**
-  - Fichier : `A7` — `cocro-angular/.../game/board/game-board.component.ts`
+  - Fichier : `A7` — `cocro-web/.../game/board/game-board.component.ts`
   - **Changements majeurs :**
 
   **Imports supplementaires :**
@@ -430,7 +430,7 @@
   ```
 
 - [ ] **STEP 17 : Refactorer `game-board.component.html`**
-  - Fichier : `A8` — `cocro-angular/.../game/board/game-board.component.html`
+  - Fichier : `A8` — `cocro-web/.../game/board/game-board.component.html`
   - Structure cible :
     ```html
     <div class="game" tabindex="0" aria-label="Grille de mots fleches">
@@ -493,7 +493,7 @@
   - **Pas de panneaux d'edition** (cell-type, clue-editor, letter-editor, grid-params) : ils ne sont pas importes.
 
 - [ ] **STEP 18 : Styles SCSS du GameBoard**
-  - Fichier : `A9` — `cocro-angular/.../game/board/game-board.component.scss`
+  - Fichier : `A9` — `cocro-web/.../game/board/game-board.component.scss`
   - Ajouter :
     ```scss
     .game__metadata {
@@ -646,7 +646,7 @@ Authorization: Bearer <jwt>
 ### Modele Angular `GridTemplateResponse`
 
 ```typescript
-// cocro-angular/src/app/domain/models/grid-template.model.ts
+// cocro-web/src/app/domain/models/grid-template.model.ts
 
 export interface GridTemplateResponse {
   title: string;

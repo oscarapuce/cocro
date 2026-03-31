@@ -1311,15 +1311,15 @@ git commit -m "test(bff): update integration tests for new session lifecycle"
 ### Task 14: Angular — models, port, HTTP adapter
 
 **Files:**
-- Modify: `cocro-angular/src/app/domain/models/session.model.ts`
-- Modify: `cocro-angular/src/app/domain/models/session-events.model.ts`
-- Modify: `cocro-angular/src/app/application/ports/session/game-session.port.ts`
-- Modify: `cocro-angular/src/app/infrastructure/adapters/session/game-session-http.adapter.ts`
+- Modify: `cocro-web/src/app/domain/models/session.model.ts`
+- Modify: `cocro-web/src/app/domain/models/session-events.model.ts`
+- Modify: `cocro-web/src/app/application/ports/session/game-session.port.ts`
+- Modify: `cocro-web/src/app/infrastructure/adapters/session/game-session-http.adapter.ts`
 
 - [ ] **Step 1: Update session.model.ts**
 
 ```typescript
-// cocro-angular/src/app/domain/models/session.model.ts
+// cocro-web/src/app/domain/models/session.model.ts
 
 import { GridTemplateResponse } from './grid-template.model';
 
@@ -1386,7 +1386,7 @@ export interface GridCheckResponse {
 
 - [ ] **Step 2: Update session-events.model.ts — add SessionEnded + SessionInterrupted**
 
-In `cocro-angular/src/app/domain/models/session-events.model.ts`, add to the event type union and add interfaces:
+In `cocro-web/src/app/domain/models/session-events.model.ts`, add to the event type union and add interfaces:
 ```typescript
 export type SessionEventType =
   | 'SessionWelcome'
@@ -1413,7 +1413,7 @@ export interface SessionInterruptedEvent extends SessionEvent {
 
 - [ ] **Step 3: Update GameSessionPort interface**
 
-In `cocro-angular/src/app/application/ports/session/game-session.port.ts`:
+In `cocro-web/src/app/application/ports/session/game-session.port.ts`:
 ```typescript
 import { Observable } from 'rxjs';
 import {
@@ -1436,7 +1436,7 @@ export interface GameSessionPort {
 - [ ] **Step 4: Update GameSessionHttpAdapter**
 
 ```typescript
-// cocro-angular/src/app/infrastructure/adapters/session/game-session-http.adapter.ts
+// cocro-web/src/app/infrastructure/adapters/session/game-session-http.adapter.ts
 
 createSession(dto: CreateSessionRequest): Observable<SessionCreatedResponse> {
   return this.http.post<SessionCreatedResponse>(this.baseUrl, dto);
@@ -1454,7 +1454,7 @@ checkGrid(shareCode: string): Observable<GridCheckResponse> {
 - [ ] **Step 5: Verify build**
 
 ```bash
-cd cocro-angular && node --max-old-space-size=2048 node_modules/.bin/ng build 2>&1 | tail -20
+cd cocro-web && node --max-old-space-size=2048 node_modules/.bin/ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -1462,9 +1462,9 @@ Expected: 0 errors
 - [ ] **Step 6: Commit**
 
 ```bash
-git add cocro-angular/src/app/domain/models/ \
-        cocro-angular/src/app/application/ports/session/ \
-        cocro-angular/src/app/infrastructure/adapters/session/game-session-http.adapter.ts
+git add cocro-web/src/app/domain/models/ \
+        cocro-web/src/app/application/ports/session/ \
+        cocro-web/src/app/infrastructure/adapters/session/game-session-http.adapter.ts
 git commit -m "feat(angular): update session models, port, and HTTP adapter for new lifecycle"
 ```
 
@@ -1473,15 +1473,15 @@ git commit -m "feat(angular): update session models, port, and HTTP adapter for 
 ### Task 15: Angular — new use cases (create, leave, sync)
 
 **Files:**
-- Create: `cocro-angular/src/app/application/use-cases/create-session.use-case.ts`
-- Create: `cocro-angular/src/app/application/use-cases/leave-session.use-case.ts`
-- Create: `cocro-angular/src/app/application/use-cases/sync-session.use-case.ts`
-- Modify: `cocro-angular/src/app/application/use-cases/join-session.use-case.ts` (ensure guest flow still works)
+- Create: `cocro-web/src/app/application/use-cases/create-session.use-case.ts`
+- Create: `cocro-web/src/app/application/use-cases/leave-session.use-case.ts`
+- Create: `cocro-web/src/app/application/use-cases/sync-session.use-case.ts`
+- Modify: `cocro-web/src/app/application/use-cases/join-session.use-case.ts` (ensure guest flow still works)
 
 - [ ] **Step 1: Create CreateSessionUseCase — orchestrates create → join**
 
 ```typescript
-// cocro-angular/src/app/application/use-cases/create-session.use-case.ts
+// cocro-web/src/app/application/use-cases/create-session.use-case.ts
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -1503,7 +1503,7 @@ export class CreateSessionUseCase {
 - [ ] **Step 2: Create LeaveSessionUseCase**
 
 ```typescript
-// cocro-angular/src/app/application/use-cases/leave-session.use-case.ts
+// cocro-web/src/app/application/use-cases/leave-session.use-case.ts
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
@@ -1522,7 +1522,7 @@ export class LeaveSessionUseCase {
 - [ ] **Step 3: Create SyncSessionUseCase**
 
 ```typescript
-// cocro-angular/src/app/application/use-cases/sync-session.use-case.ts
+// cocro-web/src/app/application/use-cases/sync-session.use-case.ts
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GAME_SESSION_PORT } from '@application/ports/session/game-session.port';
@@ -1540,7 +1540,7 @@ export class SyncSessionUseCase {
 
 - [ ] **Step 4: Update CreateSessionComponent to use CreateSessionUseCase**
 
-In `cocro-angular/src/app/presentation/features/lobby/create/create-session.component.ts`:
+In `cocro-web/src/app/presentation/features/lobby/create/create-session.component.ts`:
 - Replace direct `gameSession.createSession()` call with `createSessionUseCase.execute(gridId)`
 - Navigate to `/play/{shareCode}` using the returned `SessionFullResponse.shareCode`
 
@@ -1558,7 +1558,7 @@ this.createSession.execute(this.selectedGridId()).subscribe({
 - [ ] **Step 5: Verify build**
 
 ```bash
-cd cocro-angular && node --max-old-space-size=2048 node_modules/.bin/ng build 2>&1 | tail -20
+cd cocro-web && node --max-old-space-size=2048 node_modules/.bin/ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -1566,8 +1566,8 @@ Expected: 0 errors
 - [ ] **Step 6: Commit**
 
 ```bash
-git add cocro-angular/src/app/application/use-cases/ \
-        cocro-angular/src/app/presentation/features/lobby/create/create-session.component.ts
+git add cocro-web/src/app/application/use-cases/ \
+        cocro-web/src/app/presentation/features/lobby/create/create-session.component.ts
 git commit -m "feat(angular): add CreateSessionUseCase (create→join), LeaveSessionUseCase, SyncSessionUseCase"
 ```
 
@@ -1576,8 +1576,8 @@ git commit -m "feat(angular): add CreateSessionUseCase (create→join), LeaveSes
 ### Task 16: Angular — GridPlayerComponent (status, sync, checkGrid, events)
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/features/grid/play/grid-player.component.ts`
-- Modify: `cocro-angular/src/app/presentation/features/grid/play/grid-player.component.html`
+- Modify: `cocro-web/src/app/presentation/features/grid/play/grid-player.component.ts`
+- Modify: `cocro-web/src/app/presentation/features/grid/play/grid-player.component.html`
 
 - [ ] **Step 1: Update status signal initial value**
 
@@ -1709,7 +1709,7 @@ Add to the template (after existing leave button or in the action bar):
 - [ ] **Step 7: Verify build**
 
 ```bash
-cd cocro-angular && node --max-old-space-size=2048 node_modules/.bin/ng build 2>&1 | tail -20
+cd cocro-web && node --max-old-space-size=2048 node_modules/.bin/ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors, 0 warnings
@@ -1717,7 +1717,7 @@ Expected: 0 errors, 0 warnings
 - [ ] **Step 8: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/features/grid/play/
+git add cocro-web/src/app/presentation/features/grid/play/
 git commit -m "feat(angular): GridPlayerComponent — sync, checkGrid, SessionEnded/Interrupted handlers"
 ```
 
@@ -1738,7 +1738,7 @@ Expected: BUILD SUCCESSFUL, all tests pass
 - [ ] **Step 2: Run Angular build**
 
 ```bash
-cd cocro-angular && node --max-old-space-size=2048 node_modules/.bin/ng build 2>&1 | tail -20
+cd cocro-web && node --max-old-space-size=2048 node_modules/.bin/ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -1779,15 +1779,15 @@ git commit -m "docs: update session lifecycle doc post-refactoring"
 | `cocro-bff/src/main/kotlin/com/cocro/infrastructure/scheduler/HeartbeatTimeoutScheduler.kt` | INTERRUPTED detection |
 | `cocro-bff/src/main/kotlin/com/cocro/presentation/rest/session/SessionController.kt` | +POST /{code}/sync |
 | `cocro-bff/src/main/kotlin/com/cocro/infrastructure/persistence/mongo/session/mapper/SessionDocumentMapper.kt` | CREATING/SCORING fallback |
-| `cocro-angular/src/app/domain/models/session.model.ts` | 3 statuses, +SessionCreatedResponse, +GridCheckResponse |
-| `cocro-angular/src/app/domain/models/session-events.model.ts` | +SessionEnded, +SessionInterrupted |
-| `cocro-angular/src/app/application/ports/session/game-session.port.ts` | createSession return, +syncSession, +checkGrid |
-| `cocro-angular/src/app/infrastructure/adapters/session/game-session-http.adapter.ts` | Implement new methods |
-| `cocro-angular/src/app/application/use-cases/create-session.use-case.ts` | **NEW** create→join |
-| `cocro-angular/src/app/application/use-cases/leave-session.use-case.ts` | **NEW** |
-| `cocro-angular/src/app/application/use-cases/sync-session.use-case.ts` | **NEW** |
-| `cocro-angular/src/app/presentation/features/grid/play/grid-player.component.ts` | status, resync, checkGrid, new events |
-| `cocro-angular/src/app/presentation/features/grid/play/grid-player.component.html` | Vérifier button, ENDED/INTERRUPTED UI |
+| `cocro-web/src/app/domain/models/session.model.ts` | 3 statuses, +SessionCreatedResponse, +GridCheckResponse |
+| `cocro-web/src/app/domain/models/session-events.model.ts` | +SessionEnded, +SessionInterrupted |
+| `cocro-web/src/app/application/ports/session/game-session.port.ts` | createSession return, +syncSession, +checkGrid |
+| `cocro-web/src/app/infrastructure/adapters/session/game-session-http.adapter.ts` | Implement new methods |
+| `cocro-web/src/app/application/use-cases/create-session.use-case.ts` | **NEW** create→join |
+| `cocro-web/src/app/application/use-cases/leave-session.use-case.ts` | **NEW** |
+| `cocro-web/src/app/application/use-cases/sync-session.use-case.ts` | **NEW** |
+| `cocro-web/src/app/presentation/features/grid/play/grid-player.component.ts` | status, resync, checkGrid, new events |
+| `cocro-web/src/app/presentation/features/grid/play/grid-player.component.html` | Vérifier button, ENDED/INTERRUPTED UI |
 | `cocro-bff/src/test/kotlin/com/cocro/kernel/session/model/SessionCreateTest.kt` | empty participants |
 | `cocro-bff/src/test/kotlin/com/cocro/kernel/session/model/SessionApplyTest.kt` | INTERRUPTED join, LEFT rejoin |
 | `cocro-bff/src/test/kotlin/com/cocro/kernel/session/model/SessionEndTest.kt` | no actorId |

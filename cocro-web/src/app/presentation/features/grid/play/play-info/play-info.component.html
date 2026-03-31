@@ -1,0 +1,26 @@
+@if (hasGlobalClue()) {
+  <div class="play-info__enigme">
+    <span class="play-info__chip">Énigme</span>
+    <p class="play-info__enigme-label">{{ grid().globalClue!.label }}</p>
+    @if (grid().globalClue!.wordLengths.length) {
+      <p class="play-info__enigme-lengths">{{ grid().globalClue!.wordLengths.join(' + ') }} lettres</p>
+    }
+  </div>
+}
+
+@if (isClueSelected() && selectedCellClues()) {
+  <div class="play-info__clues">
+    @for (clue of selectedCellClues()!; track clue.direction) {
+      <div class="play-info__clue">
+        <span class="play-info__clue-dir">{{ clue.direction }}</span>
+        <span class="play-info__clue-text">{{ clue.text }}</span>
+      </div>
+    }
+  </div>
+} @else if (!hasGlobalClue() && !hasDescription()) {
+  <p class="play-info__hint">Clique sur une case indice pour voir sa définition.</p>
+}
+
+@if (hasDescription() && !isClueSelected()) {
+  <p class="play-info__description">{{ grid().description }}</p>
+}

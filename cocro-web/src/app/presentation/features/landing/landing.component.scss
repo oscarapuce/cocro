@@ -1,0 +1,44 @@
+// Les styles du contenu sont dans FrontPanelComponent
+
+.guest-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border: var(--border-dashed);
+  border-radius: var(--radius-panel);
+  animation: enter-up 350ms ease-out both;
+
+  &__badge {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-forest);
+    background: rgba(46, 80, 56, 0.1);
+    padding: var(--space-2xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+  }
+
+  &__name {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  &__logout {
+    margin-left: auto;
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: var(--color-ink);
+    }
+  }
+}

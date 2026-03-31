@@ -2,6 +2,7 @@ package com.cocro.domain.session.model
 
 import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.common.CocroResult
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.GridTemplateSnapshot
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.enum.ParticipantStatus
@@ -14,10 +15,10 @@ import org.junit.jupiter.api.Test
 
 class SessionApplyTest {
 
-    private val creatorId = UserId.new()
+    private val author = Author(id = UserId.new(), username = "Test")
     private val shareCode = SessionShareCode("AB12")
     private val session = Session.create(
-        creatorId = creatorId,
+        author = Author(id = author.id, username = "TestCreator"),
         shareCode = shareCode,
         gridId = GridShareCode("GRID01"),
         gridTemplate = minimalSnapshot(),
@@ -27,8 +28,7 @@ class SessionApplyTest {
         shortId = GridShareCode("GRID01"),
         title = "Test", width = 5, height = 5,
         difficulty = null, author = null, reference = null,
-        description = null, globalClueLabel = null,
-        globalClueWordLengths = null, cells = emptyList()
+        description = null, globalClueLabel = null, globalClueWordLengths = null, cells = emptyList()
     )
 
     // -------------------------------------------------------------------------
@@ -174,6 +174,6 @@ class SessionApplyTest {
     // -------------------------------------------------------------------------
 
     private fun Session.withStatus(status: SessionStatus): Session =
-        Session.rehydrate(id, shareCode, creatorId, gridId, status, participants, sessionGridState, createdAt, updatedAt, gridTemplate = gridTemplate)
+        Session.rehydrate(id, shareCode, author, gridId, status, participants, sessionGridState, createdAt, updatedAt, gridTemplate = gridTemplate)
 
 }

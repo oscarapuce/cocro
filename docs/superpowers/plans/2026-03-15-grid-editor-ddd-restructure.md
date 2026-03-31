@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Restructure cocro-angular into DDD 4-folder architecture, port grid editor behavior (selector, keyboard nav, business rules) from Cocro_old, fix the coral line.
+**Goal:** Restructure cocro-web into DDD 4-folder architecture, port grid editor behavior (selector, keyboard nav, business rules) from Cocro_old, fix the coral line.
 
 **Architecture:** Move from flat `shared/` + `features/` to `domain/` + `application/` + `infrastructure/` + `presentation/`. Port domain models, cell/grid utilities, validation rules, and GridSelectorService from old frontend using modern Angular signals (not BehaviorSubject). Replace mutable cell operations with immutable ones.
 
@@ -53,7 +53,7 @@
 ### Task 1: Fix coral line z-index
 
 **Files:**
-- Modify: `cocro-angular/src/styles.scss:33-43`
+- Modify: `cocro-web/src/styles.scss:33-43`
 
 - [ ] **Step 1: Fix z-index**
 
@@ -75,13 +75,13 @@ body::before {
 
 - [ ] **Step 2: Verify**
 
-Run: `cd cocro-angular && npx ng build --configuration=development 2>&1 | tail -5`
+Run: `cd cocro-web && npx ng build --configuration=development 2>&1 | tail -5`
 Expected: Build succeeds
 
 ### Task 2: Add TSConfig path aliases
 
 **Files:**
-- Modify: `cocro-angular/tsconfig.json`
+- Modify: `cocro-web/tsconfig.json`
 
 - [ ] **Step 1: Add paths to compilerOptions**
 
@@ -100,7 +100,7 @@ Expected: Build succeeds
 
 - [ ] **Step 2: Verify build still passes**
 
-Run: `cd cocro-angular && npx ng build --configuration=development 2>&1 | tail -5`
+Run: `cd cocro-web && npx ng build --configuration=development 2>&1 | tail -5`
 
 ---
 
@@ -361,7 +361,7 @@ export function isLetterFullyFilled(grid: Grid): boolean {
 
 - [ ] **Step 2: Verify build**
 
-Run: `cd cocro-angular && npx ng build --configuration=development 2>&1 | tail -5`
+Run: `cd cocro-web && npx ng build --configuration=development 2>&1 | tail -5`
 
 ---
 
@@ -562,7 +562,7 @@ export class GridSelectorService {
 
 - [ ] **Step 2: Verify build**
 
-Run: `cd cocro-angular && npx ng build --configuration=development 2>&1 | tail -5`
+Run: `cd cocro-web && npx ng build --configuration=development 2>&1 | tail -5`
 
 ---
 
@@ -579,7 +579,7 @@ Run: `cd cocro-angular && npx ng build --configuration=development 2>&1 | tail -
 - [ ] **Step 1: Move auth, session, session-events models**
 
 ```bash
-cd cocro-angular/src/app
+cd cocro-web/src/app
 mkdir -p domain/models
 mv shared/models/auth.models.ts domain/models/auth.model.ts
 mv shared/models/session.models.ts domain/models/session.model.ts
@@ -649,7 +649,7 @@ export function cellToDto(cell: Cell): CellDto {
 - [ ] **Step 3: Delete old grid.models.ts**
 
 ```bash
-rm cocro-angular/src/app/shared/models/grid.models.ts
+rm cocro-web/src/app/shared/models/grid.models.ts
 ```
 
 ### Task 9: Move services to infrastructure
@@ -663,7 +663,7 @@ rm cocro-angular/src/app/shared/models/grid.models.ts
 - [ ] **Step 1: Move files**
 
 ```bash
-cd cocro-angular/src/app
+cd cocro-web/src/app
 mkdir -p infrastructure/adapters infrastructure/auth
 mv shared/services/grid.service.ts infrastructure/adapters/grid.service.ts
 mv shared/services/session.service.ts infrastructure/adapters/session.service.ts
@@ -688,7 +688,7 @@ mv shared/services/auth.service.ts infrastructure/auth/auth.service.ts
 - [ ] **Step 1: Move files**
 
 ```bash
-cd cocro-angular/src/app
+cd cocro-web/src/app
 mkdir -p infrastructure/guards
 mv shared/guards/auth.guard.ts infrastructure/guards/auth.guard.ts
 mv shared/guards/player.guard.ts infrastructure/guards/player.guard.ts
@@ -709,7 +709,7 @@ JWT interceptor imports AuthService: change to `@infrastructure/auth/auth.servic
 - [ ] **Step 1: Move directories**
 
 ```bash
-cd cocro-angular/src/app
+cd cocro-web/src/app
 mkdir -p presentation/shared
 mv features presentation/features
 mv shared/components presentation/shared/components
@@ -718,7 +718,7 @@ mv shared/components presentation/shared/components
 - [ ] **Step 2: Clean up empty shared directory**
 
 ```bash
-rm -rf cocro-angular/src/app/shared
+rm -rf cocro-web/src/app/shared
 ```
 
 ### Task 12: Update all import paths
@@ -759,7 +759,7 @@ shared/interceptors/jwt.interceptor.spec.ts → delete or move to infrastructure
 
 - [ ] **Step 5: Verify build**
 
-Run: `cd cocro-angular && npx ng build --configuration=development 2>&1 | tail -20`
+Run: `cd cocro-web && npx ng build --configuration=development 2>&1 | tail -20`
 Expected: 0 errors
 
 ---
@@ -971,12 +971,12 @@ When a cell-type tool (LETTER, BLACK, CLUE_SINGLE, CLUE_DOUBLE) is active:
 
 - [ ] **Step 1: Full build**
 
-Run: `cd cocro-angular && npx ng build 2>&1 | tail -20`
+Run: `cd cocro-web && npx ng build 2>&1 | tail -20`
 Expected: 0 errors, 0 warnings (or only acceptable warnings)
 
 - [ ] **Step 2: Verify runtime**
 
-Run: `cd cocro-angular && npx ng serve` and verify in browser:
+Run: `cd cocro-web && npx ng serve` and verify in browser:
 - Grid editor loads at `/grids/editor`
 - Click on cells selects them
 - Arrow keys navigate
@@ -995,7 +995,7 @@ Run: `cd cocro-angular && npx ng serve` and verify in browser:
 Add the Angular DDD structure to the Architecture section:
 
 ```markdown
-### Angular Frontend (cocro-angular)
+### Angular Frontend (cocro-web)
 DDD 4-folder structure:
 - **domain/**: models, rules, services (pure functions, no Angular deps)
 - **application/**: services (GridSelectorService), ports
@@ -1008,7 +1008,7 @@ DDD 4-folder structure:
 - [ ] **Step 1: Stage and commit**
 
 ```bash
-git add cocro-angular/
+git add cocro-web/
 git commit -m "feat(angular): restructure to DDD architecture + port grid editor behavior
 
 - Restructure src/app into domain/application/infrastructure/presentation

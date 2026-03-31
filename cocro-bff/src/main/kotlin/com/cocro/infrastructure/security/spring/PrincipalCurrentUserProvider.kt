@@ -22,7 +22,7 @@ class PrincipalCurrentUserProvider : CurrentUserProvider {
                         ?.map { Role.valueOf(it) }
                         ?.toSet()
                         ?: emptySet()
-                AuthenticatedUser(userId = userId, roles = roles)
+                AuthenticatedUser(userId = userId, username = principal.getClaimAsString("username") ?: "", roles = roles)
             }
             // WebSocket/STOMP request authenticated via CocroAuthentication
             is AuthenticatedUser -> principal

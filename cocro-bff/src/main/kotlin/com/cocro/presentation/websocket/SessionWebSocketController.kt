@@ -2,6 +2,7 @@ package com.cocro.presentation.websocket
 
 import com.cocro.application.session.dto.UpdateSessionGridDto
 import com.cocro.application.session.dto.notification.SessionEvent
+import com.cocro.application.session.port.HeartbeatTracker
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.usecase.UpdateSessionGridUseCases
@@ -23,6 +24,7 @@ class SessionWebSocketController(
     private val updateSessionGridUseCases: UpdateSessionGridUseCases,
     private val sessionRepository: SessionRepository,
     private val sessionGridStateCache: SessionGridStateCache,
+    private val heartbeatTracker: HeartbeatTracker,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -99,6 +101,28 @@ class SessionWebSocketController(
                 shareCode, result.errors.map { it.errorCode },
             )
         }
+    }
+
+    /**
+     * Client sends to: /app/session/{shareCode}/heartbeat
+     * Keeps the user marked as ACTIVE in the HeartbeatTracker.
+     * Should be sent every ≤20s by the client (grace period is 30s).
+     */
+    @MessageMapping("/session/{shareCode}/heartbeat")
+    fun handleHeartbeat(
+        @DestinationVariable shareCode: String,
+        headerAccessor: SimpMessageHeaderAccessor,
+    ) {
+        val auth = headerAccessor.sessionAttributes
+            ?.get(StompAuthChannelInterceptor.SESSION_AUTH_KEY) as? CocroAuthentication
+            ?: return
+
+        if (!SessionShareCodeRule.validate(shareCode)) return
+
+        val session = sessionRepository.findByShareCode(SessionShareCode(shareCode)) ?: return
+
+        heartbeatTracker.markActive(session.id, auth.user.userId)
+        logger.trace("Heartbeat received from user={} for session={}", auth.user.userId, shareCode)
     }
 }
 

@@ -73,6 +73,7 @@ class HeartbeatTimeoutScheduler(
             if (activeCount == 0 && saved.status == SessionStatus.PLAYING) {
                 val interrupted = saved.interrupt()
                 sessionRepository.save(interrupted)
+                sessionGridStateCache.deactivate(sessionId)
                 sessionNotifier.broadcast(
                     interrupted.shareCode,
                     SessionEvent.SessionInterrupted(shareCode = interrupted.shareCode.value),

@@ -1,0 +1,200 @@
+// Variables partagées avec grid-card
+$col-dims:    90px;
+$col-diff:    100px;
+$col-date:    120px;
+$col-actions: 190px;
+
+.my-grids {
+  min-height: 100vh;
+  // Pas de background — les lignes Séyès du body transparaissent
+
+  &__content {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem calc(var(--margin-line-offset) + 1.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  // ——— en-tête + bouton ————————————————————————————————————————
+
+  &__top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-forest);
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    .section-label {
+      font-family: var(--font-label);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-ink-muted);
+    }
+
+    h1 {
+      font-family: 'Caveat', cursive;
+      font-size: 2.6rem;
+      color: var(--color-forest);
+      margin: 0;
+      line-height: 1;
+    }
+  }
+
+  // ——— bouton nouvelle grille ————————————————————————————————————
+
+  &__new-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--color-surface);
+    background: var(--color-forest);
+    border: 1.5px solid var(--color-forest-deep);
+    border-radius: var(--radius-sm);
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-smooth);
+
+    &:hover {
+      background: var(--color-forest-deep);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-btn-raised);
+      text-decoration: none;
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-btn-pressed);
+    }
+  }
+
+  &__new-btn-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+    font-weight: 400;
+  }
+
+  // ——— tableau ————————————————————————————————————————————————
+
+  &__table {
+    overflow: visible; // crucial pour les tooltips
+    background: rgba(248, 246, 240, 0.82);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(200, 192, 168, 0.5);
+    padding: 0 0 0.25rem;
+
+    // Animation d'apparition des lignes
+    cocro-grid-card {
+      display: block;
+      animation: row-in 0.2s ease-out both;
+    }
+  }
+
+  &__thead {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0 0.5rem;
+    border-bottom: 1px solid var(--color-border-soft);
+    background: rgba(235, 230, 218, 0.6);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    margin-bottom: 0;
+  }
+
+  &__th {
+    font-family: var(--font-label);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-ink-muted);
+    flex-shrink: 0;
+
+    &--title {
+      flex: 1;
+      padding: 0 1rem;
+    }
+
+    &--dims   { width: $col-dims;    padding: 0 1rem; }
+    &--diff   { width: $col-diff;   padding: 0 1rem; }
+    &--date   { width: $col-date;   padding: 0 1rem; }
+    &--actions { width: $col-actions; }
+  }
+
+  // ——— états (loading / empty / error) ————————————————————————
+
+  &__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 4rem 2rem;
+    text-align: center;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.15rem;
+    color: var(--color-ink-muted);
+
+    &--error { color: var(--color-red); }
+
+    &--empty {
+      border-top: 1px dashed var(--color-border-soft);
+      border-bottom: 1px dashed var(--color-border-soft);
+      margin: 1rem 0;
+    }
+  }
+
+  &__state-icon {
+    font-size: 2rem;
+    animation: pulse 1.2s ease-in-out infinite;
+    color: var(--color-forest);
+  }
+
+  &__empty-text {
+    color: var(--color-ink-muted);
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.1rem;
+  }
+
+  &__retry-btn {
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-red);
+    background: rgba(184, 50, 37, 0.07);
+    border: 1px solid rgba(184, 50, 37, 0.25);
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+
+    &:hover {
+      background: rgba(184, 50, 37, 0.12);
+    }
+  }
+}
+
+// ——— animations ————————————————————————————————————————————————
+
+@keyframes row-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}

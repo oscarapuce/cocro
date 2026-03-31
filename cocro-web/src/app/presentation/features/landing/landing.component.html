@@ -1,0 +1,18 @@
+<cocro-landing-home-shell
+  [showTopNav]="false"
+  heroTitle="Mots fléchés<br />collaboratifs"
+  [heroSubtitle]="heroSubtitle()"
+  [singlePanel]="auth.isAnonymous()"
+>
+  @if (auth.isAnonymous()) {
+    <div shell-banner class="guest-banner">
+      <span class="guest-banner__badge">Invité</span>
+      <span class="guest-banner__name">{{ auth.currentUser()?.username }}</span>
+      <button class="guest-banner__logout" (click)="leaveGuest()">Quitter le mode invité</button>
+    </div>
+  }
+  <cocro-front-panel side="join" shell-left-panel />
+  @if (!auth.isAnonymous()) {
+    <cocro-front-panel side="create" shell-right-panel />
+  }
+</cocro-landing-home-shell>

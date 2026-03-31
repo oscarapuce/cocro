@@ -4,9 +4,9 @@
 
 **Goal:** Replace `globalClueWords: List<List<Int>>` with `globalClueWordLengths: List<Int>` across the full stack, add backend validation, and update the Angular editor UI to use length steppers instead of free-text number sequences.
 
-**Architecture:** Three independent subsystems are touched in order: (1) `cocro-shared` domain — rename the field and add error types; (2) `cocro-bff` — update DTOs, persistence, mappers, and add validation engine method; (3) `cocro-angular` — update domain model, DTO mapping, and rewrite the GlobalClueEditor component.
+**Architecture:** Three independent subsystems are touched in order: (1) `cocro-shared` domain — rename the field and add error types; (2) `cocro-bff` — update DTOs, persistence, mappers, and add validation engine method; (3) `cocro-web` — update domain model, DTO mapping, and rewrite the GlobalClueEditor component.
 
-**Tech Stack:** Kotlin multiplatform (`cocro-shared`), Spring Boot 3.2 + Kotlin (`cocro-bff`), Angular 20 + Signals (`cocro-angular`), Gradle, JUnit 5 + Mockito-Kotlin, Jasmine/Karma (Angular).
+**Tech Stack:** Kotlin multiplatform (`cocro-shared`), Spring Boot 3.2 + Kotlin (`cocro-bff`), Angular 20 + Signals (`cocro-web`), Gradle, JUnit 5 + Mockito-Kotlin, Jasmine/Karma (Angular).
 
 ---
 
@@ -25,11 +25,11 @@
 | `cocro-bff/.../application/grid/validation/ValidateSubmitGridSchema.kt` | Call `validateGlobalClue()` |
 | `cocro-bff/.../application/grid/validation/ValidatePatchGridSchema.kt` | Call `validateGlobalClue()` |
 | `cocro-bff/src/test/.../usecase/SubmitGridUseCaseTest.kt` | Add global clue validation tests |
-| `cocro-angular/.../domain/models/grid.model.ts` | `words: number[][]` → `wordLengths: number[]` |
-| `cocro-angular/.../application/dto/grid.dto.ts` | `globalClueWords` → `globalClueWordLengths` |
-| `cocro-angular/.../global-clue-editor/global-clue-editor.component.ts` | Rewrite logic for wordLengths |
-| `cocro-angular/.../global-clue-editor/global-clue-editor.component.html` | Replace text input + preview with stepper |
-| `cocro-angular/.../global-clue-editor/global-clue-editor.component.scss` | Replace word-input/preview styles with stepper styles |
+| `cocro-web/.../domain/models/grid.model.ts` | `words: number[][]` → `wordLengths: number[]` |
+| `cocro-web/.../application/dto/grid.dto.ts` | `globalClueWords` → `globalClueWordLengths` |
+| `cocro-web/.../global-clue-editor/global-clue-editor.component.ts` | Rewrite logic for wordLengths |
+| `cocro-web/.../global-clue-editor/global-clue-editor.component.html` | Replace text input + preview with stepper |
+| `cocro-web/.../global-clue-editor/global-clue-editor.component.scss` | Replace word-input/preview styles with stepper styles |
 
 ---
 
@@ -467,8 +467,8 @@
 ## Task 5: Angular — Update domain model and DTO
 
 **Files:**
-- Modify: `cocro-angular/src/app/domain/models/grid.model.ts`
-- Modify: `cocro-angular/src/app/application/dto/grid.dto.ts`
+- Modify: `cocro-web/src/app/domain/models/grid.model.ts`
+- Modify: `cocro-web/src/app/application/dto/grid.dto.ts`
 
 - [ ] **Step 1: Update GlobalClue interface**
 
@@ -514,16 +514,16 @@
 - [ ] **Step 3: Build Angular**
 
   ```bash
-  cd cocro-angular && npx ng build 2>&1 | grep -i error
+  cd cocro-web && npx ng build 2>&1 | grep -i error
   ```
   Expected: compilation errors in `GlobalClueEditorComponent` referencing `.words` — these will be fixed in Task 6.
 
 - [ ] **Step 4: Commit**
 
   ```bash
-  git add cocro-angular/src/app/domain/models/grid.model.ts \
-          cocro-angular/src/app/application/dto/grid.dto.ts \
-          cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts
+  git add cocro-web/src/app/domain/models/grid.model.ts \
+          cocro-web/src/app/application/dto/grid.dto.ts \
+          cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts
   git commit -m "refactor(angular): rename GlobalClue.words → wordLengths, update DTO"
   ```
 
@@ -532,9 +532,9 @@
 ## Task 6: Angular — Rewrite GlobalClueEditor component
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.ts`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.html`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.scss`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.ts`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.html`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.scss`
 
 - [ ] **Step 1: Rewrite the component TypeScript**
 
@@ -764,14 +764,14 @@
 - [ ] **Step 4: Build Angular — expect 0 errors**
 
   ```bash
-  cd cocro-angular && npx ng build 2>&1 | grep -iE "error|warning"
+  cd cocro-web && npx ng build 2>&1 | grep -iE "error|warning"
   ```
   Expected: 0 errors, 0 warnings.
 
 - [ ] **Step 5: Commit**
 
   ```bash
-  git add cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/
+  git add cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/
   git commit -m "feat(angular): rewrite GlobalClueEditor with word-length steppers and count validation"
   ```
 
@@ -789,14 +789,14 @@
 - [ ] **Step 2: Build Angular**
 
   ```bash
-  cd cocro-angular && npx ng build 2>&1 | tail -10
+  cd cocro-web && npx ng build 2>&1 | tail -10
   ```
   Expected: 0 errors.
 
 - [ ] **Step 3: Smoke test the editor manually (optional)**
 
   ```bash
-  cd cocro-angular && npx ng serve
+  cd cocro-web && npx ng serve
   ```
   Open `http://localhost:4200`, navigate to the grid editor, toggle "Énigme globale", verify:
   - Label input is present

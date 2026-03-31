@@ -1,0 +1,60 @@
+<div class="my-grids">
+  <div class="my-grids__content">
+
+    <div class="my-grids__top">
+      <div class="my-grids__header">
+        <span class="section-label">Mon atelier</span>
+        <h1>Mes grilles</h1>
+      </div>
+      @if (!loading() && !error() && grids().length > 0) {
+        <a class="my-grids__new-btn" routerLink="/grid/create">
+          <span class="my-grids__new-btn-icon">+</span>
+          Nouvelle grille
+        </a>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="my-grids__state">
+        <div class="my-grids__state-icon">⟳</div>
+        <p>Chargement de vos grilles…</p>
+      </div>
+    } @else if (error()) {
+      <div class="my-grids__state my-grids__state--error">
+        <p>{{ error() }}</p>
+        <button class="my-grids__retry-btn" (click)="retry()">Réessayer</button>
+      </div>
+    } @else if (grids().length === 0) {
+      <div class="my-grids__state my-grids__state--empty">
+        <p class="my-grids__empty-text">Votre atelier est vide pour l'instant.</p>
+        <a class="my-grids__new-btn" routerLink="/grid/create">
+          <span class="my-grids__new-btn-icon">+</span>
+          Créer une première grille
+        </a>
+      </div>
+    } @else {
+      <div class="my-grids__table">
+        <!-- En-tête du tableau -->
+        <div class="my-grids__thead">
+          <span class="my-grids__th my-grids__th--title">Titre</span>
+          <span class="my-grids__th my-grids__th--dims">Format</span>
+          <span class="my-grids__th my-grids__th--diff">Difficulté</span>
+          <span class="my-grids__th my-grids__th--date">Créée le</span>
+          <span class="my-grids__th my-grids__th--actions"></span>
+        </div>
+
+        <!-- Lignes -->
+        @for (grid of grids(); track grid.gridId; let idx = $index) {
+          <cocro-grid-card
+            [grid]="grid"
+            [launching]="launching() === grid.gridId"
+            [style.animation-delay]="(idx * 40) + 'ms'"
+            (launchSession)="onLaunch(grid)"
+            (edit)="onEdit(grid)"
+          />
+        }
+      </div>
+    }
+
+  </div>
+</div>

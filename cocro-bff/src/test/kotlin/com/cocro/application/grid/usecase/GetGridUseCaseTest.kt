@@ -4,8 +4,10 @@ import com.cocro.application.grid.port.GridRepository
 import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.common.CocroResult
 import com.cocro.domain.grid.error.GridError
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.Grid
 import com.cocro.domain.grid.model.GridMetadata
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.grid.model.valueobject.GridTitle
@@ -24,10 +26,8 @@ class GetGridUseCaseTest {
     private fun validGrid(shortId: String) = Grid(
         id = UUID.randomUUID(),
         shortId = GridShareCode(shortId),
-        title = GridTitle("Test Grid"),
-        metadata = GridMetadata(author = UserId.new(), reference = null, description = null, difficulty = "NONE"),
-        width = GridWidth(5),
-        height = GridHeight(5),
+        metadata = GridMetadata(title = GridTitle("Test Grid"), author = Author(id = UserId.new(), username = "Test"), reference = null, description = null, difficulty = "NONE"),
+        dimension = GridDimension(width = GridWidth(5), height = GridHeight(5)),
         cells = emptyList(),
     )
 

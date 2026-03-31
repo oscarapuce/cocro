@@ -4,9 +4,9 @@
 
 **Goal:** Enrichir l'éditeur de grille avec : badge numéro sur les cases lettre, indice global (GlobalClue), remplacement de la difficulté EASY/MEDIUM/HARD par une échelle 0–5, majuscules sur les indices, et sélecteur de difficulté dans les paramètres de la grille.
 
-**Architecture:** Les changements traversent trois modules — cocro-shared (suppression de l'enum `GridDifficulty`), cocro-bff (DTOs, mapper, document MongoDB), et cocro-angular (modèles, service, composants). On part du bas (shared) vers le haut (UI) pour que chaque couche compile sur une base stable.
+**Architecture:** Les changements traversent trois modules — cocro-shared (suppression de l'enum `GridDifficulty`), cocro-bff (DTOs, mapper, document MongoDB), et cocro-web (modèles, service, composants). On part du bas (shared) vers le haut (UI) pour que chaque couche compile sur une base stable.
 
-**Tech Stack:** Kotlin multiplatform (cocro-shared), Spring Boot 3.2 + Kotlin (cocro-bff), Angular 20 + Signals (cocro-angular), MongoDB, SCSS
+**Tech Stack:** Kotlin multiplatform (cocro-shared), Spring Boot 3.2 + Kotlin (cocro-bff), Angular 20 + Signals (cocro-web), MongoDB, SCSS
 
 ---
 
@@ -23,25 +23,25 @@
 - Modify: `cocro-bff/src/main/kotlin/com/cocro/application/grid/mapper/GridMapper.kt` — propager `globalClueLabel`, `globalClueWords`, `difficulty: String`
 - Modify: `cocro-shared/src/commonMain/kotlin/com/cocro/kernel/grid/model/GridMetadata.kt` (déjà listé)
 
-### cocro-angular — domain / application
-- Modify: `cocro-angular/src/app/domain/models/grid.model.ts` — nouveau type `GridDifficulty`, nouveau type `GlobalClue`, champ `Grid.globalClue?`
-- Modify: `cocro-angular/src/app/application/dto/grid.dto.ts` — `SubmitGridRequest.difficulty: GridDifficulty`, ajouter `globalClueLabel?` et `globalClueWords?`
-- Modify: `cocro-angular/src/app/application/service/grid-selector.service.ts` — ajouter `updateDifficulty()` et `updateGlobalClue()`
+### cocro-web — domain / application
+- Modify: `cocro-web/src/app/domain/models/grid.model.ts` — nouveau type `GridDifficulty`, nouveau type `GlobalClue`, champ `Grid.globalClue?`
+- Modify: `cocro-web/src/app/application/dto/grid.dto.ts` — `SubmitGridRequest.difficulty: GridDifficulty`, ajouter `globalClueLabel?` et `globalClueWords?`
+- Modify: `cocro-web/src/app/application/service/grid-selector.service.ts` — ajouter `updateDifficulty()` et `updateGlobalClue()`
 
-### cocro-angular — presentation
-- Modify: `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.html` — wrapper div + badge numéro
-- Modify: `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss` — `.letter-input-wrapper` + `.letter-input__number`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.ts` — `onNumberChange()` + `clearNumber()`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.html` — binding input numéro + bouton ×
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-params/grid-params.component.ts` — constante `DIFFICULTIES` + `updateDifficulty()`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-params/grid-params.component.html` — `<select>` difficulté
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.ts`
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.html`
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.scss`
-- Modify: `cocro-angular/src/app/presentation/shared/grid/inputs/clues/clue-wrapper/clue-input.component.scss` — `text-transform: uppercase`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts` — import `GlobalClueEditorComponent`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html` — intégration `<cocro-global-clue-editor>`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts` — `onSubmit()` avec `globalClueLabel/Words`
+### cocro-web — presentation
+- Modify: `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.html` — wrapper div + badge numéro
+- Modify: `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss` — `.letter-input-wrapper` + `.letter-input__number`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.ts` — `onNumberChange()` + `clearNumber()`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.html` — binding input numéro + bouton ×
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-params/grid-params.component.ts` — constante `DIFFICULTIES` + `updateDifficulty()`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-params/grid-params.component.html` — `<select>` difficulté
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.ts`
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.html`
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.scss`
+- Modify: `cocro-web/src/app/presentation/shared/grid/inputs/clues/clue-wrapper/clue-input.component.scss` — `text-transform: uppercase`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts` — import `GlobalClueEditorComponent`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html` — intégration `<cocro-global-clue-editor>`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts` — `onSubmit()` avec `globalClueLabel/Words`
 
 ---
 
@@ -496,9 +496,9 @@ git commit -m "feat(bff): difficulty as String, add globalClue fields to grid me
 ## Task 3 — Angular domain/application : modèles, DTO, GridSelectorService
 
 **Files:**
-- Modify: `cocro-angular/src/app/domain/models/grid.model.ts`
-- Modify: `cocro-angular/src/app/application/dto/grid.dto.ts`
-- Modify: `cocro-angular/src/app/application/service/grid-selector.service.ts`
+- Modify: `cocro-web/src/app/domain/models/grid.model.ts`
+- Modify: `cocro-web/src/app/application/dto/grid.dto.ts`
+- Modify: `cocro-web/src/app/application/service/grid-selector.service.ts`
 
 - [ ] **Step 1: Mettre à jour grid.model.ts**
 
@@ -638,7 +638,7 @@ import { GlobalClue, GridDifficulty } from '@domain/models/grid.model';
 - [ ] **Step 4: Build Angular pour vérifier qu'il compile**
 
 ```bash
-cd cocro-angular && npx ng build 2>&1 | tail -20
+cd cocro-web && npx ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -646,9 +646,9 @@ Expected: 0 errors
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cocro-angular/src/app/domain/models/grid.model.ts \
-        cocro-angular/src/app/application/dto/grid.dto.ts \
-        cocro-angular/src/app/application/service/grid-selector.service.ts
+git add cocro-web/src/app/domain/models/grid.model.ts \
+        cocro-web/src/app/application/dto/grid.dto.ts \
+        cocro-web/src/app/application/service/grid-selector.service.ts
 git commit -m "feat(angular): new GridDifficulty type, GlobalClue model, updateDifficulty/updateGlobalClue"
 ```
 
@@ -657,8 +657,8 @@ git commit -m "feat(angular): new GridDifficulty type, GlobalClue model, updateD
 ## Task 4 — Angular : badge numéro sur letter-input
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.html`
-- Modify: `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss`
+- Modify: `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.html`
+- Modify: `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss`
 
 - [ ] **Step 1: Mettre à jour le template**
 
@@ -710,7 +710,7 @@ Le reste du fichier SCSS existant (`.letter-input`) est conservé tel quel.
 - [ ] **Step 3: Build Angular**
 
 ```bash
-cd cocro-angular && npx ng build 2>&1 | tail -20
+cd cocro-web && npx ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -718,8 +718,8 @@ Expected: 0 errors
 - [ ] **Step 4: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.html \
-        cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss
+git add cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.html \
+        cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss
 git commit -m "feat(angular): display letter number badge in cell corner"
 ```
 
@@ -728,8 +728,8 @@ git commit -m "feat(angular): display letter number badge in cell corner"
 ## Task 5 — Angular : binding numéro dans letter-editor
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.ts`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.html`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.ts`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.html`
 
 - [ ] **Step 1: Ajouter onNumberChange() et clearNumber() dans le composant TS**
 
@@ -781,7 +781,7 @@ Remplacer l'`<input type="text" maxlength="2" placeholder="1">` non bindé par :
 - [ ] **Step 3: Build Angular**
 
 ```bash
-cd cocro-angular && npx ng build 2>&1 | tail -20
+cd cocro-web && npx ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -789,8 +789,8 @@ Expected: 0 errors
 - [ ] **Step 4: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.ts \
-        cocro-angular/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.html
+git add cocro-web/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.ts \
+        cocro-web/src/app/presentation/features/grid/editor/letter-editor/letter-editor.component.html
 git commit -m "feat(angular): bind letter number field in letter-editor"
 ```
 
@@ -799,8 +799,8 @@ git commit -m "feat(angular): bind letter number field in letter-editor"
 ## Task 6 — Angular : sélecteur difficulté dans grid-params
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-params/grid-params.component.ts`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-params/grid-params.component.html`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-params/grid-params.component.ts`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-params/grid-params.component.html`
 
 - [ ] **Step 1: Ajouter DIFFICULTIES et updateDifficulty dans le composant TS**
 
@@ -886,7 +886,7 @@ Ajouter après le dernier `grid-params__size-control` (avant la fermeture de `.g
 - [ ] **Step 3: Build Angular**
 
 ```bash
-cd cocro-angular && npx ng build 2>&1 | tail -20
+cd cocro-web && npx ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -894,8 +894,8 @@ Expected: 0 errors
 - [ ] **Step 4: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/features/grid/editor/grid-params/grid-params.component.ts \
-        cocro-angular/src/app/presentation/features/grid/editor/grid-params/grid-params.component.html
+git add cocro-web/src/app/presentation/features/grid/editor/grid-params/grid-params.component.ts \
+        cocro-web/src/app/presentation/features/grid/editor/grid-params/grid-params.component.html
 git commit -m "feat(angular): add difficulty selector to grid-params"
 ```
 
@@ -904,7 +904,7 @@ git commit -m "feat(angular): add difficulty selector to grid-params"
 ## Task 7 — Angular : indices en majuscules (CSS seulement)
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/shared/grid/inputs/clues/clue-wrapper/clue-input.component.scss`
+- Modify: `cocro-web/src/app/presentation/shared/grid/inputs/clues/clue-wrapper/clue-input.component.scss`
 
 - [ ] **Step 1: Ajouter text-transform: uppercase dans .text**
 
@@ -927,7 +927,7 @@ Dans le bloc `.clue .text`, ajouter `text-transform: uppercase;` :
 - [ ] **Step 2: Build Angular**
 
 ```bash
-cd cocro-angular && npx ng build 2>&1 | tail -20
+cd cocro-web && npx ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -935,7 +935,7 @@ Expected: 0 errors
 - [ ] **Step 3: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/shared/grid/inputs/clues/clue-wrapper/clue-input.component.scss
+git add cocro-web/src/app/presentation/shared/grid/inputs/clues/clue-wrapper/clue-input.component.scss
 git commit -m "feat(angular): display clue text in uppercase"
 ```
 
@@ -944,9 +944,9 @@ git commit -m "feat(angular): display clue text in uppercase"
 ## Task 8 — Angular : GlobalClueEditorComponent (nouveau composant)
 
 **Files:**
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.ts`
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.html`
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.scss`
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.ts`
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.html`
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/global-clue-editor.component.scss`
 
 - [ ] **Step 1: Créer le composant TS**
 
@@ -1195,7 +1195,7 @@ export class GlobalClueEditorComponent {
 - [ ] **Step 4: Build Angular**
 
 ```bash
-cd cocro-angular && npx ng build 2>&1 | tail -20
+cd cocro-web && npx ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors
@@ -1203,7 +1203,7 @@ Expected: 0 errors
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/features/grid/editor/global-clue-editor/
+git add cocro-web/src/app/presentation/features/grid/editor/global-clue-editor/
 git commit -m "feat(angular): add GlobalClueEditorComponent with word preview"
 ```
 
@@ -1212,8 +1212,8 @@ git commit -m "feat(angular): add GlobalClueEditorComponent with word preview"
 ## Task 9 — Angular : intégration dans grid-editor (onSubmit + template)
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html`
 
 - [ ] **Step 1: Mettre à jour grid-editor.component.ts — import et onSubmit()**
 
@@ -1307,7 +1307,7 @@ Ajouter `<cocro-global-clue-editor>` dans `.editor-side`, après les cards de ty
 - [ ] **Step 3: Build Angular final**
 
 ```bash
-cd cocro-angular && npx ng build 2>&1 | tail -20
+cd cocro-web && npx ng build 2>&1 | tail -20
 ```
 
 Expected: 0 errors, 0 warnings (hors budget si SCSS grossit — vérifier et ajuster le budget dans `angular.json` si nécessaire)
@@ -1315,8 +1315,8 @@ Expected: 0 errors, 0 warnings (hors budget si SCSS grossit — vérifier et aju
 - [ ] **Step 4: Commit final**
 
 ```bash
-git add cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts \
-        cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html
+git add cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts \
+        cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html
 git commit -m "feat(angular): integrate GlobalClueEditor and globalClue fields in grid-editor submit"
 ```
 
@@ -1335,7 +1335,7 @@ Expected: BUILD SUCCESSFUL pour tous les modules
 - [ ] Lancer le serveur Angular en dev
 
 ```bash
-cd cocro-angular && npx ng serve
+cd cocro-web && npx ng serve
 ```
 
 Tester manuellement :

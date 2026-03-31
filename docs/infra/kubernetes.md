@@ -34,7 +34,7 @@ cluster k3s
 │  namespace: cocro                                              │
 │                                                                │
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────────┐  │
-│  │  cocro-front │   │   cocro-bff  │   │      minio       │  │
+│  │  cocro-web │   │   cocro-bff  │   │      minio       │  │
 │  │  Deployment  │   │  Deployment  │   │   Deployment     │  │
 │  │  nginx:alpine│   │  Spring Boot │   │  minio/minio     │  │
 │  │  ~50 MB RAM  │   │  ~512 MB RAM │   │  ~100 MB RAM     │  │
@@ -71,7 +71,7 @@ cluster k3s
          │             │             │
   app.cocro.com  api.cocro.com  storage.cocro.com
          │             │             │
-    cocro-front   cocro-bff       minio
+    cocro-web   cocro-bff       minio
     (port 80)     (port 8080)   (port 9000)
                                  bucket: releases
                                  accès: read-only public

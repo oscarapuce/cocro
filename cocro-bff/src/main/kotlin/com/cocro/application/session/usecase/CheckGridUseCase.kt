@@ -87,6 +87,7 @@ class CheckGridUseCase(
             SessionEvent.GridChecked(
                 userId = user.userId(),
                 isComplete = result.isComplete,
+                isCorrect = result.isCorrect,
                 correctCount = result.correctCount,
                 totalCount = result.totalCount,
             ),

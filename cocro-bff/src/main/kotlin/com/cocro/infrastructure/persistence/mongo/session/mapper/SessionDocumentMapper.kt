@@ -7,6 +7,7 @@ import com.cocro.infrastructure.persistence.mongo.session.document.ParticipantDo
 import com.cocro.infrastructure.persistence.mongo.session.document.SessionDocument
 import com.cocro.infrastructure.persistence.mongo.session.document.SessionGridStateDocument
 import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.CellPos
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.Participant
@@ -18,12 +19,14 @@ import com.cocro.domain.session.model.state.SessionGridState
 import com.cocro.domain.session.model.state.SessionGridStateRevision
 import com.cocro.domain.session.model.valueobject.SessionId
 import com.cocro.domain.session.model.valueobject.SessionShareCode
+import java.util.UUID
 
 fun Session.toDocument(): SessionDocument =
     SessionDocument(
         id = id.toString(),
         shareCode = shareCode.toString(),
-        creatorId = creatorId.toString(),
+        authorId = author.id.toString(),
+        authorUsername = author.username,
         gridShortId = gridId.toString(),
         gridTemplate = gridTemplate?.toDocument()
             ?: error("Session ${id} has no gridTemplate — cannot persist"),
@@ -36,13 +39,13 @@ fun Session.toDocument(): SessionDocument =
 
 fun Participant.toDocument(): ParticipantDocument =
     ParticipantDocument(
-        userId = userId.value,
+        userId = userId.value.toString(),
         status = status.name,
     )
 
 fun SessionGridState.toDocument(): SessionGridStateDocument =
     SessionGridStateDocument(
-        sessionId = sessionId.value,
+        sessionId = sessionId.value.toString(),
         gridShortId = gridShareCode.toString(),
         revision = revision.value,
         cells =
@@ -63,7 +66,10 @@ fun SessionDocument.toDomain(): Session =
     Session.rehydrate(
         id = SessionId.from(id),
         shareCode = SessionShareCode(shareCode),
-        creatorId = UserId.from(creatorId),
+        author = Author(
+            id = UserId.from(authorId ?: creatorId ?: error("No authorId or creatorId")),
+            username = authorUsername ?: "Inconnu",
+        ),
         gridId = GridShareCode(gridShortId),
         status = when (status) {
             "CREATING", "SCORING" -> SessionStatus.PLAYING  // migration fallback
@@ -78,13 +84,13 @@ fun SessionDocument.toDomain(): Session =
 
 fun ParticipantDocument.toDomain(): Participant =
     Participant(
-        userId = UserId(userId),
+        userId = UserId(UUID.fromString(userId)),
         status = ParticipantStatus.valueOf(status),
     )
 
 fun SessionGridStateDocument.toDomain(): SessionGridState =
     SessionGridState(
-        sessionId = SessionId(sessionId),
+        sessionId = SessionId(UUID.fromString(sessionId)),
         gridShareCode = GridShareCode(gridShortId),
         revision = SessionGridStateRevision(revision),
         cells =

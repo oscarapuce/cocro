@@ -64,6 +64,7 @@ class RegisterUserUseCase(
         val token =
             tokenIssuer.issue(
                 userId = savedUser.id,
+                username = savedUser.username.value,
                 roles = savedUser.roles,
             )
 

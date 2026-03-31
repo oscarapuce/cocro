@@ -18,6 +18,7 @@ class JwtTokenIssuer(
 ) : TokenIssuer {
     override fun issue(
         userId: UserId,
+        username: String,
         roles: Set<Role>,
     ): String {
         val now = Instant.now()
@@ -29,6 +30,7 @@ class JwtTokenIssuer(
                 .subject(userId.value.toString())
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(props.expirationSeconds))
+                .claim("username", username)
                 .claim("roles", roles.map { it.name })
                 .build()
 

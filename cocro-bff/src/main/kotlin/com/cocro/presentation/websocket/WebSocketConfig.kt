@@ -22,6 +22,7 @@ class WebSocketConfig(
         registry
             .addEndpoint("/ws")
             .setAllowedOriginPatterns("*")
+            .withSockJS()
     }
 
     override fun configureClientInboundChannel(registration: ChannelRegistration) {

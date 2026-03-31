@@ -49,6 +49,7 @@ enum class ErrorCode(
     SESSION_NOT_ENOUGH_PARTICIPANTS("At least one participant is required to start the session", 400),
     SESSION_REFERENCE_GRID_NOT_FOUND("Reference grid not found for this session", 404),
     SESSION_GRID_CONCURRENT_MODIFICATION("Grid state was modified concurrently; client must resync", 409),
+    SESSION_NOT_CREATOR("Only the session creator can perform this action", 403),
 
     // --- auth domain ---
     AUTH_USERNAME_ALREADY_EXISTS("Username already exists", 409),

@@ -1,7 +1,9 @@
 package com.cocro.infrastructure.persistence.mongo.grid.document
 
 data class GridMetadataDocument(
-    val author: String,
+    val authorId: String? = null,
+    val authorUsername: String? = null,
+    val author: String? = null,  // legacy field (UUID string)
     val reference: String?,
     val description: String?,
     val difficulty: String = "NONE",

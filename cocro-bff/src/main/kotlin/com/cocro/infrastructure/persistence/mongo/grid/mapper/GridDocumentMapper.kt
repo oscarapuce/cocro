@@ -4,6 +4,8 @@ import com.cocro.infrastructure.persistence.mongo.grid.document.CellDocument
 import com.cocro.infrastructure.persistence.mongo.grid.document.GridDocument
 import com.cocro.infrastructure.persistence.mongo.grid.document.GridMetadataDocument
 import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.common.model.Author
+import com.cocro.domain.grid.model.GlobalClue
 import java.util.UUID
 import com.cocro.domain.grid.enums.CellType
 import com.cocro.domain.grid.enums.ClueDirection
@@ -15,6 +17,7 @@ import com.cocro.domain.grid.model.Grid
 import com.cocro.domain.grid.model.GridMetadata
 import com.cocro.domain.grid.model.Letter
 import com.cocro.domain.grid.model.valueobject.ClueText
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.grid.model.valueobject.GridTitle
@@ -27,12 +30,13 @@ fun Grid.toDocument(): GridDocument =
         shortId = shortId.value,
         title = title.value,
         metadata = GridMetadataDocument(
-            author = metadata.author.toString(),
+            authorId = metadata.author.id.toString(),
+            authorUsername = metadata.author.username,
             reference = metadata.reference,
             description = metadata.description,
             difficulty = metadata.difficulty,
-            globalClueLabel = metadata.globalClueLabel,
-            globalClueWordLengths = metadata.globalClueWordLengths,
+            globalClueLabel = metadata.globalClue?.label,
+            globalClueWordLengths = metadata.globalClue?.wordLengths,
         ),
         hashLetters = hashLetters,
         width = width.value,
@@ -79,18 +83,24 @@ fun GridDocument.toDomain(): Grid =
     Grid(
         id = UUID.fromString(id),
         shortId = GridShareCode(shortId),
-        title = GridTitle(title),
         metadata = GridMetadata(
-            author = UserId.from(metadata.author),
+            title = GridTitle(title),
+            author = Author(
+                id = UserId.from(metadata.authorId ?: metadata.author ?: error("No authorId or author")),
+                username = metadata.authorUsername ?: "Inconnu",
+            ),
             reference = metadata.reference,
             description = metadata.description,
             difficulty = metadata.difficulty,
-            globalClueLabel = metadata.globalClueLabel,
-            globalClueWordLengths = metadata.globalClueWordLengths,
+            globalClue = if (metadata.globalClueLabel != null)
+                GlobalClue(metadata.globalClueLabel, metadata.globalClueWordLengths ?: emptyList())
+            else null,
         ),
         hashLetters = hashLetters,
-        width = GridWidth(width),
-        height = GridHeight(height),
+        dimension = GridDimension(
+            width = GridWidth(width),
+            height = GridHeight(height),
+        ),
         cells = cells.map { it.toDomain() },
         createdAt = createdAt,
         updatedAt = updatedAt,

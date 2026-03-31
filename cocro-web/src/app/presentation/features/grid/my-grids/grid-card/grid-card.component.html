@@ -1,0 +1,74 @@
+<div
+  class="grid-row"
+  [class.grid-row--launching]="launching"
+  (mouseenter)="onMouseEnter($event)"
+  (mouseleave)="onMouseLeave()">
+
+  <!-- Titre -->
+  <div class="grid-row__cell grid-row__cell--title">
+    <span class="grid-row__title">{{ grid.title }}</span>
+  </div>
+
+  <!-- Dimensions -->
+  <div class="grid-row__cell grid-row__cell--dims">
+    {{ grid.width }} × {{ grid.height }}
+  </div>
+
+  <!-- Difficulté -->
+  <div class="grid-row__cell grid-row__cell--diff">
+    <span class="grid-row__stars">{{ difficultyLabel }}</span>
+  </div>
+
+  <!-- Date -->
+  <div class="grid-row__cell grid-row__cell--date">
+    {{ grid.createdAt | date:'dd/MM/yyyy' }}
+  </div>
+
+  <!-- Actions -->
+  <div class="grid-row__cell grid-row__cell--actions">
+    <button
+      class="grid-row__btn grid-row__btn--launch"
+      (click)="launchSession.emit()"
+      [disabled]="launching">
+      @if (launching) { <span class="grid-row__spinner"></span> } @else { ▶ }
+      Lancer
+    </button>
+    <button class="grid-row__btn grid-row__btn--edit" (click)="edit.emit()">
+      ✏ Éditer
+    </button>
+  </div>
+</div>
+
+<!-- Tooltip en position: fixed — jamais rognée par les parents -->
+@if (tooltipActive()) {
+  <div class="grid-tooltip" [style]="tooltipStyle()">
+    @if (detail()) {
+      <svg class="grid-tooltip__miniature"
+        [attr.width]="miniatureWidth"
+        [attr.height]="miniatureHeight"
+        [attr.viewBox]="'0 0 ' + grid.width + ' ' + grid.height"
+        preserveAspectRatio="xMidYMid meet">
+        <rect width="100%" height="100%" fill="#f7f4ed"/>
+        @for (cell of detail()!.cells; track cell.x + '-' + cell.y) {
+          <rect
+            [attr.x]="cell.x"
+            [attr.y]="cell.y"
+            width="1"
+            height="1"
+            [attr.fill]="cellFill(cell.type)"
+            stroke="#c8c0a8"
+            stroke-width="0.04"/>
+        }
+      </svg>
+    } @else {
+      <div class="grid-tooltip__skeleton"
+        [style.width.px]="miniatureWidth"
+        [style.height.px]="miniatureHeight">
+      </div>
+    }
+    <div class="grid-tooltip__footer">
+      <span class="grid-tooltip__name">{{ grid.title }}</span>
+      <span class="grid-tooltip__meta">{{ grid.width }} × {{ grid.height }}</span>
+    </div>
+  </div>
+}

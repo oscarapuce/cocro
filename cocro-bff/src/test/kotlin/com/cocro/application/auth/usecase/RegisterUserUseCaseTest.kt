@@ -43,7 +43,7 @@ class RegisterUserUseCaseTest {
         whenever(userRepository.findByUsername(Username("validUser"))).thenReturn(null)
         whenever(passwordHasher.hash("Secure1!")).thenReturn(hash)
         whenever(userRepository.save(any())).thenReturn(savedUser)
-        whenever(tokenIssuer.issue(savedUser.id, savedUser.roles)).thenReturn("jwt-token")
+        whenever(tokenIssuer.issue(savedUser.id, savedUser.username.value, savedUser.roles)).thenReturn("jwt-token")
 
         // when
         val result = useCase.execute(dto)
@@ -138,7 +138,7 @@ class RegisterUserUseCaseTest {
         whenever(userRepository.findByUsername(Username("validUser"))).thenReturn(null)
         whenever(passwordHasher.hash(any())).thenReturn(hash)
         whenever(userRepository.save(any())).thenReturn(savedUser)
-        whenever(tokenIssuer.issue(savedUser.id, savedUser.roles)).thenReturn("jwt-token")
+        whenever(tokenIssuer.issue(savedUser.id, savedUser.username.value, savedUser.roles)).thenReturn("jwt-token")
 
         // when
         val result = useCase.execute(dto)

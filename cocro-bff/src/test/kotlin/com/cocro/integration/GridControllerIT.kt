@@ -60,7 +60,7 @@ class GridControllerIT {
     // -------------------------------------------------------------------------
 
     private fun tokenFor(userId: UserId = UserId.new(), roles: Set<Role> = setOf(Role.PLAYER)): String =
-        tokenIssuer.issue(userId, roles)
+        tokenIssuer.issue(userId, "TestUser", roles)
 
     private fun headersFor(token: String) = HttpHeaders().apply {
         setBearerAuth(token)

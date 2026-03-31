@@ -1,14 +1,17 @@
 package com.cocro.application.session.mapper
 
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.enums.ClueDirection
 import com.cocro.domain.grid.enums.SeparatorType
 import com.cocro.domain.grid.model.Cell
 import com.cocro.domain.grid.model.CellPos
 import com.cocro.domain.grid.model.Clue
+import com.cocro.domain.grid.model.GlobalClue
 import com.cocro.domain.grid.model.Grid
 import com.cocro.domain.grid.model.GridMetadata
 import com.cocro.domain.grid.model.Letter
 import com.cocro.domain.grid.model.valueobject.ClueText
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.grid.model.valueobject.GridTitle
@@ -25,17 +28,15 @@ class GridTemplateMapperTest {
     private fun buildGrid(vararg cells: Cell): Grid = Grid(
         id = UUID.randomUUID(),
         shortId = gridId,
-        title = GridTitle("Ma Grille"),
         metadata = GridMetadata(
-            author = com.cocro.domain.auth.model.valueobject.UserId.new(),
+            title = GridTitle("Ma Grille"),
+            author = Author(id = com.cocro.domain.auth.model.valueobject.UserId.new(), username = "TestAuthor"),
             reference = "REF-XYZ",
             description = "Description de test",
             difficulty = "3",
-            globalClueLabel = "Mot mystère",
-            globalClueWordLengths = listOf(2, 5),
+            globalClue = GlobalClue("Mot mystère", listOf(2, 5)),
         ),
-        width = GridWidth(5),
-        height = GridHeight(5),
+        dimension = GridDimension(width = GridWidth(5), height = GridHeight(5)),
         cells = cells.toList(),
     )
 

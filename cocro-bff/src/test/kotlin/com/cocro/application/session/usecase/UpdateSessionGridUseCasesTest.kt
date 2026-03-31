@@ -15,6 +15,7 @@ import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.Session
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.session.model.state.SessionGridState
 import com.cocro.domain.session.model.valueobject.SessionId
 import com.cocro.domain.session.model.valueobject.SessionShareCode
@@ -47,6 +48,8 @@ private class ConflictingSessionGridStateCache : SessionGridStateCache {
     override fun markFlushed(sessionId: SessionId, revision: Long) {}
 
     override fun getActiveSessions(): Set<SessionId> = emptySet()
+
+    override fun deactivate(sessionId: SessionId) {}
 
     fun seedState(sessionId: SessionId, state: SessionGridState) {
         states[sessionId.toString()] = state
@@ -81,6 +84,8 @@ private class FakeSessionGridStateCache : SessionGridStateCache {
     }
 
     override fun getActiveSessions(): Set<SessionId> = emptySet()
+
+    override fun deactivate(sessionId: SessionId) {}
 }
 
 class UpdateSessionGridUseCasesTest {
@@ -89,24 +94,23 @@ class UpdateSessionGridUseCasesTest {
     private val sessionRepository: SessionRepository = mock()
     private val sessionNotifier: SessionNotifier = mock()
 
-    private val creatorId = UserId.new()
-    private val authenticatedUser = AuthenticatedUser(creatorId, setOf(Role.PLAYER))
+    private val author = Author(id = UserId.new(), username = "Test")
+    private val authenticatedUser = AuthenticatedUser(author.id, "TestCreator", setOf(Role.PLAYER))
     private val shareCode = SessionShareCode("AB12")
     private val gridId = GridShareCode("GRID01")
 
     private fun minimalSnapshot() = GridTemplateSnapshot(
         shortId = gridId, title = "T", width = 5, height = 5,
         difficulty = null, author = null, reference = null,
-        description = null, globalClueLabel = null,
-        globalClueWordLengths = null, cells = emptyList(),
+        description = null, globalClueLabel = null, globalClueWordLengths = null, cells = emptyList(),
     )
 
     private fun buildPlayingSession(): Session {
-        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
+        val base = Session.create(author = Author(id = author.id, username = "TestCreator"), shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         return Session.rehydrate(
             id = base.id,
             shareCode = base.shareCode,
-            creatorId = base.creatorId,
+            author = base.author,
             gridId = base.gridId,
             status = SessionStatus.PLAYING,
             participants = base.participants,
@@ -138,7 +142,7 @@ class UpdateSessionGridUseCasesTest {
         assertThat(success.commandType).isEqualTo("PLACE_LETTER")
         verify(sessionNotifier).broadcast(
             shareCode,
-            SessionEvent.GridUpdated(actorId = creatorId.toString(), posX = 0, posY = 0, commandType = "PLACE_LETTER", letter = 'A'),
+            SessionEvent.GridUpdated(actorId = author.id.toString(), posX = 0, posY = 0, commandType = "PLACE_LETTER", letter = 'A'),
         )
     }
 
@@ -233,7 +237,7 @@ class UpdateSessionGridUseCasesTest {
         val conflictingCache = ConflictingSessionGridStateCache()
         val command = com.cocro.domain.session.model.state.SessionGridCommand.SetLetter(
             sessionId = session.id,
-            actorId = creatorId,
+            actorId = author.id,
             position = com.cocro.domain.grid.model.CellPos(0, 0),
             letter = 'Z',
         )
@@ -252,7 +256,7 @@ class UpdateSessionGridUseCasesTest {
         assertThat(result).isInstanceOf(CocroResult.Error::class.java)
         assertThat((result as CocroResult.Error).errors).contains(SessionError.ConcurrentModification)
         verify(sessionNotifier).notifyUser(
-            creatorId,
+            author.id,
             SessionEvent.SyncRequired(currentRevision = stateAtRevisionOne.revision.value),
         )
     }

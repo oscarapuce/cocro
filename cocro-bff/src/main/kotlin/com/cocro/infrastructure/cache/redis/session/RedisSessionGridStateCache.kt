@@ -34,16 +34,17 @@ class RedisSessionGridStateCache(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     // Atomic compareAndSet via Lua: checks revision, writes new state if matching.
+    // Returns new revision on success, -1 if key not found, -2 if revision conflict.
     private val compareAndSetScript = DefaultRedisScript<Long>().apply {
         setScriptText(
             """
             local current = redis.call('GET', KEYS[1])
             if not current then
-              return redis.error_reply('NOT_FOUND')
+              return -1
             end
             local state = cjson.decode(current)
             if tostring(state['revision']) ~= ARGV[1] then
-              return redis.error_reply('CONFLICT')
+              return -2
             end
             redis.call('SET', KEYS[1], ARGV[2])
             redis.call('EXPIRE', KEYS[1], ARGV[3])
@@ -77,13 +78,17 @@ class RedisSessionGridStateCache(
         )
 
         checkNotNull(result) { "Redis compareAndSet returned null for session=${sessionId.value}" }
-        return result
+        return when (result) {
+            -1L -> throw IllegalStateException("NOT_FOUND: key missing for session=${sessionId.value}")
+            -2L -> throw IllegalStateException("CONFLICT: revision mismatch for session=${sessionId.value}")
+            else -> result
+        }
     }
 
     override fun initialize(sessionId: SessionId, state: SessionGridState) {
         val json = objectMapper.writeValueAsString(state.toRedisDto())
         redisTemplate.opsForValue().set(stateKey(sessionId), json, TTL_HOURS, TimeUnit.HOURS)
-        redisTemplate.opsForValue().set(lastFlushKey(sessionId), "0")
+        redisTemplate.opsForValue().set(lastFlushKey(sessionId), "0", TTL_HOURS, TimeUnit.HOURS)
         redisTemplate.opsForSet().add(ACTIVE_SESSIONS_KEY, sessionId.value.toString())
         logger.debug("Session {} initialized in Redis cache", sessionId.value)
     }
@@ -92,7 +97,7 @@ class RedisSessionGridStateCache(
         redisTemplate.opsForValue().get(lastFlushKey(sessionId))?.toLong() ?: 0L
 
     override fun markFlushed(sessionId: SessionId, revision: Long) {
-        redisTemplate.opsForValue().set(lastFlushKey(sessionId), revision.toString())
+        redisTemplate.opsForValue().set(lastFlushKey(sessionId), revision.toString(), TTL_HOURS, TimeUnit.HOURS)
     }
 
     override fun getActiveSessions(): Set<SessionId> =
@@ -100,6 +105,11 @@ class RedisSessionGridStateCache(
             .orEmpty()
             .map { SessionId(UUID.fromString(it)) }
             .toSet()
+
+    override fun deactivate(sessionId: SessionId) {
+        redisTemplate.opsForSet().remove(ACTIVE_SESSIONS_KEY, sessionId.value.toString())
+        logger.debug("Session {} deactivated from cache", sessionId.value)
+    }
 
     private fun stateKey(sessionId: SessionId) = "session:${sessionId.value}:state"
     private fun lastFlushKey(sessionId: SessionId) = "session:${sessionId.value}:lastFlush"

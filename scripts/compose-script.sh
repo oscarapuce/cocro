@@ -2,7 +2,7 @@
 set -e
 
 cleanup() {
-  podman compose -f compose.dev.yml down
+  podman compose -f infra/compose.dev.yml down
 }
 
 trap cleanup EXIT INT TERM

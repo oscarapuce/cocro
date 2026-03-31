@@ -7,11 +7,13 @@ import com.cocro.application.grid.port.GridRepository
 import com.cocro.domain.auth.enum.Role
 import com.cocro.domain.auth.model.AuthenticatedUser
 import com.cocro.domain.auth.model.valueobject.UserId
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.common.CocroResult
 import com.cocro.domain.grid.enums.CellType
 import com.cocro.domain.grid.error.GridError
 import com.cocro.domain.grid.model.Grid
 import com.cocro.domain.grid.model.GridMetadata
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.grid.model.valueobject.GridTitle
@@ -33,10 +35,8 @@ class PatchGridUseCaseTest {
     private fun existingGrid() = Grid(
         id = java.util.UUID.randomUUID(),
         shortId = GridShareCode("GRPAT1"),
-        title = GridTitle("Old Title"),
-        metadata = GridMetadata(author = authorId, reference = null, description = null, difficulty = "NONE"),
-        width = GridWidth(5),
-        height = GridHeight(5),
+        metadata = GridMetadata(title = GridTitle("Test Grid"), author = Author(id = authorId, username = "TestAuthor"), reference = null, description = null, difficulty = "NONE"),
+        dimension = GridDimension(width = GridWidth(5), height = GridHeight(5)),
         cells = emptyList(),
     )
 
@@ -63,7 +63,7 @@ class PatchGridUseCaseTest {
     fun `should patch grid title successfully`() {
         // given
         val grid = existingGrid()
-        val author = AuthenticatedUser(authorId, setOf(Role.PLAYER))
+        val author = AuthenticatedUser(authorId, "Author", setOf(Role.PLAYER))
         whenever(gridRepository.findByShortId(GridShareCode("GRPAT1"))).thenReturn(grid)
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(author)
         whenever(gridRepository.findByHashLetters(any())).thenReturn(null)
@@ -82,7 +82,7 @@ class PatchGridUseCaseTest {
     @Test
     fun `should return GridNotFound when grid does not exist`() {
         // given
-        val author = AuthenticatedUser(authorId, setOf(Role.PLAYER))
+        val author = AuthenticatedUser(authorId, "Author", setOf(Role.PLAYER))
         whenever(gridRepository.findByShortId(GridShareCode("GRPAT1"))).thenReturn(null)
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(author)
 
@@ -100,7 +100,7 @@ class PatchGridUseCaseTest {
     fun `should return UnauthorizedGridModification when user is not the author`() {
         // given
         val grid = existingGrid()
-        val otherUser = AuthenticatedUser(otherUserId, setOf(Role.PLAYER))
+        val otherUser = AuthenticatedUser(otherUserId, "Other", setOf(Role.PLAYER))
         whenever(gridRepository.findByShortId(GridShareCode("GRPAT1"))).thenReturn(grid)
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(otherUser)
 
@@ -118,7 +118,7 @@ class PatchGridUseCaseTest {
     fun `should allow admin to patch any grid`() {
         // given
         val grid = existingGrid()
-        val adminUser = AuthenticatedUser(otherUserId, setOf(Role.PLAYER, Role.ADMIN))
+        val adminUser = AuthenticatedUser(otherUserId, "Admin", setOf(Role.PLAYER, Role.ADMIN))
         whenever(gridRepository.findByShortId(GridShareCode("GRPAT1"))).thenReturn(grid)
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(adminUser)
         whenever(gridRepository.findByHashLetters(any())).thenReturn(null)

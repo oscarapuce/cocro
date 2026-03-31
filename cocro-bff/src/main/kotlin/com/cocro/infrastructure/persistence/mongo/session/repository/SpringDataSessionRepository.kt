@@ -10,4 +10,10 @@ interface SpringDataSessionRepository : MongoRepository<SessionDocument, UUID> {
     fun existsByShareCode(shareCode: String): Boolean
 
     fun save(session: SessionDocument): SessionDocument
+
+    fun findByAuthorId(authorId: String): List<SessionDocument>
+
+    fun findByParticipantsUserId(userId: String): List<SessionDocument>
+
+    fun deleteById(id: String)
 }

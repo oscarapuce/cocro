@@ -1,0 +1,21 @@
+rouge rouge
+bleue bleu
+verte vert
+violette violet
+dorée doré
+argentée argenté
+ambrée ambré
+vermeille vermeil
+cramoisie cramoisi
+nacrée nacré
+cuivrée cuivré
+brune brun
+grise gris
+blanche blanc
+noire noir
+pourpre pourpre
+écarlate écarlate
+fauve fauve
+ocre ocre
+ivoire ivoire
+

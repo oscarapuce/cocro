@@ -1,0 +1,197 @@
+.landing-home-shell {
+  min-height: 100vh;
+  padding: 0 var(--space-xl) var(--space-2xl);
+  max-width: 1100px;
+  margin: 0 auto;
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg) 0;
+    animation: enter-up 300ms ease-out both;
+  }
+
+  &__nav-brand {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  &__nav-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  &__nav-user {
+    font-size: var(--text-sm);
+  }
+
+  &__hero {
+    padding: var(--space-2xl) 0 var(--space-xl);
+    position: relative;
+    overflow: visible;
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      line-height: 1;
+      margin-bottom: var(--space-md);
+      animation: enter-up 400ms ease-out both;
+    }
+
+    p {
+      font-size: var(--text-lg);
+      max-width: 480px;
+      animation: enter-up 400ms ease-out 100ms both;
+    }
+
+    // Decorative mini crossword grid (CSS-only, no SVG for bundle budget)
+    &::after {
+      content: '';
+      position: absolute;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%) rotate(6deg);
+      width: 104px;
+      height: 104px;
+      background-color: var(--color-surface);
+      background-image:
+        linear-gradient(var(--color-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+      background-size: 26px 26px;
+      border: 1px solid var(--color-border);
+      box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.16);
+      opacity: 0.15;
+      pointer-events: none;
+      animation: enter-up 500ms ease-out 200ms both;
+    }
+  }
+
+  &__main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--space-xl) + var(--space-sm));
+    align-items: stretch;
+
+    &--single {
+      grid-template-columns: 1fr;
+      max-width: 520px;
+    }
+  }
+
+  &__panel {
+    padding: calc(var(--space-xl) + var(--space-sm));
+    border: var(--border-dashed);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-panel);
+    background-color: var(--color-surface);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    animation: enter-up 400ms ease-out 150ms both;
+
+    .section-label {
+      display: block;
+      margin-bottom: var(--space-md);
+    }
+
+    h2 {
+      margin-bottom: var(--space-md);
+    }
+
+    p {
+      margin-bottom: var(--space-lg);
+      color: var(--color-ink-muted);
+    }
+
+    &--dark {
+      background-color: var(--color-forest);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: var(--space-sm);
+      position: relative;
+      overflow: hidden;
+      animation-delay: 250ms;
+
+      // First decorative crossword hint (bottom-right)
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -16px;
+        right: -16px;
+        width: 80px;
+        height: 80px;
+        background-color: rgba(255, 255, 255, 0.12);
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+        background-size: 20px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        opacity: 0.5;
+        transform: rotate(12deg);
+        pointer-events: none;
+      }
+
+      // Second decorative crossword hint (top-left, smaller, different angle)
+      &::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        width: 56px;
+        height: 56px;
+        background-color: rgba(255, 255, 255, 0.08);
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.22) 1px, transparent 1px);
+        background-size: 14px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        opacity: 0.4;
+        transform: rotate(-8deg);
+        pointer-events: none;
+      }
+
+      ::ng-deep .section-label,
+      ::ng-deep h2,
+      ::ng-deep p,
+      ::ng-deep span,
+      ::ng-deep strong {
+        color: rgba(255, 255, 255, 0.92);
+      }
+
+      ::ng-deep h2 {
+        color: #fff;
+        margin-bottom: var(--space-xs);
+      }
+
+      ::ng-deep p {
+        max-width: 34ch;
+        margin-bottom: var(--space-xl);
+      }
+
+      cocro-button ::ng-deep .cocro-btn--secondary {
+        background-color: transparent;
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.5);
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-color: #fff;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    &__hero::after {
+      display: none;
+    }
+
+    &__main {
+      grid-template-columns: 1fr;
+    }
+  }
+}

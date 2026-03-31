@@ -13,10 +13,10 @@ class GuestLoginUseCaseTest {
 
     // Stubs manuels — Mockito ne supporte pas @JvmInline value class (UserId)
     private val tokenIssuer = object : TokenIssuer {
-        override fun issue(userId: UserId, roles: Set<Role>) = "guest-jwt-token"
+        override fun issue(userId: UserId, username: String, roles: Set<Role>) = "guest-jwt-token"
     }
     private val spiceNameGenerator = object : SpiceNameGenerator() {
-        override fun generate() = "Cardamome-4821"
+        override fun generate() = "Cardamome-Dorée"
     }
 
     private val useCase = GuestLoginUseCase(tokenIssuer, spiceNameGenerator)
@@ -27,7 +27,7 @@ class GuestLoginUseCaseTest {
         val result = useCase.execute()
 
         // then
-        assertThat(result.username).isEqualTo("Cardamome-4821")
+        assertThat(result.username).isEqualTo("Cardamome-Dorée")
         assertThat(result.roles).containsExactly("ANONYMOUS")
         assertThat(result.token).isEqualTo("guest-jwt-token")
         assertThat(result.userId).isNotBlank()
@@ -44,7 +44,7 @@ class GuestLoginUseCaseTest {
     }
 
     @Test
-    fun `SpiceNameGenerator should produce name matching Spice-NNNN pattern`() {
+    fun `SpiceNameGenerator should produce name matching Spice-Color pattern`() {
         val generator = SpiceNameGenerator()
 
         repeat(20) {
@@ -52,7 +52,8 @@ class GuestLoginUseCaseTest {
             val parts = name.split("-")
             assertThat(parts).hasSize(2)
             assertThat(parts[0]).isNotBlank()
-            assertThat(parts[1]).hasSize(4).matches("\\d{4}")
+            assertThat(parts[1]).isNotBlank()
+            assertThat(parts[1][0].isUpperCase()).isTrue()
         }
     }
 }

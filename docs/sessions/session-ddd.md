@@ -21,7 +21,7 @@ following the layered DDD/Clean Architecture of the project.
 
 ## 1. Domain Model
 
-All domain types live in `cocro-bff` under the `kernel` package — no framework dependencies.
+All domain types live in `cocro-bff` under the `domain` package (`com.cocro.domain.*`) — no framework dependencies.
 
 ### Session (Aggregate Root)
 
@@ -152,7 +152,7 @@ Grid updates are **WebSocket-only** — there is no REST endpoint for grid updat
 2. Applies the `SessionGridCommand`.
 3. Writes the new state back to Redis using CAS (compare-and-swap on revision).
 4. On success: broadcasts `GridUpdated` to `/topic/session/{shareCode}`.
-5. On CAS conflict (stale revision): sends private `SyncRequired { currentRevision }` to the sender (not yet implemented — currently raises an exception).
+5. On CAS conflict (stale revision): catches the `IllegalStateException`, sends private `SyncRequired { currentRevision }` to the sender via `sessionNotifier.notifyUser()`, and returns `CocroResult.Error(SessionError.ConcurrentModification)`.
 
 ### Resync
 
@@ -290,7 +290,7 @@ The client then subscribes to `/topic/session/{shareCode}` for broadcasts.
 | `GridChecked`       | broadcast  | `/topic/session/{shareCode}` | `CheckGridUseCase`                   |
 | `SessionEnded`      | broadcast  | `/topic/session/{shareCode}` | Grid complete+correct via CheckGrid  |
 | `SessionInterrupted`| broadcast  | `/topic/session/{shareCode}` | Last participant left/timed out      |
-| `SyncRequired`      | private    | `/user/queue/session`        | CAS conflict on grid update (future) |
+| `SyncRequired`      | private    | `/user/queue/session`        | CAS conflict on grid update          |
 
 ### Jackson Serialization
 

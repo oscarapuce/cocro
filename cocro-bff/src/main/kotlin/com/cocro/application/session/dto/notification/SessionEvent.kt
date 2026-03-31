@@ -69,6 +69,7 @@ sealed interface SessionEvent {
     data class GridChecked(
         val userId: String,
         val isComplete: Boolean,
+        val isCorrect: Boolean,
         val correctCount: Int,
         val totalCount: Int,
     ) : SessionEvent

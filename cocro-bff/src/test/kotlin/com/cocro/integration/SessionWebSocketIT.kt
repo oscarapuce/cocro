@@ -76,7 +76,7 @@ class SessionWebSocketIT {
     // -------------------------------------------------------------------------
 
     private fun tokenFor(userId: UserId = UserId.new()) =
-        tokenIssuer.issue(userId, setOf(Role.PLAYER))
+        tokenIssuer.issue(userId, "TestUser", setOf(Role.PLAYER))
 
     private fun headersFor(token: String) = HttpHeaders().apply {
         setBearerAuth(token)
@@ -160,7 +160,7 @@ class SessionWebSocketIT {
             set("shareCode", shareCode)
         }
         return client.connectAsync(
-            "ws://localhost:$port/ws",
+            "ws://localhost:$port/ws/websocket",
             null as WebSocketHttpHeaders?,
             connectHeaders,
             object : StompSessionHandlerAdapter() {
@@ -193,13 +193,15 @@ class SessionWebSocketIT {
         val shareCode = createSession(gridId, token)
 
         val welcomeQueue = LinkedBlockingQueue<Map<*, *>>()
-        stompConnect(token, shareCode, onWelcome = { welcomeQueue.offer(it) })
+        val session = stompConnect(token, shareCode, onWelcome = { welcomeQueue.offer(it) })
 
         val welcome = welcomeQueue.poll(3, TimeUnit.SECONDS)
         assertThat(welcome).isNotNull()
         assertThat(welcome!!["type"]).isEqualTo("SessionWelcome")
         assertThat(welcome["shareCode"]).isEqualTo(shareCode)
         assertThat(welcome["topicToSubscribe"]).isEqualTo("/topic/session/$shareCode")
+
+        session.disconnect()
     }
 
     @Test
@@ -301,5 +303,54 @@ class SessionWebSocketIT {
 
         session1.disconnect()
         session2.disconnect()
+    }
+
+    @Test
+    fun `heartbeat STOMP message does not error and keeps connection alive`() {
+        val token = tokenFor()
+        val gridId = createTestGrid(token)
+        val shareCode = createSession(gridId, token)
+        post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), token, Any::class.java)
+
+        val session = stompConnect(token, shareCode)
+
+        // Send a heartbeat — should not error
+        session.send("/app/session/$shareCode/heartbeat", ByteArray(0))
+
+        // Small delay to let the server process the message
+        Thread.sleep(200)
+
+        // Connection should still be alive — we can still subscribe and get a welcome
+        val welcomeQueue = LinkedBlockingQueue<Map<*, *>>()
+        session.subscribe("/app/session/$shareCode/welcome", mapFrameHandler { welcomeQueue.offer(it) })
+        val welcome = welcomeQueue.poll(3, TimeUnit.SECONDS)
+        assertThat(welcome).isNotNull()
+        assertThat(welcome!!["type"]).isEqualTo("SessionWelcome")
+
+        session.disconnect()
+    }
+
+    @Test
+    fun `GridChecked broadcast includes isCorrect field`() {
+        val token = tokenFor()
+        val gridId = createTestGrid(token)
+        val shareCode = createSession(gridId, token)
+        post("/api/sessions/join", JoinSessionDto(shareCode = shareCode), token, Any::class.java)
+
+        val received = LinkedBlockingQueue<Map<*, *>>()
+        val session = stompConnect(token, shareCode)
+        session.subscribe("/topic/session/$shareCode", mapFrameHandler { received.offer(it) })
+
+        Thread.sleep(100)
+
+        post("/api/sessions/$shareCode/check", emptyMap<String, String>(), token, Any::class.java)
+
+        val event = received.poll(3, TimeUnit.SECONDS)
+        assertThat(event).isNotNull()
+        assertThat(event!!["type"]).isEqualTo("GridChecked")
+        @Suppress("UNCHECKED_CAST")
+        assertThat(event as Map<String, Any?>).containsKey("isCorrect")
+
+        session.disconnect()
     }
 }

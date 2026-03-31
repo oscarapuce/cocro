@@ -43,14 +43,14 @@
 │  │                                                         │   │
 │  │  ┌──────────────────────────────────────────────────┐  │   │
 │  │  │  Traefik Ingress  :80 / :443                     │  │   │
-│  │  │  ├── app.cocro.com   → cocro-front (nginx)       │  │   │
+│  │  │  ├── app.cocro.com   → cocro-web (nginx)       │  │   │
 │  │  │  ├── api.cocro.com   → cocro-bff                 │  │   │
 │  │  │  └── storage.cocro.com → minio                   │  │   │
 │  │  └──────────────────────────────────────────────────┘  │   │
 │  │                                                         │   │
 │  │  namespace: cocro                                       │   │
 │  │  ├── cocro-bff      ClusterIP  (via Ingress)            │   │
-│  │  ├── cocro-front    ClusterIP  (via Ingress)            │   │
+│  │  ├── cocro-web    ClusterIP  (via Ingress)            │   │
 │  │  ├── mongodb        ClusterIP  (interne uniquement)     │   │
 │  │  ├── redis          ClusterIP  (interne uniquement)     │   │
 │  │  └── minio          ClusterIP  (via Ingress, read-only) │   │

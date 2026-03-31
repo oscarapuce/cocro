@@ -1,0 +1,78 @@
+<div class="my-sessions">
+  <h1 class="my-sessions__title">Mes sessions</h1>
+
+  @if (loading()) {
+    <p class="text-muted">Chargement…</p>
+  } @else if (error()) {
+    <p class="my-sessions__error">{{ error() }}</p>
+  } @else if (sessions().length === 0) {
+    <div class="my-sessions__empty">
+      <p class="text-muted">Aucune session pour le moment.</p>
+      <cocro-button variant="secondary" (click)="router.navigate(['/lobby/create'])">
+        Créer une session
+      </cocro-button>
+    </div>
+  } @else {
+
+    @if (createdSessions.length > 0) {
+      <section class="my-sessions__section">
+        <h2 class="my-sessions__section-title">Sessions créées</h2>
+        <div class="my-sessions__grid">
+          @for (session of createdSessions; track session.shareCode) {
+            <div class="session-card">
+              <div class="session-card__header">
+                <span class="session-card__title">{{ session.gridTitle }}</span>
+                <span class="session-card__status" [class]="statusClass(session.status)">
+                  {{ statusLabel(session.status) }}
+                </span>
+              </div>
+              <div class="session-card__meta">
+                <span>{{ session.gridDimension.width }}×{{ session.gridDimension.height }}</span>
+                <span>{{ session.participantCount }} joueur(s)</span>
+                <span class="session-card__code">{{ session.shareCode }}</span>
+              </div>
+              <div class="session-card__actions">
+                @if (canRejoin(session)) {
+                  <cocro-button size="sm" (click)="onRejoin(session)">Rejoindre</cocro-button>
+                }
+                <cocro-button size="sm" variant="danger" [loading]="deleting() === session.shareCode" (click)="onDelete(session)">
+                  Supprimer
+                </cocro-button>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @if (joinedSessions.length > 0) {
+      <section class="my-sessions__section">
+        <h2 class="my-sessions__section-title">Sessions rejointes</h2>
+        <div class="my-sessions__grid">
+          @for (session of joinedSessions; track session.shareCode) {
+            <div class="session-card">
+              <div class="session-card__header">
+                <span class="session-card__title">{{ session.gridTitle }}</span>
+                <span class="session-card__status" [class]="statusClass(session.status)">
+                  {{ statusLabel(session.status) }}
+                </span>
+              </div>
+              <div class="session-card__meta">
+                <span>{{ session.gridDimension.width }}×{{ session.gridDimension.height }}</span>
+                <span>par {{ session.authorName }}</span>
+                <span>{{ session.participantCount }} joueur(s)</span>
+              </div>
+              <div class="session-card__actions">
+                @if (canRejoin(session)) {
+                  <cocro-button size="sm" (click)="onRejoin(session)">Rejoindre</cocro-button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+  }
+</div>
+

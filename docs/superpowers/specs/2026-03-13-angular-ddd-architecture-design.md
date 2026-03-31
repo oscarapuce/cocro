@@ -1,14 +1,14 @@
-# Spec — Rearchitecture DDD de cocro-angular
+# Spec — Rearchitecture DDD de cocro-web
 
 **Date:** 2026-03-13
 **Statut:** Approuvé
-**Scope:** `cocro-angular` (Angular 20, standalone components, Signals)
+**Scope:** `cocro-web` (Angular 20, standalone components, Signals)
 
 ---
 
 ## Contexte
 
-L'architecture actuelle de `cocro-angular` est organisée par type (`shared/services/`, `shared/models/`, `features/`) avec des services God-Object (`AuthService`, `SessionService`) qui mélangent HTTP, persistance token, et logique métier. L'objectif est de rearchitecter en DDD intermédiaire avec couches horizontales, en miroir exact de `cocro-cmp`, pour que les deux frontends partagent le même vocabulaire architectural.
+L'architecture actuelle de `cocro-web` est organisée par type (`shared/services/`, `shared/models/`, `features/`) avec des services God-Object (`AuthService`, `SessionService`) qui mélangent HTTP, persistance token, et logique métier. L'objectif est de rearchitecter en DDD intermédiaire avec couches horizontales, en miroir exact de `cocro-cmp`, pour que les deux frontends partagent le même vocabulaire architectural.
 
 En parallèle, plusieurs écarts avec la charte design Fusion B — Cahier de Notes ont été identifiés et seront corrigés.
 

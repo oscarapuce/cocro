@@ -11,6 +11,7 @@ import com.cocro.application.session.port.SessionRepository
 import com.cocro.application.session.service.SessionCodeGenerator
 import com.cocro.application.session.validation.validateCreateSessionDto
 import com.cocro.domain.common.CocroResult
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.Session
@@ -51,7 +52,7 @@ class CreateSessionUseCase(
 
         val session =
             Session.create(
-                creatorId = user.userId,
+                author = Author(id = user.userId, username = user.username),
                 shareCode = shareCodeGenerator.generateId(),
                 gridId = gridId,
                 gridTemplate = grid.toGridTemplateSnapshot(),

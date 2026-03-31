@@ -19,11 +19,11 @@ internal fun Grid.toGridTemplateDto(): GridTemplateDto = GridTemplateDto(
     width = this.width.value,
     height = this.height.value,
     difficulty = this.metadata.difficulty,
-    author = this.metadata.author.toString(),
+    author = this.metadata.author.username,
     reference = this.metadata.reference,
     description = this.metadata.description,
-    globalClueLabel = this.metadata.globalClueLabel,
-    globalClueWordLengths = this.metadata.globalClueWordLengths,
+    globalClueLabel = this.metadata.globalClue?.label,
+    globalClueWordLengths = this.metadata.globalClue?.wordLengths,
     cells = this.cells.map { it.toCellDto() },
 )
 
@@ -66,11 +66,11 @@ internal fun Grid.toGridTemplateSnapshot(): GridTemplateSnapshot =
         width = this.width.value,
         height = this.height.value,
         difficulty = this.metadata.difficulty,
-        author = this.metadata.author.toString(),
+        author = this.metadata.author.username,
         reference = this.metadata.reference,
         description = this.metadata.description,
-        globalClueLabel = this.metadata.globalClueLabel,
-        globalClueWordLengths = this.metadata.globalClueWordLengths,
+        globalClueLabel = this.metadata.globalClue?.label,
+        globalClueWordLengths = this.metadata.globalClue?.wordLengths,
         cells = this.cells.map { it.toSnapshotCell() },
     )
 

@@ -12,4 +12,6 @@ interface SpringDataGridRepository : MongoRepository<GridDocument, UUID> {
     fun findByShortId(shortId: String): GridDocument?
 
     fun save(document: GridDocument): GridDocument
+
+    fun findByMetadataAuthorId(authorId: String): List<GridDocument>
 }

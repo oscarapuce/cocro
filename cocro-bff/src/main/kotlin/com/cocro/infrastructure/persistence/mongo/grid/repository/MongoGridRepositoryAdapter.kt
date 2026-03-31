@@ -1,6 +1,7 @@
 package com.cocro.infrastructure.persistence.mongo.grid.repository
 
 import com.cocro.application.grid.port.GridRepository
+import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.infrastructure.persistence.mongo.grid.mapper.toDocument
 import com.cocro.infrastructure.persistence.mongo.grid.mapper.toDomain
 import com.cocro.domain.grid.model.Grid
@@ -27,4 +28,9 @@ class MongoGridRepositoryAdapter(
         springDataRepo
             .findByShortId(shortId.toString())
             ?.toDomain()
+
+    override fun findByAuthor(author: UserId): List<Grid> =
+        springDataRepo
+            .findByMetadataAuthorId(author.toString())
+            .map { it.toDomain() }
 }

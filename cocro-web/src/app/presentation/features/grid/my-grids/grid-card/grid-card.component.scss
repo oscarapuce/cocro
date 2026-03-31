@@ -1,0 +1,212 @@
+// — colonnes (partagées avec le thead du parent) —
+$col-dims:    90px;
+$col-diff:    100px;
+$col-date:    120px;
+$col-actions: 190px;
+
+// ——— ligne du tableau ————————————————————————————————————————
+
+.grid-row {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  border-bottom: 1px solid rgba(191, 207, 232, 0.4);
+  transition: background-color var(--transition-smooth);
+
+  &:last-child { border-bottom: none; }
+
+  &:hover {
+    background-color: rgba(37, 87, 54, 0.05);
+  }
+
+  &--launching {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  // ——— cellules ————————————————————————————————————————————————
+
+  &__cell {
+    padding: 0.6rem 1rem;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    flex-shrink: 0;
+
+    &--title {
+      flex: 1;
+      min-width: 0;
+    }
+
+    &--dims,
+    &--date {
+      width: $col-dims;
+      color: var(--color-ink-muted);
+      font-family: var(--font-label);
+      font-size: var(--text-xs);
+      letter-spacing: 0.02em;
+    }
+
+    &--date   { width: $col-date; }
+    &--diff   { width: $col-diff; }
+
+    &--actions {
+      width: $col-actions;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      padding-right: 0;
+    }
+  }
+
+  // ——— titre ————————————————————————————————————————————————
+
+  &__title {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1rem;
+    color: var(--color-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+  }
+
+  // ——— étoiles ————————————————————————————————————————————————
+
+  &__stars {
+    color: var(--color-gold);
+    letter-spacing: -0.08em;
+    font-size: 0.8rem;
+  }
+
+  // ——— boutons ————————————————————————————————————————————————
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    transition: all var(--transition-smooth);
+    white-space: nowrap;
+
+    &--launch {
+      color: var(--color-forest);
+      border-color: rgba(37, 87, 54, 0.3);
+
+      &:hover:not(:disabled) {
+        background: var(--color-forest-tint);
+        border-color: rgba(37, 87, 54, 0.5);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 0 rgba(37, 87, 54, 0.18);
+      }
+
+      &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+    }
+
+    &--edit {
+      color: var(--color-ink-muted);
+      border-color: var(--color-border-soft);
+
+      &:hover {
+        background: rgba(107, 94, 78, 0.08);
+        color: var(--color-ink);
+        border-color: rgba(107, 94, 78, 0.3);
+      }
+    }
+  }
+
+  &__spinner {
+    width: 10px;
+    height: 10px;
+    border: 2px solid rgba(37, 87, 54, 0.25);
+    border-top-color: var(--color-forest);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+}
+
+// ——— tooltip (position: fixed, jamais rognée) ————————————————
+
+.grid-tooltip {
+  position: fixed;
+  z-index: 500;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-soft);
+  border-radius: var(--radius-sm);
+  box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.14);
+  padding: 10px;
+  width: 216px;
+  pointer-events: none;
+  animation: tooltip-reveal 0.12s ease-out both;
+
+  &__miniature {
+    display: block;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 3px;
+    background: #f7f4ed;
+  }
+
+  &__skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-paper) 25%,
+      var(--color-paper-dark) 50%,
+      var(--color-paper) 75%
+    );
+    background-size: 300% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 3px;
+    border: 1px solid var(--color-border-soft);
+  }
+
+  &__footer {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__name {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.875rem;
+    color: var(--color-ink);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__meta {
+    font-size: 0.7rem;
+    color: var(--color-ink-muted);
+    font-family: var(--font-label);
+    letter-spacing: 0.03em;
+  }
+}
+
+// ——— animations ————————————————————————————————————————————————
+
+@keyframes tooltip-reveal {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

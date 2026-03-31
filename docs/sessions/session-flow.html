@@ -262,7 +262,8 @@ stateDiagram-v2
           → ou <code>SyncRequired</code> si conflit CAS</p>
         <br>
         <p>SEND <code>/app/session/{code}/heartbeat</code><br>
-          (toutes les ≤30s pour rester ACTIVE)</p>
+          (toutes les 20s — grace period 30s)<br>
+          <span class="note-dim">Maintient l'utilisateur ACTIVE dans le HeartbeatTracker</span></p>
       </div>
       <div class="ws-card">
         <h3>④ Événements privés</h3>
@@ -300,7 +301,7 @@ stateDiagram-v2
       </div>
       <div class="event-chip">
         <div class="name">GridChecked</div>
-        <div class="payload">{ isComplete, isCorrect, correctCount, totalCount }</div>
+        <div class="payload">{ userId, isComplete, isCorrect, correctCount, totalCount }</div>
       </div>
       <div class="event-chip">
         <div class="name">SessionEnded</div>
@@ -347,9 +348,9 @@ stateDiagram-v2
       <p style="font-size:13px;color:#868e96;margin-bottom:10px">
         Reconnexion &lt;30s (grace period) : AWAY → ACTIVE, <strong>pas de broadcast</strong>, transparent pour les autres participants.
       </p>
-      <p style="font-size:13px;color:#495057">
-        Le client doit envoyer un heartbeat toutes les ≤30s sur<br>
-        <code>/app/session/{code}/heartbeat</code>
+      <p style="font-size:13px;color:#495057;margin-bottom:10px">
+        Le client envoie un heartbeat toutes les 20s sur<br>
+        <code>/app/session/{code}/heartbeat</code> (grace period serveur : 30s)
       </p>
     </section>
 
@@ -395,7 +396,7 @@ stateDiagram-v2
       </div>
       <div class="bs-card">
         <h3>6. GridEditor (Phase 4) absent</h3>
-        <p>La création de grilles n'est pas encore implémentée dans cocro-angular. Seules les grilles insérées via API/DB fonctionnent. Le flux complet de bout en bout est incomplet.</p>
+        <p>La création de grilles n'est pas encore implémentée dans cocro-web. Seules les grilles insérées via API/DB fonctionnent. Le flux complet de bout en bout est incomplet.</p>
       </div>
     </div>
   </section>

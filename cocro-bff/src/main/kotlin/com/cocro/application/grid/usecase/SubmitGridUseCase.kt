@@ -7,6 +7,7 @@ import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.grid.service.GridIdGenerator
 import com.cocro.application.grid.validation.validateSubmitGrid
 import com.cocro.domain.common.CocroResult
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.error.GridError
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import org.slf4j.LoggerFactory
@@ -37,7 +38,7 @@ class SubmitGridUseCase(
                 }
 
         val shortId = gridIdGenerator.generateId()
-        val grid = dto.toDomain(shortId, user.userId)
+        val grid = dto.toDomain(shortId, Author(id = user.userId, username = user.username))
 
         // CHECK
         val otherGrid = gridRepository.findByHashLetters(grid.hashLetters)

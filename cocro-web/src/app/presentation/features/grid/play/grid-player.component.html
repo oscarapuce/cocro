@@ -1,0 +1,129 @@
+<div class="grid-player">
+
+  <!-- Session band -->
+  <header class="play-band">
+    <cocro-play-header
+      [shareCode]="shareCode()"
+      [title]="selector.grid().title"
+      [difficulty]="selector.grid().difficulty ?? 'NONE'"
+      [reference]="selector.grid().reference"
+      [participantCount]="participantCount()"
+      [connected]="connected()"
+      (leave)="leave()"
+    />
+  </header>
+
+  <!-- Error banner -->
+  @if (error()) {
+    <div class="play-error">{{ error() }}</div>
+  }
+
+  <!-- Workspace: grid + side panel -->
+  @if (!loading()) {
+    <div class="play-workspace">
+
+      <!-- Grid area (LEFT, centered) -->
+      <div class="grid-wrapper">
+        @if (hasGlobalClue()) {
+          <cocro-global-clue-preview />
+        }
+        <cocro-grid [disableKeyboard]="true" [cellColorClassFn]="getCellColorClass" />
+      </div>
+
+      <!-- Side panel (RIGHT) -->
+      <aside class="play-side">
+
+        <!-- Share code card -->
+        <div class="play-code-card">
+          <span class="play-code-card__label">Code de session</span>
+          <div class="play-code-card__row">
+            <span class="play-code-card__code">{{ shareCode() }}</span>
+            <button
+              class="play-code-card__copy"
+              [class.play-code-card__copy--done]="codeCopied()"
+              (click)="copyShareCode()"
+              [attr.aria-label]="codeCopied() ? 'Copié !' : 'Copier le code'"
+            >
+              @if (codeCopied()) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              }
+              <span>{{ codeCopied() ? 'Copié !' : 'Copier' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Players panel -->
+        <div class="play-players">
+          <span class="play-players__label">Joueurs connectés</span>
+          <ul class="play-players__list">
+            @for (playerId of activePlayers(); track playerId) {
+              <li class="play-players__item">
+                <span class="play-players__dot" [class.play-players__dot--me]="playerId === myUserId()"></span>
+                <span class="play-players__name">
+                  {{ playerId === myUserId() ? 'Vous' : 'Joueur' }}
+                </span>
+                @if (playerId === myUserId()) {
+                  <span class="play-players__badge">moi</span>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Contextual clue info -->
+        <div class="play-clue-panel">
+          <cocro-play-info />
+        </div>
+
+        <!-- Verify action -->
+        @if (status() === 'PLAYING') {
+          <div class="play-check">
+            <button class="btn-verify" (click)="checkGrid()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>Vérifier la grille</span>
+            </button>
+
+            @if (checkResult()) {
+              <div class="check-result" [class.check-result--complete]="checkResult()!.isComplete">
+                <span class="check-result__score">
+                  {{ checkResult()!.correctCount }}<span class="check-result__denom">/{{ checkResult()!.totalCount }}</span>
+                </span>
+                <span class="check-result__label">
+                  @if (checkResult()!.isComplete) {
+                    Grille complète !
+                  } @else {
+                    {{ checkResult()!.totalCount - checkResult()!.correctCount }}
+                    erreur{{ checkResult()!.totalCount - checkResult()!.correctCount > 1 ? 's' : '' }}
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        }
+
+      </aside>
+    </div>
+
+    <!-- ENDED state -->
+    @if (status() === 'ENDED') {
+      <div class="session-state session-state--ended">
+        <strong>Félicitations !</strong>
+        <span>La grille est complète et correcte.</span>
+      </div>
+    }
+
+    <!-- INTERRUPTED state -->
+    @if (status() === 'INTERRUPTED') {
+      <div class="session-state session-state--interrupted">
+        <span>Session interrompue — tous les participants ont quitté.</span>
+      </div>
+    }
+  } @else {
+    <div class="play-loading">Chargement de la grille…</div>
+  }
+
+</div>

@@ -55,7 +55,7 @@
 |--------|------|----------------|
 | **MODIFY** | `presentation/rest/session/SessionController.kt` | Remove `start` + `grid-template` endpoints; update return types |
 
-### cocro-angular — Domain & Ports
+### cocro-web — Domain & Ports
 | Action | Path | Responsibility |
 |--------|------|----------------|
 | **MODIFY** | `domain/models/session.model.ts` | Add `SessionFullResponse` |
@@ -67,7 +67,7 @@
 | **MODIFY** | `infrastructure/adapters/session/session-stomp.adapter.ts` | Handle `GridChecked` event |
 | **MODIFY** | `application/use-cases/join-session.use-case.ts` | Return `SessionFullResponse` |
 
-### cocro-angular — Presentation
+### cocro-web — Presentation
 | Action | Path | Responsibility |
 |--------|------|----------------|
 | **MODIFY** | `presentation/features/lobby/create/create-session.component.ts` | Navigate to `/play/{shareCode}` after create |
@@ -911,8 +911,8 @@ git commit -m "test(it): update SessionWebSocketIT for direct-join flow (no star
 ## Task 12 — Angular: Update domain models
 
 **Files:**
-- Modify: `cocro-angular/src/app/domain/models/session.model.ts`
-- Modify: `cocro-angular/src/app/domain/models/session-events.model.ts`
+- Modify: `cocro-web/src/app/domain/models/session.model.ts`
+- Modify: `cocro-web/src/app/domain/models/session-events.model.ts`
 
 - [ ] **Step 1: Add `SessionFullResponse` to `session.model.ts`**
 
@@ -950,13 +950,13 @@ Add `GridCheckedEvent` to the `SessionEvent` union type.
 
 - [ ] **Step 3: Build check**
 ```bash
-cd cocro-angular && npx ng build
+cd cocro-web && npx ng build
 ```
 Expected: compile errors pointing to usages of removed types — fix them progressively in the next tasks.
 
 - [ ] **Step 4: Commit what compiles**
 ```bash
-git add cocro-angular/src/app/domain/models/
+git add cocro-web/src/app/domain/models/
 git commit -m "feat(ng-domain): add SessionFullResponse, GridCheckedEvent; remove SessionStartedEvent"
 ```
 
@@ -965,16 +965,16 @@ git commit -m "feat(ng-domain): add SessionFullResponse, GridCheckedEvent; remov
 ## Task 13 — Angular: Remove grid-template port & adapter; update game-session port
 
 **Files:**
-- Delete: `cocro-angular/src/app/application/ports/session/session-grid-template.port.ts`
-- Delete: `cocro-angular/src/app/infrastructure/adapters/session/session-grid-template-http.adapter.ts`
-- Modify: `cocro-angular/src/app/application/ports/session/game-session.port.ts`
-- Modify: `cocro-angular/src/app/infrastructure/adapters/session/game-session-http.adapter.ts`
+- Delete: `cocro-web/src/app/application/ports/session/session-grid-template.port.ts`
+- Delete: `cocro-web/src/app/infrastructure/adapters/session/session-grid-template-http.adapter.ts`
+- Modify: `cocro-web/src/app/application/ports/session/game-session.port.ts`
+- Modify: `cocro-web/src/app/infrastructure/adapters/session/game-session-http.adapter.ts`
 
 - [ ] **Step 1: Delete the grid-template port and adapter files**
 
 ```bash
-rm cocro-angular/src/app/application/ports/session/session-grid-template.port.ts
-rm cocro-angular/src/app/infrastructure/adapters/session/session-grid-template-http.adapter.ts
+rm cocro-web/src/app/application/ports/session/session-grid-template.port.ts
+rm cocro-web/src/app/infrastructure/adapters/session/session-grid-template-http.adapter.ts
 ```
 
 Remove DI registration of the adapter (look in the module/app.config.ts for `SessionGridTemplatePort` provider — remove it).
@@ -1019,12 +1019,12 @@ Remove any handling for `SessionStarted` (or leave a `default` fallback).
 
 - [ ] **Step 5: Build**
 ```bash
-cd cocro-angular && npx ng build
+cd cocro-web && npx ng build
 ```
 
 - [ ] **Step 6: Commit**
 ```bash
-git add cocro-angular/src/app/
+git add cocro-web/src/app/
 git commit -m "feat(ng-infra): remove grid-template port/adapter; update GameSession port for SessionFullResponse"
 ```
 
@@ -1033,8 +1033,8 @@ git commit -m "feat(ng-infra): remove grid-template port/adapter; update GameSes
 ## Task 14 — Angular: Update join use-case and create-session component
 
 **Files:**
-- Modify: `cocro-angular/src/app/application/use-cases/join-session.use-case.ts`
-- Modify: `cocro-angular/src/app/presentation/features/lobby/create/create-session.component.ts`
+- Modify: `cocro-web/src/app/application/use-cases/join-session.use-case.ts`
+- Modify: `cocro-web/src/app/presentation/features/lobby/create/create-session.component.ts`
 
 - [ ] **Step 1: Update `join-session.use-case.ts`**
 
@@ -1069,13 +1069,13 @@ Remove navigation to `/lobby/room/{shareCode}`.
 
 - [ ] **Step 3: Build**
 ```bash
-cd cocro-angular && npx ng build
+cd cocro-web && npx ng build
 ```
 
 - [ ] **Step 4: Commit**
 ```bash
-git add cocro-angular/src/app/application/use-cases/join-session.use-case.ts
-git add cocro-angular/src/app/presentation/features/lobby/create/create-session.component.ts
+git add cocro-web/src/app/application/use-cases/join-session.use-case.ts
+git add cocro-web/src/app/presentation/features/lobby/create/create-session.component.ts
 git commit -m "feat(ng-app): create and join navigate directly to /play; return SessionFullResponse"
 ```
 
@@ -1084,8 +1084,8 @@ git commit -m "feat(ng-app): create and join navigate directly to /play; return 
 ## Task 15 — Angular: Simplify grid-player component
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/features/grid/play/grid-player.component.ts`
-- Modify: `cocro-angular/src/app/presentation/features/grid/play/grid-player.component.html` (if needed)
+- Modify: `cocro-web/src/app/presentation/features/grid/play/grid-player.component.ts`
+- Modify: `cocro-web/src/app/presentation/features/grid/play/grid-player.component.html` (if needed)
 
 - [ ] **Step 1: Read the current `grid-player.component.ts` in full**
 
@@ -1146,13 +1146,13 @@ Remove `SessionGridTemplatePort` injection if present. Remove the now-unused `ge
 
 - [ ] **Step 4: Build and check for 0 errors**
 ```bash
-cd cocro-angular && npx ng build
+cd cocro-web && npx ng build
 ```
 Expected: 0 errors, 0 warnings.
 
 - [ ] **Step 5: Commit**
 ```bash
-git add cocro-angular/src/app/presentation/features/grid/play/
+git add cocro-web/src/app/presentation/features/grid/play/
 git commit -m "feat(ng-play): simplified grid-player init — one join HTTP call, then WS"
 ```
 
@@ -1161,14 +1161,14 @@ git commit -m "feat(ng-play): simplified grid-player init — one join HTTP call
 ## Task 16 — Angular: Remove lobby-room; update routing
 
 **Files:**
-- Delete: `cocro-angular/src/app/presentation/features/lobby/room/lobby-room.component.ts`
-- Delete: `cocro-angular/src/app/presentation/features/lobby/room/lobby-room.component.html`
-- Delete: `cocro-angular/src/app/presentation/features/lobby/room/lobby-room.component.scss`
-- Modify: `cocro-angular/src/app/presentation/features/lobby/lobby.routes.ts`
+- Delete: `cocro-web/src/app/presentation/features/lobby/room/lobby-room.component.ts`
+- Delete: `cocro-web/src/app/presentation/features/lobby/room/lobby-room.component.html`
+- Delete: `cocro-web/src/app/presentation/features/lobby/room/lobby-room.component.scss`
+- Modify: `cocro-web/src/app/presentation/features/lobby/lobby.routes.ts`
 
 - [ ] **Step 1: Delete lobby-room component files**
 ```bash
-rm cocro-angular/src/app/presentation/features/lobby/room/lobby-room.component.*
+rm cocro-web/src/app/presentation/features/lobby/room/lobby-room.component.*
 ```
 
 - [ ] **Step 2: Update `lobby.routes.ts`**
@@ -1185,13 +1185,13 @@ Or just remove it entirely.
 
 - [ ] **Step 3: Build**
 ```bash
-cd cocro-angular && npx ng build
+cd cocro-web && npx ng build
 ```
 Expected: 0 errors.
 
 - [ ] **Step 4: Commit**
 ```bash
-git add cocro-angular/src/app/presentation/features/lobby/
+git add cocro-web/src/app/presentation/features/lobby/
 git commit -m "feat(ng-lobby): remove waiting-room; create navigates directly to /play"
 ```
 
@@ -1201,13 +1201,13 @@ git commit -m "feat(ng-lobby): remove waiting-room; create navigates directly to
 
 - [ ] **Step 1: Full build**
 ```bash
-cd cocro-angular && npx ng build
+cd cocro-web && npx ng build
 ```
 Expected: 0 errors, 0 warnings.
 
 - [ ] **Step 2: Run unit tests**
 ```bash
-cd cocro-angular && npx ng test --watch=false
+cd cocro-web && npx ng test --watch=false
 ```
 Fix any failing tests. Key tests to update:
 - `create-session.component.spec.ts`: expect navigation to `/play/{shareCode}`, not `/lobby/room`

@@ -5,14 +5,19 @@ import com.cocro.application.session.dto.JoinSessionDto
 import com.cocro.application.session.dto.LeaveSessionDto
 import com.cocro.application.session.usecase.CheckGridUseCase
 import com.cocro.application.session.usecase.CreateSessionUseCase
+import com.cocro.application.session.usecase.DeleteSessionUseCase
+import com.cocro.application.session.usecase.GetMySessionsUseCase
 import com.cocro.application.session.usecase.GetSessionStateUseCase
 import com.cocro.application.session.usecase.JoinSessionUseCase
 import com.cocro.application.session.usecase.LeaveSessionUseCase
 import com.cocro.application.session.usecase.SynchroniseSessionUseCase
 import com.cocro.presentation.rest.error.toResponseEntity
+import com.cocro.infrastructure.security.spring.CocroAuthentication
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -29,6 +34,8 @@ class SessionController(
     private val getSessionStateUseCase: GetSessionStateUseCase,
     private val checkGridUseCase: CheckGridUseCase,
     private val synchroniseSessionUseCase: SynchroniseSessionUseCase,
+    private val getMySessionsUseCase: GetMySessionsUseCase,
+    private val deleteSessionUseCase: DeleteSessionUseCase,
 ) {
     @PostMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
@@ -89,4 +96,24 @@ class SessionController(
         checkGridUseCase
             .execute(shareCode)
             .toResponseEntity(HttpStatus.OK)
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
+    fun getMySessions(authentication: Authentication): ResponseEntity<*> {
+        val userId = (authentication as CocroAuthentication).user.userId
+        val sessions = getMySessionsUseCase.execute(userId)
+        return ResponseEntity.ok(sessions)
+    }
+
+    @DeleteMapping("/{shareCode}")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
+    fun deleteSession(
+        @PathVariable shareCode: String,
+        authentication: Authentication,
+    ): ResponseEntity<*> {
+        val userId = (authentication as CocroAuthentication).user.userId
+        return deleteSessionUseCase
+            .execute(shareCode, userId)
+            .toResponseEntity(HttpStatus.NO_CONTENT)
+    }
 }

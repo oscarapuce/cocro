@@ -2,13 +2,17 @@ package com.cocro.presentation.rest.grid
 
 import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.dto.SubmitGridDto
+import com.cocro.application.grid.usecase.GetGridUseCase
+import com.cocro.application.grid.usecase.GetMyGridsUseCase
 import com.cocro.application.grid.usecase.PatchGridUseCase
 import com.cocro.application.grid.usecase.SubmitGridUseCase
 import com.cocro.presentation.rest.error.toResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController
 class GridController(
     private val submitGridUseCase: SubmitGridUseCase,
     private val patchGridUseCase: PatchGridUseCase,
+    private val getMyGridsUseCase: GetMyGridsUseCase,
+    private val getGridUseCase: GetGridUseCase,
 ) {
     @PostMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
@@ -36,5 +42,21 @@ class GridController(
     ): ResponseEntity<*> =
         patchGridUseCase
             .execute(dto)
+            .toResponseEntity(HttpStatus.OK)
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
+    fun getMyGrids(): ResponseEntity<*> =
+        getMyGridsUseCase
+            .execute()
+            .toResponseEntity(HttpStatus.OK)
+
+    @GetMapping("/{shortId}")
+    @PreAuthorize("isAuthenticated()")
+    fun getGrid(
+        @PathVariable shortId: String,
+    ): ResponseEntity<*> =
+        getGridUseCase
+            .execute(shortId)
             .toResponseEntity(HttpStatus.OK)
 }

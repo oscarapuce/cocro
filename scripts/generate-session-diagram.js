@@ -343,7 +343,7 @@ const bs = [
    'If the client misses it (hidden tab, micro-disconnect)\n' +
    'there\'s no retry — client silently falls behind.'],
   ['6. Angular GridEditor (Phase 4) pending',
-   'Grid creation UI is not yet implemented in cocro-angular.\n' +
+   'Grid creation UI is not yet implemented in cocro-web.\n' +
    'Users cannot create new grids through the frontend.\n' +
    'Only grids inserted via API/DB work end-to-end today.'],
 ];

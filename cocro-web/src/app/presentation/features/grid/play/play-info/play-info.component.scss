@@ -1,0 +1,90 @@
+.play-info {
+  &__enigme {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px dashed var(--color-border-soft);
+  }
+
+  &__chip {
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-forest);
+    background: var(--color-forest-tint);
+    padding: 1px 8px;
+    border-radius: 99px;
+    align-self: flex-start;
+  }
+
+  &__enigme-label {
+    font-family: var(--font-title);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-ink);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  &__enigme-lengths {
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    color: var(--color-ink-muted);
+    margin: 0;
+  }
+
+  &__clues {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  &__clue {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    & + & {
+      padding-top: var(--space-xs);
+      border-top: 1px dashed var(--color-border-soft);
+    }
+  }
+
+  &__clue-dir {
+    font-family: var(--font-ui);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-croco-strong);
+  }
+
+  &__clue-text {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    line-height: 1.45;
+  }
+
+  &__hint {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-ink-muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  &__description {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-ink-muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+}

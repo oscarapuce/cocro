@@ -4,6 +4,7 @@ import com.cocro.application.session.port.SessionRepository
 import com.cocro.infrastructure.persistence.mongo.session.document.SessionDocument
 import com.cocro.infrastructure.persistence.mongo.session.mapper.toDocument
 import com.cocro.infrastructure.persistence.mongo.session.mapper.toDomain
+import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.session.model.Session
 import com.cocro.domain.session.model.state.SessionGridState
 import com.cocro.domain.session.model.valueobject.SessionId
@@ -38,5 +39,15 @@ class MongoSessionRepositoryAdapter(
             Update().set("sessionGridState", gridState.toDocument()),
             SessionDocument::class.java,
         )
+    }
+
+    override fun findByCreator(authorId: UserId): List<Session> =
+        springDataRepo.findByAuthorId(authorId.toString()).map { it.toDomain() }
+
+    override fun findByParticipantUserId(userId: UserId): List<Session> =
+        springDataRepo.findByParticipantsUserId(userId.toString()).map { it.toDomain() }
+
+    override fun deleteById(sessionId: SessionId) {
+        springDataRepo.deleteById(sessionId.value.toString())
     }
 }

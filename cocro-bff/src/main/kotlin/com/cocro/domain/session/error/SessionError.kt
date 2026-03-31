@@ -137,4 +137,12 @@ sealed interface SessionError : CocroError {
     object ConcurrentModification : SessionError {
         override val errorCode = ErrorCode.SESSION_GRID_CONCURRENT_MODIFICATION
     }
+
+    data class NotCreator(
+        val userId: String,
+        val shareCode: String,
+    ) : SessionError {
+        override val errorCode = ErrorCode.SESSION_NOT_CREATOR
+        override fun context() = mapOf("userId" to userId, "shareCode" to shareCode)
+    }
 }

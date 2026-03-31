@@ -61,7 +61,13 @@ class UpdateSessionGridUseCases(
                     return CocroResult.Error(listOf(SessionError.SessionNotFound(sessionShareCode.toString())))
                 }
 
-        val currentState = sessionGridStateCache.get(session.id) ?: session.sessionGridState
+        val currentState = sessionGridStateCache.get(session.id)
+            ?: run {
+                // Redis key missing (restart or TTL expiry) — reinitialize from MongoDB state
+                logger.info("Redis key missing for session={}, reinitializing from MongoDB", session.shareCode.value)
+                sessionGridStateCache.initialize(session.id, session.sessionGridState)
+                session.sessionGridState
+            }
 
         // APPLY COMMAND
         val command = dto.toCommand(session.id, user.userId)

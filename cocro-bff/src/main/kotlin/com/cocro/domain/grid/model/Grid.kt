@@ -1,5 +1,6 @@
 package com.cocro.domain.grid.model
 
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.grid.model.valueobject.GridTitle
@@ -10,15 +11,18 @@ import java.util.UUID
 data class Grid(
     val id: UUID,
     val shortId: GridShareCode,
-    val title: GridTitle,
     val metadata: GridMetadata,
     val hashLetters: Long,
-    val width: GridWidth,
-    val height: GridHeight,
+    val dimension: GridDimension,
     val cells: List<Cell>,
     val createdAt: Instant,
     val updatedAt: Instant,
 ) {
+    // Helpers d'accès rapide (rétro-compat)
+    val title: GridTitle get() = metadata.title
+    val width: GridWidth get() = dimension.width
+    val height: GridHeight get() = dimension.height
+
     /**
      * Constructeur métier
      * Le hash des lettres est dérivé automatiquement
@@ -26,21 +30,17 @@ data class Grid(
     constructor(
         id: UUID,
         shortId: GridShareCode,
-        title: GridTitle,
         metadata: GridMetadata,
-        width: GridWidth,
-        height: GridHeight,
+        dimension: GridDimension,
         cells: List<Cell>,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = createdAt,
     ) : this(
         id = id,
         shortId = shortId,
-        title = title,
         metadata = metadata,
         hashLetters = computeLetterHash(cells),
-        width = width,
-        height = height,
+        dimension = dimension,
         cells = cells,
         createdAt = createdAt,
         updatedAt = updatedAt,
@@ -52,7 +52,7 @@ data class Grid(
                 .asSequence()
                 .filterIsInstance<Cell.LetterCell>()
                 .sortedWith(compareBy({ it.pos.y }, { it.pos.x }))
-                .map { it.letter.value }
+                .map { it.letter.value.value }
                 .joinToString(separator = "")
                 .hashCode()
                 .toLong()

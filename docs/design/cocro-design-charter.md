@@ -1,6 +1,6 @@
 # CoCro Design Charter
 
-Reference charter for agents and contributors working on the current CoCro frontend in `cocro-angular`.
+Reference charter for agents and contributors working on the current CoCro frontend in `cocro-web`.
 
 This document describes the design system that is actually implemented today. It is prescriptive: new UI work should reinforce this system instead of introducing a parallel one.
 
@@ -29,7 +29,7 @@ Most screens work because they contrast light paper panels against a single dark
 Primary actions should feel like printed cards being pushed on paper: hard shadows, small lift on hover, crisp edges.
 
 5. Stay inside the shared token system.
-Prefer tokens from [`_tokens.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/styles/_tokens.scss) before introducing ad hoc colors, radii, spacing, or shadows.
+Prefer tokens from [`_tokens.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/styles/_tokens.scss) before introducing ad hoc colors, radii, spacing, or shadows.
 
 6. Keep the design docs in sync.
 When a component, several components, or the overall system changes visually, update this charter and [`cocro-design-book.html`](/Users/oscar_mallet/Documents/cocro/docs/design/cocro-design-book.html) whenever the guidance or the visual references need to change.
@@ -83,7 +83,7 @@ Use the `--space-*` scale. Available values: `--space-2xs` (2px), `--space-xs` (
 
 ### Page Shell
 
-- Preserve the full-page paper background from [`styles.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/styles.scss).
+- Preserve the full-page paper background from [`styles.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/styles.scss).
 - Favor centered content columns with generous horizontal breathing room.
 - Use horizontal rules to segment major blocks.
 - Prefer two-panel compositions for landing and home.
@@ -108,7 +108,7 @@ Use the `--space-*` scale. Available values: `--space-2xs` (2px), `--space-xs` (
 
 ### Buttons
 
-Use [`button.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/presentation/shared/components/button/button.component.scss) as the source of truth.
+Use [`button.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/app/presentation/shared/components/button/button.component.scss) as the source of truth.
 
 - `primary`: forest fill, handwritten emphasis, hard shadow
 - `secondary`: light surface with dashed border and green shadow
@@ -121,7 +121,7 @@ Do not create screen-specific button aesthetics when an existing variant can be 
 
 ### Inputs
 
-Use [`input.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/presentation/shared/components/input/input.component.scss).
+Use [`input.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/app/presentation/shared/components/input/input.component.scss).
 
 - Labels are uppercase and compact
 - Input background stays light and paper-adjacent (`--color-input-bg`)
@@ -131,7 +131,7 @@ Prefer the shared `cocro-input` over native `input` when the field is part of st
 
 ### Cards
 
-Use [`card.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/presentation/shared/components/card/card.component.scss).
+Use [`card.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/app/presentation/shared/components/card/card.component.scss).
 
 - Dashed border
 - Short offset shadow
@@ -249,11 +249,11 @@ A frontend change is visually acceptable when:
 
 ## Reference Files
 
-- [`styles.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/styles.scss)
-- [`_tokens.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/styles/_tokens.scss)
-- [`_typography.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/styles/_typography.scss)
-- [`landing.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/presentation/features/landing/landing.component.scss)
-- [`button.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/presentation/shared/components/button/button.component.scss)
-- [`input.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/presentation/shared/components/input/input.component.scss)
-- [`card.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/presentation/shared/components/card/card.component.scss)
-- [`grid-editor.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.scss)
+- [`styles.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/styles.scss)
+- [`_tokens.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/styles/_tokens.scss)
+- [`_typography.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/styles/_typography.scss)
+- [`landing.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/app/presentation/features/landing/landing.component.scss)
+- [`button.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/app/presentation/shared/components/button/button.component.scss)
+- [`input.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/app/presentation/shared/components/input/input.component.scss)
+- [`card.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/app/presentation/shared/components/card/card.component.scss)
+- [`grid-editor.component.scss`](/Users/oscar_mallet/Documents/cocro/cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.scss)

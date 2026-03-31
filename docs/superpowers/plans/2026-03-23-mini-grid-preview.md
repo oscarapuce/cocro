@@ -14,19 +14,19 @@
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss` | Modify | Move `.letter-input__number` from top-right to top-left |
-| `cocro-angular/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.ts` | Create | Reactive component computing word preview from grid signals |
-| `cocro-angular/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.html` | Create | Option-A single-row layout template |
-| `cocro-angular/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.scss` | Create | Mini-cell styles matching crossword aesthetic |
-| `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts` | Modify | Import `GlobalCluePreviewComponent` |
-| `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html` | Modify | Add `<cocro-global-clue-preview>` above `<cocro-grid>` |
+| `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss` | Modify | Move `.letter-input__number` from top-right to top-left |
+| `cocro-web/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.ts` | Create | Reactive component computing word preview from grid signals |
+| `cocro-web/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.html` | Create | Option-A single-row layout template |
+| `cocro-web/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.scss` | Create | Mini-cell styles matching crossword aesthetic |
+| `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts` | Modify | Import `GlobalCluePreviewComponent` |
+| `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html` | Modify | Add `<cocro-global-clue-preview>` above `<cocro-grid>` |
 
 ---
 
 ### Task 1: Move cell number indicator to top-left
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss:10-20`
+- Modify: `cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss:10-20`
 
 - [ ] **Step 1: Apply the CSS change**
 
@@ -49,7 +49,7 @@ In `.letter-input__number`, remove `right: 2px`, replace with `left: 2px`, and c
 - [ ] **Step 2: Verify build**
 
 ```bash
-cd /Users/oscar_mallet/Documents/cocro/cocro-angular && npx ng build 2>&1 | tail -5
+cd /Users/oscar_mallet/Documents/cocro/cocro-web && npx ng build 2>&1 | tail -5
 ```
 
 Expected: `Build at: ... - Hash: ...` with 0 errors.
@@ -57,7 +57,7 @@ Expected: `Build at: ... - Hash: ...` with 0 errors.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss
+git add cocro-web/src/app/presentation/shared/grid/inputs/letter/letter-input.component.scss
 git commit -m "fix(ui): move cell number indicator to top-left"
 ```
 
@@ -66,9 +66,9 @@ git commit -m "fix(ui): move cell number indicator to top-left"
 ### Task 2: Create GlobalCluePreviewComponent
 
 **Files:**
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.ts`
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.html`
-- Create: `cocro-angular/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.scss`
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.ts`
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.html`
+- Create: `cocro-web/src/app/presentation/features/grid/editor/global-clue-preview/global-clue-preview.component.scss`
 
 **Context:**
 - `GridSelectorService.grid()` is a signal returning `Grid` — reactive, no subscription needed.
@@ -192,7 +192,7 @@ export class GlobalCluePreviewComponent {
 - [ ] **Step 4: Verify build (component alone, not yet integrated)**
 
 ```bash
-cd /Users/oscar_mallet/Documents/cocro/cocro-angular && npx ng build 2>&1 | tail -5
+cd /Users/oscar_mallet/Documents/cocro/cocro-web && npx ng build 2>&1 | tail -5
 ```
 
 Expected: 0 errors. If the component is not imported anywhere yet, the build still succeeds.
@@ -200,7 +200,7 @@ Expected: 0 errors. If the component is not imported anywhere yet, the build sti
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/features/grid/editor/global-clue-preview/
+git add cocro-web/src/app/presentation/features/grid/editor/global-clue-preview/
 git commit -m "feat(ui): add GlobalCluePreviewComponent for enigme globale mini-grid"
 ```
 
@@ -209,8 +209,8 @@ git commit -m "feat(ui): add GlobalCluePreviewComponent for enigme globale mini-
 ### Task 3: Integrate preview into grid editor
 
 **Files:**
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts`
-- Modify: `cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts`
+- Modify: `cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html`
 
 **Context:**
 - `showGlobalClue()` is a `signal<boolean>` on `GridEditorComponent` — the preview should only appear when the global clue panel is active.
@@ -260,7 +260,7 @@ In `grid-editor.component.html`, inside `<div class="grid-wrapper">`, add the pr
 - [ ] **Step 3: Verify build**
 
 ```bash
-cd /Users/oscar_mallet/Documents/cocro/cocro-angular && npx ng build 2>&1 | tail -5
+cd /Users/oscar_mallet/Documents/cocro/cocro-web && npx ng build 2>&1 | tail -5
 ```
 
 Expected: 0 errors.
@@ -268,7 +268,7 @@ Expected: 0 errors.
 - [ ] **Step 4: Smoke test in browser**
 
 ```bash
-cd /Users/oscar_mallet/Documents/cocro/cocro-angular && npx ng serve --port 4200
+cd /Users/oscar_mallet/Documents/cocro/cocro-web && npx ng serve --port 4200
 ```
 
 Manual verification:
@@ -281,7 +281,7 @@ Manual verification:
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts
-git add cocro-angular/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html
+git add cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.ts
+git add cocro-web/src/app/presentation/features/grid/editor/grid-editor/grid-editor.component.html
 git commit -m "feat(editor): integrate GlobalCluePreviewComponent above grid"
 ```

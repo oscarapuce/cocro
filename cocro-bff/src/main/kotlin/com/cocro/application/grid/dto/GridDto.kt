@@ -55,3 +55,45 @@ data class CellDto(
     val number: Int?,
     val clues: List<ClueDto>?,
 )
+
+data class GridSummaryDto(
+    val gridId: String,
+    val title: String,
+    val width: Int,
+    val height: Int,
+    val difficulty: String,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
+data class GridFullDto(
+    val gridId: String,
+    val title: String,
+    val width: Int,
+    val height: Int,
+    val difficulty: String,
+    val description: String?,
+    val reference: String?,
+    val author: String,
+    val cells: List<GridFullCellDto>,
+    val globalClue: GlobalClueDto?,
+)
+
+data class GridFullCellDto(
+    val x: Int,
+    val y: Int,
+    val type: CellType,
+    val letter: GridFullLetterDto?,
+    val clues: List<ClueDto>?,
+)
+
+data class GridFullLetterDto(
+    val value: String,
+    val separator: SeparatorType,
+    val number: Int?,
+)
+
+data class GlobalClueDto(
+    val label: String,
+    val wordLengths: List<Int>,
+)

@@ -18,7 +18,7 @@ class GuestLoginUseCase(
     fun execute(): AuthSuccess {
         val userId = UserId.new()
         val username = spiceNameGenerator.generate()
-        val token = tokenIssuer.issue(userId, setOf(Role.ANONYMOUS))
+        val token = tokenIssuer.issue(userId, username, setOf(Role.ANONYMOUS))
 
         logger.info("Guest account created: userId={} username={}", userId.value, username)
 

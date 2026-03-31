@@ -6,8 +6,10 @@ import com.cocro.domain.auth.enum.Role
 import com.cocro.domain.auth.model.AuthenticatedUser
 import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.common.CocroResult
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.Grid
 import com.cocro.domain.grid.model.GridMetadata
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.grid.model.valueobject.GridTitle
@@ -27,16 +29,14 @@ class GetMyGridsUseCaseTest {
     private fun gridFor(userId: UserId, shortId: String, title: String) = Grid(
         id = UUID.randomUUID(),
         shortId = GridShareCode(shortId),
-        title = GridTitle(title),
-        metadata = GridMetadata(author = userId, reference = null, description = null, difficulty = "NONE"),
-        width = GridWidth(5),
-        height = GridHeight(5),
+        metadata = GridMetadata(title = GridTitle(title), author = Author(id = userId, username = "Test"), reference = null, description = null, difficulty = "NONE"),
+        dimension = GridDimension(width = GridWidth(5), height = GridHeight(5)),
         cells = emptyList(),
     )
 
     @Test
     fun `should return empty list when user has no grids`() {
-        val user = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
+        val user = AuthenticatedUser(UserId.new(), "TestUser", setOf(Role.PLAYER))
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(user)
         whenever(gridRepository.findByAuthor(user.userId)).thenReturn(emptyList())
 
@@ -48,10 +48,10 @@ class GetMyGridsUseCaseTest {
 
     @Test
     fun `should return grids belonging to the authenticated user`() {
-        val user = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
+        val user = AuthenticatedUser(UserId.new(), "TestUser", setOf(Role.PLAYER))
         val grids = listOf(
-            gridFor(user.userId, "ABCDE1", "Grid One"),
-            gridFor(user.userId, "ABCDE2", "Grid Two"),
+            gridFor(user.userId, "ABCDE1", "Grid One Title"),
+            gridFor(user.userId, "ABCDE2", "Grid Two Title"),
         )
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(user)
         whenever(gridRepository.findByAuthor(user.userId)).thenReturn(grids)
@@ -62,14 +62,14 @@ class GetMyGridsUseCaseTest {
         val summaries = (result as CocroResult.Success).value
         assertThat(summaries).hasSize(2)
         assertThat(summaries.map { it.gridId }).containsExactly("ABCDE1", "ABCDE2")
-        assertThat(summaries.map { it.title }).containsExactly("Grid One", "Grid Two")
+        assertThat(summaries.map { it.title }).containsExactly("Grid One Title", "Grid Two Title")
     }
 
     @Test
     fun `should only return grids for the current user`() {
-        val currentUser = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
+        val currentUser = AuthenticatedUser(UserId.new(), "TestUser", setOf(Role.PLAYER))
         val otherUserId = UserId.new()
-        val currentUserGrid = gridFor(currentUser.userId, "MINE01", "My Grid")
+        val currentUserGrid = gridFor(currentUser.userId, "MINE01", "My Grid Title")
         // The repository is queried with currentUser.userId, so otherUser grids are never returned.
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(currentUser)
         whenever(gridRepository.findByAuthor(currentUser.userId)).thenReturn(listOf(currentUserGrid))

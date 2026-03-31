@@ -15,11 +15,13 @@ import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.Session
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.session.model.state.GridCheckResult
 import com.cocro.domain.session.model.state.SessionGridState
 import com.cocro.domain.session.model.valueobject.SessionShareCode
 import com.cocro.domain.grid.model.Grid
 import com.cocro.domain.grid.model.GridMetadata
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridTitle
 import com.cocro.domain.grid.model.valueobject.GridWidth
@@ -43,9 +45,9 @@ class CheckGridUseCaseTest {
 
     private val useCase = CheckGridUseCase(currentUserProvider, sessionRepository, sessionGridStateCache, gridRepository, sessionNotifier)
 
-    private val creatorId = UserId.new()
+    private val author = Author(id = UserId.new(), username = "Test")
     private val participantId = UserId.new()
-    private val participantUser = AuthenticatedUser(participantId, setOf(Role.PLAYER))
+    private val participantUser = AuthenticatedUser(participantId, "Participant", setOf(Role.PLAYER))
     private val shareCode = SessionShareCode("AB12")
     private val gridId = GridShareCode("GRID01")
 
@@ -53,12 +55,12 @@ class CheckGridUseCaseTest {
         shortId = gridId,
         title = "T", width = 5, height = 5,
         difficulty = null, author = null, reference = null,
-        description = null, globalClueLabel = null,
-        globalClueWordLengths = null, cells = emptyList(),
+        description = null, globalClueLabel = null, globalClueWordLengths = null,
+        cells = emptyList(),
     )
 
     private fun baseSession() = Session.create(
-        creatorId = creatorId,
+        author = Author(id = author.id, username = "TestCreator"),
         shareCode = shareCode,
         gridId = gridId,
         gridTemplate = minimalSnapshot(),
@@ -69,7 +71,7 @@ class CheckGridUseCaseTest {
         Session.rehydrate(
             id = base.id,
             shareCode = shareCode,
-            creatorId = creatorId,
+            author = Author(id = author.id, username = "TestCreator"),
             gridId = gridId,
             status = SessionStatus.PLAYING,
             participants = base.join(participantId).participants,
@@ -83,25 +85,24 @@ class CheckGridUseCaseTest {
     private val referenceGrid = Grid(
         id = UUID.randomUUID(),
         shortId = gridId,
-        title = GridTitle("Test Grid"),
         metadata = GridMetadata(
-            author = creatorId,
+            title = GridTitle("Test Grid"),
+            author = Author(id = author.id, username = "TestCreator"),
             reference = null,
             description = null,
             difficulty = "NONE",
         ),
-        width = GridWidth(5),
-        height = GridHeight(5),
+        dimension = GridDimension(width = GridWidth(5), height = GridHeight(5)),
         cells = emptyList(),
     )
 
     private fun buildPlayingSession(): Session {
-        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
+        val base = Session.create(author = Author(id = author.id, username = "TestCreator"), shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         val withParticipant = base.join(participantId)
         return Session.rehydrate(
             id = base.id,
             shareCode = base.shareCode,
-            creatorId = base.creatorId,
+            author = base.author,
             gridId = base.gridId,
             status = SessionStatus.PLAYING,
             participants = withParticipant.participants,
@@ -139,6 +140,7 @@ class CheckGridUseCaseTest {
             SessionEvent.GridChecked(
                 userId = participantId.toString(),
                 isComplete = true,
+                isCorrect = true,
                 correctCount = 0,
                 totalCount = 0,
             ),
@@ -217,7 +219,7 @@ class CheckGridUseCaseTest {
     @Test
     fun `should return UserNotParticipant when user is not in the session`() {
         // given
-        val outsider = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
+        val outsider = AuthenticatedUser(UserId.new(), "TestUser", setOf(Role.PLAYER))
         val session = buildPlayingSession()
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(outsider)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
@@ -234,13 +236,13 @@ class CheckGridUseCaseTest {
     @Test
     fun `should return InvalidStatusForAction when session is not PLAYING`() {
         // given
-        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
+        val base = Session.create(author = Author(id = author.id, username = "TestCreator"), shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         val withParticipant = base.join(participantId)
         // Session in ENDED status (not PLAYING, so InvalidStatusForAction is expected)
         val endedSession = Session.rehydrate(
             id = base.id,
             shareCode = base.shareCode,
-            creatorId = base.creatorId,
+            author = base.author,
             gridId = base.gridId,
             status = SessionStatus.ENDED,
             participants = withParticipant.participants,

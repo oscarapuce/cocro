@@ -28,4 +28,7 @@ interface SessionGridStateCache {
 
     /** All session IDs currently tracked in cache. */
     fun getActiveSessions(): Set<SessionId>
+
+    /** Remove the session from the active set (called when session is ended/interrupted). */
+    fun deactivate(sessionId: SessionId)
 }

@@ -11,7 +11,7 @@ The current `GlobalClue` model stores explicit cell number sequences per word (`
 
 - `cocro-shared`: domain model, new error types, new ErrorCode entries
 - `cocro-bff`: DTOs, persistence documents, mappers, validation engine
-- `cocro-angular`: domain model, DTO, GlobalClueEditor component
+- `cocro-web`: domain model, DTO, GlobalClueEditor component
 
 No data migration needed — `globalClueWords` is `null` for all existing grids in MongoDB.
 
@@ -51,7 +51,7 @@ data class GridMetadataDocument(
 val globalClueWordLengths: List<Int>? = null  // was: globalClueWords: List<List<Int>>?
 ```
 
-### cocro-angular — `grid.model.ts`
+### cocro-web — `grid.model.ts`
 
 ```ts
 export interface GlobalClue {
@@ -60,7 +60,7 @@ export interface GlobalClue {
 }
 ```
 
-### cocro-angular — `grid.dto.ts`
+### cocro-web — `grid.dto.ts`
 
 ```ts
 // In SubmitGridRequest and PatchGridRequest:

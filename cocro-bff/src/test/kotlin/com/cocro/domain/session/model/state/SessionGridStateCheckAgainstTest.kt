@@ -4,8 +4,10 @@ import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.grid.model.Cell
 import com.cocro.domain.grid.model.CellPos
 import com.cocro.domain.grid.model.Grid
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.GridMetadata
 import com.cocro.domain.grid.model.Letter
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.grid.model.valueobject.GridTitle
@@ -28,15 +30,13 @@ class SessionGridStateCheckAgainstTest {
     private fun buildGrid(cells: List<Cell>): Grid = Grid(
         id = UUID.randomUUID(),
         shortId = gridShareCode,
-        title = GridTitle("Test Grid"),
         metadata = GridMetadata(
-            author = UserId.new(),
+            title = GridTitle("Test Grid"), author = Author(id = UserId.new(), username = "Test"),
             reference = null,
             description = null,
             difficulty = "NONE",
         ),
-        width = GridWidth(5),
-        height = GridHeight(5),
+        dimension = GridDimension(width = GridWidth(5), height = GridHeight(5)),
         cells = cells,
     )
 

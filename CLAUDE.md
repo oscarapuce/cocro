@@ -62,12 +62,12 @@ Business operations return `CocroResult<T, E>` (a sealed `Success`/`Error` type 
 - **Spring Security**: JWT resource server + channel interceptor for WebSocket auth.
 - **Dev credentials** (`.env`): `MONGO_USER=admin`, `MONGO_PASSWORD=admin`, `REDIS_PASSWORD=redispass`
 
-### Angular Frontend (cocro-angular)
+### Angular Frontend (cocro-web)
 
 Angular 20 standalone + Signals app with DDD 4-folder architecture:
 
 ```
-cocro-angular/src/app/
+cocro-web/src/app/
 ├── domain/         — models, rules, services (pure functions, no Angular deps)
 ├── application/    — services (GridSelectorService), ports
 ├── infrastructure/ — adapters (HTTP services), auth, guards, DTOs
@@ -75,8 +75,8 @@ cocro-angular/src/app/
 ```
 
 - TSConfig path aliases: `@domain/*`, `@application/*`, `@infrastructure/*`, `@presentation/*`
-- Build: `cd cocro-angular && npx ng build`
-- Dev: `cd cocro-angular && npx ng serve` (port 4200)
+- Build: `cd cocro-web && npx ng build`
+- Dev: `cd cocro-web && npx ng serve` (port 4200)
 - Design: "L'Atelier du Cruciverbiste" — beige/paper + forest green, Séyès notebook style
 
 ## Roadmap & Backlog

@@ -12,8 +12,10 @@ import com.cocro.domain.auth.model.AuthenticatedUser
 import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.common.CocroResult
 import com.cocro.domain.grid.model.Grid
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.GridMetadata
 import com.cocro.domain.grid.model.GridTemplateSnapshot
+import com.cocro.domain.grid.model.valueobject.GridDimension
 import com.cocro.domain.grid.model.valueobject.GridHeight
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.grid.model.valueobject.GridTitle
@@ -45,7 +47,7 @@ class CreateSessionUseCaseTest {
         gridRepository,
     )
 
-    private val authenticatedUser = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
+    private val authenticatedUser = AuthenticatedUser(UserId.new(), "TestUser", setOf(Role.PLAYER))
 
     @Test
     fun `should return SessionCreationSuccess on valid input`() {
@@ -56,20 +58,18 @@ class CreateSessionUseCaseTest {
         val grid = Grid(
             id = UUID.randomUUID(),
             shortId = gridId,
-            title = GridTitle("Test Grid"),
-            metadata = GridMetadata(author = authenticatedUser.userId, reference = null, description = null, difficulty = "NONE"),
-            width = GridWidth(5),
-            height = GridHeight(5),
+            metadata = GridMetadata(title = GridTitle("Test Grid"), author = Author(id = authenticatedUser.userId, username = "TestUser"), reference = null, description = null, difficulty = "NONE"),
+            dimension = GridDimension(width = GridWidth(5), height = GridHeight(5)),
             cells = emptyList(),
         )
         val snapshot = GridTemplateSnapshot(
             shortId = gridId, title = "T", width = 5, height = 5,
             difficulty = null, author = null, reference = null,
-            description = null, globalClueLabel = null,
-            globalClueWordLengths = null, cells = emptyList(),
+            description = null, globalClueLabel = null, globalClueWordLengths = null,
+            cells = emptyList(),
         )
         val session = Session.create(
-            creatorId = authenticatedUser.userId,
+            author = Author(id = authenticatedUser.userId, username = "TestCreator"),
             shareCode = shareCode,
             gridId = gridId,
             gridTemplate = snapshot,

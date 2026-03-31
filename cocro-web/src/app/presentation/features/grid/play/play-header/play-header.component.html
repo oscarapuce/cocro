@@ -1,0 +1,19 @@
+<div class="play-header">
+  <div class="play-header__left">
+    <h2 class="play-header__title">{{ title() }}</h2>
+    @if (reference()) {
+      <span class="play-header__reference">Réf. {{ reference() }}</span>
+    }
+    @if (difficulty() && difficulty() !== 'NONE') {
+      <span class="play-header__difficulty">★ {{ difficulty() }}</span>
+    }
+  </div>
+
+  <div class="play-header__right">
+    <div class="play-header__players">
+      <span class="play-header__dot" [class.play-header__dot--online]="connected()"></span>
+      <span>{{ participantCount() }} joueur{{ participantCount() > 1 ? 's' : '' }}</span>
+    </div>
+    <cocro-button variant="ghost" size="sm" (click)="onLeave()">Quitter</cocro-button>
+  </div>
+</div>

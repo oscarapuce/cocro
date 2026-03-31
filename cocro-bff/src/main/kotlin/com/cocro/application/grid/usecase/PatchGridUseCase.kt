@@ -35,7 +35,7 @@ class PatchGridUseCase(
                     return CocroResult.Error(listOf(GridError.GridNotFound(dto.gridId)))
                 }
         val user = currentUserProvider.currentUserOrNull()
-        if (user == null || (previousGrid.metadata.author != user.userId && !user.isAdmin())) {
+        if (user == null || (previousGrid.metadata.author.id != user.userId && !user.isAdmin())) {
             logger.warn("Grid patch rejected: unauthorized modification of grid {} by user {}", dto.gridId, user?.userId() ?: "anonymous")
             return CocroResult.Error(listOf(GridError.UnauthorizedGridModification(dto.gridId)))
         }

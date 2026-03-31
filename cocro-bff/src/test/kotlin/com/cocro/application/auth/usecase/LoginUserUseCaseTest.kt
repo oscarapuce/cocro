@@ -40,7 +40,7 @@ class LoginUserUseCaseTest {
         val dto = LoginUserCommandDto(username = "validUser", password = "Secure1!")
         whenever(userRepository.findByUsername(Username("validUser"))).thenReturn(existingUser)
         whenever(passwordHasher.matches("Secure1!", existingUser.passwordHash)).thenReturn(true)
-        whenever(tokenIssuer.issue(existingUser.id, existingUser.roles)).thenReturn("jwt-token")
+        whenever(tokenIssuer.issue(existingUser.id, existingUser.username.value, existingUser.roles)).thenReturn("jwt-token")
 
         // when
         val result = useCase.execute(dto)

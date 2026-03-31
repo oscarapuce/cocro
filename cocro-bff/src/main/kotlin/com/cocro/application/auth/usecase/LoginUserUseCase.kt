@@ -54,6 +54,7 @@ class LoginUserUseCase(
         val token =
             tokenIssuer.issue(
                 userId = user.id,
+                username = user.username.value,
                 roles = user.roles,
             )
 

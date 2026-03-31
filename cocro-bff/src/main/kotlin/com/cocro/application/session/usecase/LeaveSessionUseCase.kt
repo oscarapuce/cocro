@@ -74,6 +74,7 @@ class LeaveSessionUseCase(
         if (activeCount == 0 && updatedSession.status == SessionStatus.PLAYING) {
             val interrupted = updatedSession.interrupt()
             sessionRepository.save(interrupted)
+            sessionGridStateCache.deactivate(session.id)
             sessionNotifier.broadcast(
                 interrupted.shareCode,
                 SessionEvent.SessionInterrupted(shareCode = interrupted.shareCode.value),

@@ -24,6 +24,7 @@ class JwtTokenAuthenticationService(
 
             AuthenticatedUser(
                 userId = UserId.from(jwt.subject),
+                username = jwt.getClaimAsString("username") ?: "",
                 roles = roles,
             )
         } catch (e: Exception) {

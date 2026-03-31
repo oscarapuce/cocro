@@ -12,6 +12,7 @@ import com.cocro.domain.grid.model.GridTemplateSnapshot
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.Session
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.session.model.valueobject.SessionShareCode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -29,16 +30,15 @@ class SynchroniseSessionUseCaseTest {
     private val useCase = SynchroniseSessionUseCase(currentUserProvider, sessionRepository, sessionGridStateCache)
 
     private val userId = UserId.new()
-    private val user = AuthenticatedUser(userId, setOf(Role.PLAYER))
+    private val user = AuthenticatedUser(userId, "TestUser", setOf(Role.PLAYER))
     private val shareCode = SessionShareCode("AB12")
     private val gridId = GridShareCode("GRID01")
     private val template = GridTemplateSnapshot(
         shortId = gridId, title = "T", width = 5, height = 5,
         difficulty = null, author = null, reference = null,
-        description = null, globalClueLabel = null,
-        globalClueWordLengths = null, cells = emptyList(),
+        description = null, globalClueLabel = null, globalClueWordLengths = null, cells = emptyList(),
     )
-    private val session = Session.create(creatorId = UserId.new(), shareCode = shareCode, gridId = gridId, gridTemplate = template)
+    private val session = Session.create(author = Author(id = UserId.new(), username = "TestUser"), shareCode = shareCode, gridId = gridId, gridTemplate = template)
         .join(userId)
 
     @Test
@@ -68,7 +68,7 @@ class SynchroniseSessionUseCaseTest {
 
     @Test
     fun `should return UserNotParticipant when caller is not in session`() {
-        val outsider = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
+        val outsider = AuthenticatedUser(UserId.new(), "TestUser", setOf(Role.PLAYER))
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(outsider)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
 

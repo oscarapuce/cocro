@@ -74,14 +74,14 @@ Events are defined as sealed `SessionEvent` in the BFF application layer, serial
 
 | Event type | Direction | Topic | Trigger |
 |-----------|-----------|-------|---------|
-| `SessionWelcome` | private | `/user/queue/session` | Client subscribes to `/app/session/{code}/welcome` |
+| `SessionWelcome` | private | `/app/session/{code}/welcome` (sync reply via `@SubscribeMapping`) | Client subscribes to `/app/session/{code}/welcome` |
 | `ParticipantJoined` | broadcast | `/topic/session/{code}` | Successful `JoinSessionUseCase` |
 | `ParticipantLeft` | broadcast | `/topic/session/{code}` | `LeaveSessionUseCase` (manual or timeout) |
 | `GridUpdated` | broadcast | `/topic/session/{code}` | Grid cell update via WebSocket command |
 | `GridChecked` | broadcast | `/topic/session/{code}` | `CheckGridUseCase` |
 | `SessionEnded` | broadcast | `/topic/session/{code}` | `CheckGridUseCase` when grid is complete+correct |
 | `SessionInterrupted` | broadcast | `/topic/session/{code}` | Last participant left (explicit or timeout) |
-| `SyncRequired` | private | `/user/queue/session` | CAS conflict on grid update — **defined but not yet sent** |
+| `SyncRequired` | private | `/user/queue/session` | CAS conflict on grid update (`UpdateSessionGridUseCases`) |
 
 ### SessionWelcome Pattern
 
@@ -111,7 +111,15 @@ sealed interface SessionEvent {
 
 ### Client obligations
 
-Clients must send a heartbeat message to `/app/session/{code}/heartbeat` at least every **30 seconds** to stay in `active` state.
+Clients must send a heartbeat message to `/app/session/{code}/heartbeat` at least every **20 seconds** to stay in `active` state. The server grace period is **30 seconds**.
+
+The Angular frontend sends heartbeats automatically via `SessionStompAdapter.startHeartbeat()` using a 20s `setInterval` started on STOMP connect. The BFF handler is `SessionWebSocketController.handleHeartbeat()`.
+
+### Disconnect detection
+
+The server detects client disconnections via two mechanisms:
+1. **STOMP disconnect event** (`StompSessionEventListener`): when the WebSocket closes, the user is immediately moved to "away" status.
+2. **Missing heartbeat**: if no heartbeat arrives within the 30s grace period (after a STOMP disconnect), `HeartbeatTimeoutScheduler` evicts the user.
 
 ### Server-side flow
 

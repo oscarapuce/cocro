@@ -13,6 +13,7 @@ import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.Session
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.session.model.state.SessionGridCellState
 import com.cocro.domain.session.model.valueobject.SessionShareCode
 import org.assertj.core.api.Assertions.assertThat
@@ -33,7 +34,7 @@ class GetSessionStateUseCaseTest {
         sessionGridStateCache,
     )
 
-    private val creatorId = UserId.new()
+    private val author = Author(id = UserId.new(), username = "Test")
     private val participantId = UserId.new()
     private val shareCode = SessionShareCode("AB12")
     private val gridId = GridShareCode("GRID01")
@@ -41,15 +42,14 @@ class GetSessionStateUseCaseTest {
     private fun minimalSnapshot() = GridTemplateSnapshot(
         shortId = gridId, title = "T", width = 5, height = 5,
         difficulty = null, author = null, reference = null,
-        description = null, globalClueLabel = null,
-        globalClueWordLengths = null, cells = emptyList(),
+        description = null, globalClueLabel = null, globalClueWordLengths = null, cells = emptyList(),
     )
 
     private fun buildPlayingSessionWithParticipant(): Session {
-        val base = Session.create(creatorId = creatorId, shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
+        val base = Session.create(author = Author(id = author.id, username = "TestCreator"), shareCode = shareCode, gridId = gridId, gridTemplate = minimalSnapshot())
         val withParticipant = base.join(participantId)
         return Session.rehydrate(
-            id = base.id, shareCode = base.shareCode, creatorId = base.creatorId,
+            id = base.id, shareCode = base.shareCode, author = base.author,
             gridId = base.gridId, status = SessionStatus.PLAYING,
             participants = withParticipant.participants,
             sessionGridState = base.sessionGridState,
@@ -60,7 +60,7 @@ class GetSessionStateUseCaseTest {
     @Test
     fun `should return session state from cache when available`() {
         // given
-        val user = AuthenticatedUser(participantId, setOf(Role.PLAYER))
+        val user = AuthenticatedUser(participantId, "Participant", setOf(Role.PLAYER))
         val session = buildPlayingSessionWithParticipant()
         val cachedState = session.sessionGridState.copy(
             cells = mapOf(CellPos(0, 0) to SessionGridCellState.Letter('A')),
@@ -84,7 +84,7 @@ class GetSessionStateUseCaseTest {
     @Test
     fun `should fall back to embedded state when cache miss`() {
         // given
-        val user = AuthenticatedUser(participantId, setOf(Role.PLAYER))
+        val user = AuthenticatedUser(participantId, "Participant", setOf(Role.PLAYER))
         val session = buildPlayingSessionWithParticipant()
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(user)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
@@ -118,7 +118,7 @@ class GetSessionStateUseCaseTest {
     @Test
     fun `should return InvalidShareCode when shareCode format is invalid`() {
         // given
-        val user = AuthenticatedUser(participantId, setOf(Role.PLAYER))
+        val user = AuthenticatedUser(participantId, "Participant", setOf(Role.PLAYER))
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(user)
 
         // when
@@ -134,7 +134,7 @@ class GetSessionStateUseCaseTest {
     @Test
     fun `should return SessionNotFound when session does not exist`() {
         // given
-        val user = AuthenticatedUser(participantId, setOf(Role.PLAYER))
+        val user = AuthenticatedUser(participantId, "Participant", setOf(Role.PLAYER))
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(user)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(null)
 
@@ -151,7 +151,7 @@ class GetSessionStateUseCaseTest {
     fun `should return UserNotParticipant when user is not a joined participant`() {
         // given
         val outsiderId = UserId.new()
-        val user = AuthenticatedUser(outsiderId, setOf(Role.PLAYER))
+        val user = AuthenticatedUser(outsiderId, "Outsider", setOf(Role.PLAYER))
         val session = buildPlayingSessionWithParticipant()
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(user)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)

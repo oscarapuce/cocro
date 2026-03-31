@@ -32,7 +32,7 @@ class SubmitGridUseCaseTest {
         gridIdGenerator,
     )
 
-    private val authenticatedUser = AuthenticatedUser(UserId.new(), setOf(Role.PLAYER))
+    private val authenticatedUser = AuthenticatedUser(UserId.new(), "TestUser", setOf(Role.PLAYER))
 
     private fun validDto(): SubmitGridDto {
         val w = 5

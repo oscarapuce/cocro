@@ -5,6 +5,7 @@ import com.cocro.domain.auth.model.valueobject.UserId
 
 data class AuthenticatedUser(
     val userId: UserId,
+    val username: String,
     val roles: Set<Role>,
 ) : CocroUser {
     override fun userId(): String = userId.toString()

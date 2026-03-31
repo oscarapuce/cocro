@@ -15,6 +15,7 @@ import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.Session
+import com.cocro.domain.common.model.Author
 import com.cocro.domain.session.model.valueobject.SessionShareCode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -35,20 +36,19 @@ class JoinSessionUseCaseTest {
 
     private val useCase = JoinSessionUseCase(currentUserProvider, sessionRepository, sessionGridStateCache, sessionNotifier, heartbeatTracker)
 
-    private val creatorId = UserId.new()
+    private val author = Author(id = UserId.new(), username = "Test")
     private val joiningUserId = UserId.new()
-    private val joiningUser = AuthenticatedUser(joiningUserId, setOf(Role.PLAYER))
+    private val joiningUser = AuthenticatedUser(joiningUserId, "JoiningUser", setOf(Role.PLAYER))
     private val shareCode = SessionShareCode("AB12")
     private val gridId = GridShareCode("GRID01")
     private val session = Session.create(
-        creatorId = creatorId,
+        author = Author(id = author.id, username = "TestCreator"),
         shareCode = shareCode,
         gridId = gridId,
         gridTemplate = GridTemplateSnapshot(
             shortId = gridId, title = "T", width = 5, height = 5,
             difficulty = null, author = null, reference = null,
-            description = null, globalClueLabel = null,
-            globalClueWordLengths = null, cells = emptyList(),
+            description = null, globalClueLabel = null, globalClueWordLengths = null, cells = emptyList(),
         ),
     )
 
@@ -126,9 +126,9 @@ class JoinSessionUseCaseTest {
     @Test
     fun `should return SessionFullDto when active participant joins again (idempotent)`() {
         // given — creator has already joined the session
-        val sessionWithCreator = session.join(creatorId)
+        val sessionWithCreator = session.join(author.id)
         val dto = JoinSessionDto(shareCode = "AB12")
-        val creatorUser = AuthenticatedUser(creatorId, setOf(Role.PLAYER))
+        val creatorUser = AuthenticatedUser(author.id, "TestCreator", setOf(Role.PLAYER))
         whenever(currentUserProvider.currentUserOrNull()).thenReturn(creatorUser)
         whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(sessionWithCreator)
         whenever(sessionGridStateCache.get(sessionWithCreator.id)).thenReturn(null)
@@ -166,7 +166,7 @@ class JoinSessionUseCaseTest {
         val endedSession = Session.rehydrate(
             id = session.id,
             shareCode = session.shareCode,
-            creatorId = session.creatorId,
+            author = session.author,
             gridId = session.gridId,
             status = SessionStatus.ENDED,
             participants = session.participants,
@@ -194,7 +194,7 @@ class JoinSessionUseCaseTest {
         val interruptedSession = Session.rehydrate(
             id = sessionWithLeft.id,
             shareCode = sessionWithLeft.shareCode,
-            creatorId = sessionWithLeft.creatorId,
+            author = sessionWithLeft.author,
             gridId = sessionWithLeft.gridId,
             status = SessionStatus.INTERRUPTED,
             participants = sessionWithLeft.participants,
