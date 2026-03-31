@@ -14,16 +14,17 @@ participant "GridController\n/api/grids"     as GRID
 participant "SessionController\n/api/sessions" as SC
 participant "SessionWebSocketController\n/ws (STOMP)" as WSC
 participant "StompAuthChannelInterceptor"    as INT
+participant "StompSessionEventListener"      as EVT
 participant "Use Cases"                      as UC
 participant "MongoDB"                        as DB
-participant "Redis\n(grid state cache)"      as REDIS
+participant "Redis\n(grid state cache\n+ heartbeat)"  as REDIS
 
 ' ============================================================
 ' 1. AUTHENTICATION
 ' ============================================================
 == Authentication ==
 
-C  -> AUTH : POST /auth/register\n{ username, password }
+C  -> AUTH : POST /auth/register\n{ username, password, email? }
 AUTH -> DB  : save User
 AUTH --> C  : 201 { token, userId, username, roles }
 
@@ -31,9 +32,9 @@ C  -> AUTH : POST /auth/login\n{ username, password }
 AUTH -> DB  : load + verify password
 AUTH --> C  : 200 { token, userId, username, roles }
 
-C  -> AUTH : POST /auth/guest
-AUTH -> DB  : create anonymous User\n(generated username, ANONYMOUS role)
-AUTH --> C  : 201 { token, userId, username, roles }
+C  -> AUTH : POST /auth/guest\n(no body)
+AUTH -> AUTH : generate SpiceName username\n+ UserId + ANONYMOUS role
+AUTH --> C  : 200 { token, userId, username, roles: ["ANONYMOUS"] }
 
 note right of C
   All subsequent REST calls include:
@@ -45,15 +46,33 @@ end note
 ' ============================================================
 == Grid Management ==
 
-C  -> SEC  : POST /api/grids\n{ gridShareCode, sizeX, sizeY, cells, clues }
-SEC -> GRID : authenticated
-GRID -> DB  : persist Grid
-GRID --> C  : 200 { gridId }
+C  -> SEC  : POST /api/grids\n{ title, width, height, difficulty?,\n  reference?, description?,\n  cells[], globalClueLabel?,\n  globalClueWordLengths? }
+SEC -> GRID : authenticated (PLAYER, ADMIN)
+GRID -> UC  : SubmitGridUseCase
+UC -> DB   : persist Grid\n(shortId generated server-side,\nauthor = { userId, username })
+UC --> GRID : GridShareCode (shortId)
+GRID --> C  : 201 "<shortId>"
 
-C  -> SEC  : PATCH /api/grids\n{ gridShareCode, cells, clues }
-SEC -> GRID : authenticated
-GRID -> DB  : update Grid
-GRID --> C  : 200
+C  -> SEC  : PATCH /api/grids\n{ gridId, title?, width?, height?,\n  difficulty?, reference?, description?,\n  cells[]?, globalClueLabel?,\n  globalClueWordLengths? }
+SEC -> GRID : authenticated (PLAYER, ADMIN)
+GRID -> UC  : PatchGridUseCase
+UC -> DB   : update Grid (partial patch)
+UC --> GRID : GridShareCode
+GRID --> C  : 200 "<shortId>"
+
+C  -> SEC  : GET /api/grids/mine
+SEC -> GRID : authenticated (PLAYER, ADMIN)
+GRID -> UC  : GetMyGridsUseCase
+UC -> DB   : find grids by current user
+UC --> GRID : List<GridSummaryDto>
+GRID --> C  : 200 [{ gridId, title, width, height,\n  difficulty, createdAt, updatedAt }]
+
+C  -> SEC  : GET /api/grids/{shortId}
+SEC -> GRID : authenticated (any role)
+GRID -> UC  : GetGridUseCase
+UC -> DB   : find grid by shortId
+UC --> GRID : GridFullDto
+GRID --> C  : 200 { gridId, title, width, height,\n  difficulty, description?, reference?,\n  author, cells[], globalClue? }
 
 ' ============================================================
 ' 3. SESSION LIFECYCLE — REST
@@ -61,9 +80,9 @@ GRID --> C  : 200
 == Session Lifecycle (REST) ==
 
 C  -> SEC  : POST /api/sessions\n{ gridId }
-SEC -> SC  : authenticated
+SEC -> SC  : authenticated (PLAYER, ADMIN)
 SC -> UC   : CreateSessionUseCase
-UC -> DB   : persist Session (status=PLAYING, participants=[])
+UC -> DB   : persist Session\n(status=PLAYING, participants=[],\nauthor = { userId, username })
 UC -> REDIS: init SessionGridState cache
 UC --> SC  : SessionCreationSuccess
 SC --> C   : 201 { sessionId, shareCode }
@@ -74,41 +93,57 @@ note right of C
 end note
 
 C  -> SEC  : POST /api/sessions/join\n{ shareCode }
-SEC -> SC  : authenticated
+SEC -> SC  : authenticated (PLAYER, ADMIN, ANONYMOUS)
 SC -> UC   : JoinSessionUseCase
 UC -> DB   : add/update Participant (status=JOINED)
+UC -> REDIS: register heartbeat (userId → sessionId)
 UC --> SC  : SessionFullDto
 SC --> C   : 200 { sessionId, shareCode, status,\n  participantCount, topicToSubscribe,\n  gridTemplate, gridRevision, cells[] }\nor 409 SessionFull / AlreadyParticipant\nor 400 InvalidStatusForAction (ENDED)
 
 C  -> SEC  : POST /api/sessions/leave\n{ shareCode }
-SEC -> SC  : authenticated
+SEC -> SC  : authenticated (PLAYER, ADMIN, ANONYMOUS)
 SC -> UC   : LeaveSessionUseCase
 UC -> DB   : set Participant.status = LEFT\n[if last participant → Session.interrupt()]
+UC -> REDIS: remove heartbeat tracking
 UC --> SC  : Success
 SC --> C   : 200
 
 C  -> SEC  : GET /api/sessions/{shareCode}/state
-SEC -> SC  : authenticated
+SEC -> SC  : authenticated (PLAYER, ADMIN, ANONYMOUS)
 SC -> UC   : GetSessionStateUseCase
 UC -> REDIS: get cached SessionGridState\n(fallback → MongoDB)
-UC --> SC  : SessionGridStateDto
-SC --> C   : 200 { revision, cells[] }
+UC --> SC  : SessionStateDto
+SC --> C   : 200 { sessionId, shareCode,\n  revision, cells[] }
 
 C  -> SEC  : POST /api/sessions/{shareCode}/sync
-SEC -> SC  : authenticated (JOINED participant only)
+SEC -> SC  : authenticated (PLAYER, ADMIN, ANONYMOUS)
 SC -> UC   : SynchroniseSessionUseCase
 UC -> REDIS: flush to MongoDB
 UC --> SC  : SessionFullDto
-SC --> C   : 200 { sessionId, shareCode, status,\n  participantCount, gridTemplate,\n  gridRevision, cells[] }
+SC --> C   : 200 { sessionId, shareCode, status,\n  participantCount, topicToSubscribe,\n  gridTemplate, gridRevision, cells[] }
 
 C  -> SEC  : POST /api/sessions/{shareCode}/check
-SEC -> SC  : authenticated (JOINED participant)
+SEC -> SC  : authenticated (PLAYER, ADMIN, ANONYMOUS)
 SC -> UC   : CheckGridUseCase
 UC -> REDIS: flush + compare against reference Grid
 UC -> WSC  : broadcast GridChecked
 UC -> UC   : if isComplete && isCorrect:\n  Session.end() → broadcast SessionEnded
 UC --> SC  : GridCheckSuccess
-SC --> C   : 200 { isComplete, isCorrect,\n  filledCount, totalCount }
+SC --> C   : 200 { shareCode, isComplete, isCorrect,\n  filledCount, totalCount,\n  wrongCount, correctCount }
+
+C  -> SEC  : GET /api/sessions/mine
+SEC -> SC  : authenticated (PLAYER, ADMIN)
+SC -> UC   : GetMySessionsUseCase
+UC -> DB   : find sessions by creator\n+ by participant userId
+UC --> SC  : List<SessionSummaryDto>
+SC --> C   : 200 [{ sessionId, shareCode, status,\n  gridTitle, gridDimension,\n  authorName, participantCount,\n  role, createdAt, updatedAt }]
+
+C  -> SEC  : DELETE /api/sessions/{shareCode}
+SEC -> SC  : authenticated (PLAYER, ADMIN)
+SC -> UC   : DeleteSessionUseCase\n(must be session author)
+UC -> DB   : delete Session
+UC --> SC  : Success
+SC --> C   : 204 No Content\nor 403 NotCreator
 
 note right of C
   Grid updates are WebSocket-only.
@@ -165,6 +200,33 @@ note right of REDIS
   Returns ConcurrentModification (409)
 end note
 
+== WebSocket — Heartbeat ==
+
+C  -> WSC  : SEND /app/session/{shareCode}/heartbeat\n(empty body, every ≤20s)
+WSC -> REDIS: heartbeatTracker.markActive(sessionId, userId)
+
+note right of WSC
+  Client must send heartbeat every ≤20s.
+  Grace period is 30s (configurable).
+  If no heartbeat received within grace period,
+  HeartbeatTimeoutScheduler removes the user.
+end note
+
+== WebSocket — Disconnect ==
+
+C  ->x WSC : STOMP DISCONNECT (or TCP drop)
+EVT -> EVT : StompSessionEventListener\nonDisconnect(SessionDisconnectEvent)
+EVT -> REDIS: heartbeatTracker.markAway(sessionId, userId)
+
+note right of EVT
+  On STOMP disconnect, the user is marked "away".
+  The 30s grace period starts.
+  If they reconnect (POST /join) within 30s,
+  the disconnect is transparent.
+  Otherwise HeartbeatTimeoutScheduler
+  confirms timeout → LeaveSessionUseCase.
+end note
+
 == WebSocket — Broadcast Events ==
 
 note over WSC
@@ -173,7 +235,7 @@ note over WSC
   ParticipantJoined   { userId, participantCount }
   ParticipantLeft     { userId, participantCount, reason }
   GridUpdated         { actorId, posX, posY, commandType, letter }
-  GridChecked         { isComplete, isCorrect, correctCount, totalCount }
+  GridChecked         { userId, isComplete, isCorrect, correctCount, totalCount }
   SessionEnded        { shareCode, correctCount, totalCount }
   SessionInterrupted  { shareCode }
 
@@ -189,14 +251,22 @@ end note
 
 note over REDIS, DB
   HeartbeatTimeoutScheduler (every 15s, grace period 30s)
-    For each tracked participant:
-      if lastHeartbeat > 30s ago → LeaveSessionUseCase (reason=timeout)
-      broadcasts ParticipantLeft { reason: "timeout" }
-      if last participant → broadcasts SessionInterrupted
+    For each active session in Redis:
+      getTimedOutUserIds(gracePeriodMs)
+      For each timed-out user:
+        Session.leave(userId) → persist to MongoDB
+        Flush grid state to MongoDB
+        heartbeatTracker.remove + unregisterUserSession
+        broadcast ParticipantLeft { reason: "timeout" }
+      if last participant → Session.interrupt()
+        → broadcast SessionInterrupted
+        → deactivate session in cache
 
-  SessionFlushScheduler (every 60s)
-    For each idle SessionGridState in Redis:
-      flush updated state to MongoDB
+  SessionFlushScheduler (every 30s–60s, configurable)
+    For each active session in Redis:
+      if revision > lastFlushedRevision:
+        flush SessionGridState to MongoDB
+        markFlushed(revision)
 end note
 
 @enduml

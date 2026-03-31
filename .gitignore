@@ -29,3 +29,4 @@ build
 **/.claude
 **/dist
 **/.angular
+/docs/superpowers/*

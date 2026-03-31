@@ -7,10 +7,8 @@ CoCro uses MongoDB 7 as its primary persistence store. Collections:
 | Collection | Document type | Domain aggregate |
 |------------|--------------|-----------------|
 | `grids` | `GridDocument` | `Grid` |
-| `grids` | `SessionDocument` | `Session` |
+| `sessions` | `SessionDocument` | `Session` |
 | `users` | `UserDocument` | `User` |
-
-Note: `Session` documents are stored in the `grids` collection (historical naming — the collection predates the session concept being split out). The `@Document(collection = "grids")` annotation appears on both `GridDocument` and `SessionDocument`; they are distinguished by a `type` discriminator field.
 
 ## Document → Domain Mapping Pattern
 
@@ -19,16 +17,18 @@ Every aggregate follows the same three-class structure:
 ### 1. `XxxDocument` — the MongoDB record
 
 ```kotlin
-@Document(collection = "grids")
+@Document(collection = "sessions")
 data class SessionDocument(
-    @Id val id: UUID,
-    val type: String = "SESSION",
+    @Id val id: String,
     val shareCode: String,
+    val authorId: String,
+    val authorUsername: String,
+    val creatorId: String? = null,  // legacy fallback field
+    val gridShortId: String,
+    val gridTemplate: GridTemplateDocument?,
     val status: String,
-    val creatorId: String,
-    val participants: List<ParticipantDocument>,
-    val gridShareCode: String,
-    val sessionGridState: SessionGridStateDocument?,
+    val participants: Set<ParticipantDocument>,
+    val sessionGridState: SessionGridStateDocument,
     val createdAt: Instant,
     val updatedAt: Instant,
 )
@@ -41,6 +41,7 @@ object SessionDocumentMapper {
     fun SessionDocument.toDomain(): Session = Session(
         id = SessionId(id),
         shareCode = SessionShareCode(shareCode),
+        author = Author(UserId(authorId), authorUsername),
         status = SessionStatus.valueOf(status),
         // ...
     )
@@ -48,6 +49,8 @@ object SessionDocumentMapper {
     fun Session.toDocument(): SessionDocument = SessionDocument(
         id = id.value,
         shareCode = shareCode.value,
+        authorId = author.id.value,
+        authorUsername = author.username,
         status = status.name,
         // ...
     )
@@ -63,7 +66,7 @@ class MongoSessionRepositoryAdapter(
     private val mongoTemplate: MongoTemplate,
 ) : SessionRepository {
     override fun findByShareCode(code: SessionShareCode): Session? =
-        springRepo.findByShareCodeAndType(code.value, "SESSION")
+        springRepo.findByShareCode(code.value)
             ?.toDomain()
 
     override fun save(session: Session) {
@@ -75,8 +78,8 @@ class MongoSessionRepositoryAdapter(
 ### 4. `SpringDataXxxRepository` — Spring Data interface
 
 ```kotlin
-interface SpringDataSessionRepository : MongoRepository<SessionDocument, UUID> {
-    fun findByShareCodeAndType(shareCode: String, type: String): SessionDocument?
+interface SpringDataSessionRepository : MongoRepository<SessionDocument, String> {
+    fun findByShareCode(shareCode: String): SessionDocument?
 }
 ```
 
@@ -86,31 +89,19 @@ Grid state cells are stored flattened as `List<CellDocument>` (not a `Map`). The
 
 ```kotlin
 data class SessionGridStateDocument(
-    val gridShareCode: String,
+    val sessionId: String,
+    val gridShortId: String,
     val revision: Long,
     val cells: List<CellDocument>,
 )
-
-data class CellDocument(
-    val x: Int,
-    val y: Int,
-    val letter: String?,
-    val lockedBy: String?,
-)
 ```
 
-Reconstruction on read:
+## ParticipantDocument
 
 ```kotlin
-fun SessionGridStateDocument.toDomain(): SessionGridState = SessionGridState(
-    gridShareCode = GridShareCode(gridShareCode),
-    revision = revision,
-    cells = cells.associate { cell ->
-        CellPos(cell.x, cell.y) to SessionGridCellState(
-            letter = cell.letter?.firstOrNull()?.let { Letter(it) },
-            lockedBy = cell.lockedBy?.let { UserId(it) },
-        )
-    },
+data class ParticipantDocument(
+    val userId: String,
+    val status: String,   // "JOINED" or "LEFT" — maps to ParticipantStatus enum
 )
 ```
 
@@ -121,7 +112,7 @@ fun SessionGridStateDocument.toDomain(): SessionGridState = SessionGridState(
 ```kotlin
 override fun updateGridState(sessionId: SessionId, gridState: SessionGridState) {
     mongoTemplate.updateFirst(
-        Query(Criteria.where("_id").`is`(sessionId.value).and("type").`is`("SESSION")),
+        Query(Criteria.where("_id").`is`(sessionId.value)),
         Update.update("sessionGridState", gridState.toDocument())
             .set("updatedAt", Instant.now()),
         SessionDocument::class.java,
@@ -133,7 +124,40 @@ This is called by the flush scheduler and by use cases that need to persist an u
 
 ## GridDocument
 
-`Grid` cells are stored as `List<CellDocument>` with a `type` string discriminator:
+```kotlin
+@Document(collection = "grids")
+data class GridDocument(
+    @Id val id: String,
+    val shortId: String,
+    val title: String,
+    val metadata: GridMetadataDocument,
+    val hashLetters: Long,
+    val width: Int,
+    val height: Int,
+    val cells: List<CellDocument>,
+    val createdAt: Instant,
+    val updatedAt: Instant,
+)
+```
+
+### GridMetadataDocument
+
+```kotlin
+data class GridMetadataDocument(
+    val authorId: String? = null,
+    val authorUsername: String? = null,
+    val author: String? = null,  // legacy field (UUID string)
+    val reference: String?,
+    val description: String?,
+    val difficulty: String = "NONE",
+    val globalClueLabel: String? = null,
+    val globalClueWordLengths: List<Int>? = null,
+)
+```
+
+### CellDocument
+
+Grid cells are stored as `List<CellDocument>` with a `type` string discriminator:
 
 | `type` value | Domain class |
 |-------------|-------------|
@@ -142,28 +166,56 @@ This is called by the flush scheduler and by use cases that need to persist an u
 | `CLUE_DOUBLE` | `Cell.ClueCell` (both directions) |
 | `BLACK` | `Cell.BlackCell` |
 
+```kotlin
+data class CellDocument(
+    val x: Int,
+    val y: Int,
+    val type: String,
+    // Letter
+    val letter: Char? = null,
+    val separator: String? = null,
+    val number: Int? = null,
+    // Clues
+    val clueDirection: String? = null,
+    val clueText: String? = null,
+    val secondClueDirection: String? = null,
+    val secondClueText: String? = null,
+)
+```
+
 The `GridDocumentMapper` uses a `when (cell.type)` branch to reconstruct the correct sealed subtype on read.
 
 ## Infrastructure File Layout
 
 ```
 infrastructure/persistence/mongo/
-  document/
-    GridDocument.kt
-    SessionDocument.kt
-    UserDocument.kt
-    CellDocument.kt
-    SessionGridStateDocument.kt
-    ParticipantDocument.kt
-  mapper/
-    GridDocumentMapper.kt
-    SessionDocumentMapper.kt
-    UserDocumentMapper.kt
-  repository/
-    MongoGridRepositoryAdapter.kt
-    MongoSessionRepositoryAdapter.kt
-    MongoUserRepositoryAdapter.kt
-    SpringDataGridRepository.kt
-    SpringDataSessionRepository.kt
-    SpringDataUserRepository.kt
+  grid/
+    document/
+      GridDocument.kt
+      GridMetadataDocument.kt
+      CellDocument.kt
+    mapper/
+      GridDocumentMapper.kt
+    repository/
+      MongoGridRepositoryAdapter.kt
+      SpringDataGridRepository.kt
+  session/
+    document/
+      SessionDocument.kt
+      SessionGridStateDocument.kt
+      ParticipantDocument.kt
+      GridTemplateDocument.kt
+    mapper/
+      SessionDocumentMapper.kt
+    repository/
+      MongoSessionRepositoryAdapter.kt
+      SpringDataSessionRepository.kt
+  user/
+    document/
+      UserDocument.kt
+    mapper/
+      UserDocumentMapper.kt
+    repository/
+      MongoUserRepositoryAdapter.kt
+      SpringDataUserRepository.kt
 ```

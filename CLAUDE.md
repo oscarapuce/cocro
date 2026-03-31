@@ -23,13 +23,13 @@ bash scripts/compose-script.sh
 
 This is a Kotlin/Spring Boot collaborative crossword app. The `cocro-bff` directory is a standalone Gradle project (has its own `settings.gradle.kts` and Gradle wrapper).
 
-- **cocro-bff**: Spring Boot 3.2 backend-for-frontend with REST and WebSocket (STOMP). Contains all business logic in `kernel/` (domain models, value objects, rules, error types).
+- **cocro-bff**: Spring Boot 3.2 backend-for-frontend with REST and WebSocket (STOMP). Contains all business logic in `domain/` (domain models, value objects, rules, error types).
 
 ### Layered Architecture (Clean/DDD)
 
 ```
 cocro-bff
-├── kernel/         — domain entities, value objects, sealed errors, CocroResult<T,E>
+├── domain/         — domain entities, value objects, sealed errors, CocroResult<T,E>
 ├── application/    — use cases, DTOs, mappers, ports (interfaces)
 ├── infrastructure/ — MongoDB adapters, Redis cache, JWT, Spring Security
 └── presentation/   — REST controllers, WebSocket controllers, error mapping
@@ -39,7 +39,7 @@ The application layer has **no Spring dependencies** — only ports/interfaces. 
 
 ### Error Handling
 
-Business operations return `CocroResult<T, E>` (a sealed `Success`/`Error` type defined in `kernel/`). Use cases return this type; controllers unwrap it and map errors to HTTP responses via `ErrorMapper`.
+Business operations return `CocroResult<T, E>` (a sealed `Success`/`Error` type defined in `domain/`). Use cases return this type; controllers unwrap it and map errors to HTTP responses via `ErrorMapper`.
 
 ### Real-time (WebSocket)
 
@@ -85,6 +85,3 @@ cocro-web/src/app/
   — session management (list/delete), grid picker, WebSocket robustness, flow wiring.
   Add items here naturally as new work is identified.
 
-## Domain package rename note
-
-`kernel/` references in this file are outdated — the package was renamed to `domain/` in commit `e60c60c`. All domain code is under `com.cocro.domain.*`.

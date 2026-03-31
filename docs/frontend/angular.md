@@ -5,7 +5,7 @@
 - Angular 20, standalone components, Signals
 - `@stomp/stompjs` + `sockjs-client` for WebSocket (CJS, allowlisted in `angular.json` `allowedCommonJsDependencies`)
 - JWT stored in `localStorage` under keys `cocro_token` and `cocro_user`
-- Design: "L'Atelier du Cruciverbiste — Fusion B (Cahier de Notes)" — see `docs/design/option-2.md`
+- Design: "L'Atelier du Cruciverbiste — Fusion B (Cahier de Notes)" — see `docs/design/cocro-design-charter.md`
 
 ## Directory Structure (`src/app/`)
 
@@ -17,8 +17,10 @@ app/
 │   ├── models/
 │   │   ├── auth.model.ts         — AuthUser interface
 │   │   ├── grid.model.ts         — Grid, Cell, Clue types
+│   │   ├── grid-summary.model.ts — GridSummary (list view)
 │   │   ├── grid-template.model.ts— GridTemplateResponse, CellDto
 │   │   ├── session.model.ts      — SessionStatus, SessionFullResponse, SessionCreatedResponse, GridCheckResponse, …
+│   │   ├── session-summary.model.ts — SessionSummary (list view, role: CREATOR|PARTICIPANT)
 │   │   └── session-events.model.ts — SessionEvent union + per-event interfaces
 │   ├── rules/
 │   │   └── grid.rules.ts
@@ -36,13 +38,17 @@ app/
 │   │   ├── session/game-session.port.ts   ← REST session operations
 │   │   └── session/session-socket.port.ts ← STOMP connect/send/disconnect
 │   ├── service/
-│   │   └── grid-selector.service.ts       ← shared grid state (selected cell, letter placement)
+│   │   ├── grid-selector.service.ts       ← shared grid state (selected cell, letter placement)
+│   │   └── letter-author.service.ts       ← tracks which user placed each letter
 │   └── use-cases/
-│       ├── create-grid.use-case.ts
+│       ├── check-grid.use-case.ts
 │       ├── create-session.use-case.ts     ← orchestrates createSession → joinSession
+│       ├── get-my-grids.use-case.ts       ← fetches user's grids (GET /api/grids/mine)
 │       ├── join-session.use-case.ts
 │       ├── leave-session.use-case.ts
-│       ├── submit-grid.use-case.ts
+│       ├── load-grid.use-case.ts          ← loads a single grid for editing
+│       ├── save-grid.use-case.ts          ← saves/updates a grid (PATCH /api/grids)
+│       ├── submit-grid.use-case.ts        ← creates a new grid (POST /api/grids)
 │       └── sync-session.use-case.ts
 │
 ├── infrastructure/               ← Angular services, HTTP adapters, guards
@@ -51,6 +57,7 @@ app/
 │   │   ├── grid/grid-http.adapter.ts
 │   │   └── session/
 │   │       ├── game-session-http.adapter.ts  ← implements GameSessionPort
+│   │       ├── session-http.adapter.ts        ← session list/delete operations
 │   │       ├── grid-template.mapper.ts        ← GridTemplateResponse → Grid
 │   │       └── session-stomp.adapter.ts       ← implements SessionSocketPort
 │   ├── auth/
@@ -68,15 +75,21 @@ app/
     ├── features/
     │   ├── auth/                 — login, register
     │   ├── grid/
-    │   │   ├── editor/           — GridEditorComponent, cell/clue/letter editors
-    │   │   └── play/             — GridPlayerComponent + PlayHeaderComponent + PlayInfoComponent
-    │   ├── landing/              — LandingComponent
+    │   │   ├── editor/           — GridEditorComponent, cell/clue/letter/global-clue editors, grid-params
+    │   │   ├── my-grids/         — MyGridsComponent + GridCardComponent (list user's grids)
+    │   │   └── play/             — GridPlayerComponent + PlayHeaderComponent + PlayInfoComponent + playLeaveGuard
+    │   ├── landing/              — LandingComponent (adapts to auth state: guest vs player)
     │   └── lobby/
-    │       └── create/           — CreateSessionComponent
+    │       ├── create/           — CreateSessionComponent
+    │       └── my-sessions/      — MySessionsComponent (list user's sessions)
     └── shared/
         ├── components/           — ButtonComponent, CardComponent, InputComponent, ToastComponent
-        ├── front-panel/
-        └── grid/                 — GridComponent (shared grid wrapper), GridCellComponent
+        ├── front-panel/          — FrontPanelComponent (join/create panels on landing)
+        ├── grid/                 — GridComponent (shared grid wrapper), GridCellComponent, inputs (letter, clue, arrow)
+        ├── pipes/                — KebabCasePipe
+        ├── shell/                — LandingHomeShellComponent (layout shell with sidebar awareness)
+        ├── sidebar/              — AuthSidebarComponent (collapsible left sidebar with nav sections)
+        └── user-profile/         — UserProfileWidgetComponent (displays username + role badge)
 ```
 
 ## Auth Service Signals
@@ -148,6 +161,18 @@ export interface SessionFullResponse {
 ```
 
 ```typescript
+// domain/models/session-summary.model.ts
+export interface SessionSummary {
+  sessionId: string; shareCode: string;
+  status: 'PLAYING' | 'INTERRUPTED' | 'ENDED';
+  gridTitle: string; gridDimension: { width: number; height: number };
+  authorName: string; participantCount: number;
+  role: 'CREATOR' | 'PARTICIPANT';
+  createdAt: string; updatedAt: string;
+}
+```
+
+```typescript
 // domain/models/session-events.model.ts
 export type SessionEventType =
   | 'SessionWelcome' | 'ParticipantJoined' | 'ParticipantLeft'
@@ -206,20 +231,36 @@ Blocks navigation if there is no token at all. Allows ANONYMOUS users. Redirects
 
 Blocks navigation if the user is not authenticated as PLAYER or ADMIN. Redirects to `/`.
 
+### `playLeaveGuard`
+
+`canDeactivate` guard on play routes. Prompts user before leaving an active session (calls `leaveSession` + STOMP disconnect).
+
 ### Route Configuration
 
 ```typescript
-{ path: '',         loadComponent: () => LandingComponent },
+// root.routes.ts
+{ path: '',         data: { showSidebar: true }, loadComponent: () => LandingComponent },
 { path: 'auth',     loadChildren: () => authRoutes },
 { path: 'home',     redirectTo: '' },
-{ path: 'lobby',    loadChildren: () => lobbyRoutes,   canActivate: [authGuard] },
-{ path: 'grid',     loadChildren: () => editorRoutes,  canActivate: [playerGuard] },
-{ path: 'play',     loadChildren: () => playRoutes,    canActivate: [authGuard] },
+{ path: 'grid',     data: { showSidebar: true }, canActivate: [playerGuard],  loadChildren: () => editorRoutes },
+{ path: 'lobby',    data: { showSidebar: true }, canActivate: [authGuard],    loadChildren: () => lobbyRoutes },
+{ path: 'play',     data: { showSidebar: true }, canActivate: [authGuard],    loadChildren: () => playRoutes },
 { path: '**',       redirectTo: '' },
-```
 
-Play route: `play/:shareCode` → `GridPlayerComponent`
-Lobby route: `lobby/create` → `CreateSessionComponent`
+// editorRoutes
+{ path: 'create',         → GridEditorComponent }
+{ path: ':gridId/edit',   → GridEditorComponent }
+{ path: 'mine',           → MyGridsComponent }
+{ path: '',               redirectTo: 'mine' }
+
+// lobbyRoutes
+{ path: 'create',  canActivate: [playerGuard],  → CreateSessionComponent }
+{ path: 'mine',    canActivate: [playerGuard],  → MySessionsComponent }
+{ path: '',        redirectTo: 'mine' }
+
+// playRoutes
+{ path: ':shareCode', canDeactivate: [playLeaveGuard], → GridPlayerComponent }
+```
 
 ---
 
@@ -236,3 +277,5 @@ Lobby route: `lobby/create` → `CreateSessionComponent`
    - `SyncRequired` → call `syncSession` to rehydrate
 4. `checkGrid()` method: calls `POST /check`, sets `checkResult` signal locally.
 5. `leave()`: calls `leaveSession` + disconnect STOMP + navigate to `/`.
+6. `ngOnDestroy`: calls `leaveSession` + disconnect STOMP (also triggered via `playLeaveGuard` on navigation).
+7. `@HostListener('window:beforeunload')`: warns user before closing tab during active session.

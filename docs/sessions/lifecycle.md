@@ -1,6 +1,6 @@
 # Session Lifecycle Reference
 
-> See also: `/docs/session-ddd.md` for full domain model documentation (Session aggregate, SessionGridState, SessionGridCommand, SessionError definitions).
+> See also: `/docs/sessions/session-ddd.md` for full domain model documentation (Session aggregate, SessionGridState, SessionGridCommand, SessionError definitions).
 
 This file focuses on the session state machine and operational flows.
 

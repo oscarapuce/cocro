@@ -29,7 +29,7 @@ All domain types live in `cocro-bff` under the `domain` package (`com.cocro.doma
 Session
 ├── id: SessionId
 ├── shareCode: SessionShareCode        ← URL-safe join code
-├── creatorId: UserId                  ← userId of the user who created the session
+├── author: Author                     ← { id: UserId, username: String } — who created the session
 ├── gridId: GridShareCode              ← which crossword grid is played
 ├── gridTemplate: GridTemplateSnapshot ← snapshot of the grid at session creation time
 ├── status: SessionStatus
@@ -37,6 +37,8 @@ Session
 ├── sessionGridState: SessionGridState ← current grid content + revision
 └── createdAt / updatedAt: Instant
 ```
+
+> **Note:** `creatorId: UserId` was replaced by `author: Author` (a value object with `id` + `username`). A helper `val creatorId: UserId get() = author.id` exists for retro-compatibility.
 
 A `Session` is the central aggregate. All mutations go through pure functions on `Session`
 (e.g. `session.join(userId)`, `session.leave(userId)`, `session.end()`) or through
@@ -74,7 +76,7 @@ Used as the primary join key and as the routing key for WebSocket topics.
 ### Create
 
 1. Creator calls `POST /api/sessions { gridId }`.
-2. `CreateSessionUseCase` validates the `gridId` format, generates a unique `SessionShareCode`, creates the `Session` with status `PLAYING` and an **empty participant list**.
+2. `CreateSessionUseCase` validates the `gridId` format, generates a unique `SessionShareCode`, creates the `Session` with `author = Author(userId, username)`, status `PLAYING`, and an **empty participant list**.
 3. Session is persisted to MongoDB. Redis grid state cache is initialized.
 4. Response: `SessionCreationSuccess { sessionId, shareCode }`.
 
@@ -89,14 +91,14 @@ The creator must then call `POST /api/sessions/join` to join their own session.
    - Participant must not already be `JOINED`.
    - Active participants (`JOINED`) must be < `ParticipantsRule.MAX_ACTIVE_PARTICIPANTS` (= **4**).
    - A previously `LEFT` participant may rejoin.
-4. On success: participant added/updated with `InviteStatus.JOINED`, `ParticipantJoined` event broadcast.
+4. On success: participant added/updated with `ParticipantStatus.JOINED`, `ParticipantJoined` event broadcast.
 5. Response: `SessionFullDto` (full session state including grid template and current cells).
 
 ### Leave
 
 1. Player calls `POST /api/sessions/leave { shareCode }`.
 2. `LeaveSessionUseCase` applies `SessionLifecycleCommand.Leave(userId)`.
-3. Participant's `InviteStatus` → `LEFT`.
+3. Participant's `ParticipantStatus` → `LEFT`.
 4. If no active participants remain and `status == PLAYING` → `Session.interrupt()` is called → `INTERRUPTED`.
 5. Events broadcast:
    - `ParticipantLeft { userId, participantCount, reason: "explicit" }` to all
@@ -169,10 +171,10 @@ If a client receives `SyncRequired` or needs to rehydrate after reconnect, it ca
 ```
 Participant
 ├── userId: UserId
-└── status: InviteStatus
+└── status: ParticipantStatus
 ```
 
-### InviteStatus
+### ParticipantStatus
 
 | Status  | Meaning                                    |
 |---------|--------------------------------------------|

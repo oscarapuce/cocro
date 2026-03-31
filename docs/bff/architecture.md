@@ -4,23 +4,23 @@
 
 ```
 cocro-bff (Spring Boot 3.2)
-  kernel/          — domain model, value objects, rules, errors (no framework deps)
-    kernel/auth/     — User, UserId, AuthenticatedUser, AuthError
-    kernel/grid/     — Grid aggregate, Cell sealed (LetterCell/ClueCell/BlackCell), Letter, GridShareCode
-    kernel/session/  — Session aggregate, SessionGridState, SessionGridCommand, SessionError
-    kernel/common/   — CocroResult<T,E>, CocroError, ErrorCode
+  domain/          — domain model, value objects, rules, errors (no framework deps)
+    domain/auth/     — User, UserId, AuthenticatedUser, AuthError
+    domain/grid/     — Grid aggregate, Cell sealed (LetterCell/ClueCell/BlackCell), Letter, GridShareCode, GridDimension, GridMetadata, GlobalClue
+    domain/session/  — Session aggregate, SessionGridState, SessionGridCommand, SessionError
+    domain/common/   — CocroResult<T,E>, CocroError, ErrorCode, Author
   application/     — use cases, DTOs, mappers, ports (interfaces only — NO Spring deps)
   infrastructure/  — MongoDB adapters, Redis cache, JWT, Spring Security, schedulers
   presentation/    — REST controllers, WebSocket controllers, ErrorMapper
 ```
 
-The `kernel` package has zero framework dependencies. All business logic, domain models, value objects, rules, and error types live here.
+The `domain` package (`com.cocro.domain.*`) has zero framework dependencies. All business logic, domain models, value objects, rules, and error types live here.
 
-> **Note:** `cocro-shared` (Kotlin Multiplatform) was absorbed into `cocro-bff` as a plain Kotlin package during the session lifecycle refactoring. The module no longer exists as a separate Gradle project.
+> **Note:** `cocro-shared` (Kotlin Multiplatform) was absorbed into `cocro-bff`'s `domain` package during the session lifecycle refactoring. The module no longer exists as a separate Gradle project.
 
 ## CocroResult
 
-The core error-handling type, defined in `cocro-shared`:
+The core error-handling type, defined in the `domain.common` package:
 
 ```kotlin
 sealed class CocroResult<out T, out E> {
@@ -82,10 +82,10 @@ class JoinSessionUseCase(
 
 ## Domain Command Pattern
 
-Domain mutations never happen directly in use cases. They go through sealed `XxxCommand` types defined in `cocro-shared`. The aggregate's `apply()` function is a pure function — it returns a new aggregate (or error) without side effects.
+Domain mutations never happen directly in use cases. They go through sealed `XxxCommand` types defined in the `domain` package. The aggregate's `apply()` function is a pure function — it returns a new aggregate (or error) without side effects.
 
 ```kotlin
-// cocro-bff/kernel
+// cocro-bff/domain/session
 sealed interface SessionLifecycleCommand {
     data class Join(val actorId: UserId) : SessionLifecycleCommand
     data class Leave(val actorId: UserId) : SessionLifecycleCommand
@@ -95,16 +95,16 @@ sealed interface SessionLifecycleCommand {
 session.apply(SessionLifecycleCommand.Join(user.userId))
 ```
 
-Grid cell mutations use `SessionGridCommand` (separate sealed interface in `cocro-shared`).
+Grid cell mutations use `SessionGridCommand` (separate sealed interface in `domain.session.model.state`).
 
 ## Error Model
 
-`ErrorCode` enum in `cocro-shared` carries `(message: String, httpCode: Int)`. All `CocroError` subtypes delegate to an `ErrorCode`. `ErrorMapper.toResponseEntity()` automatically computes HTTP status from `errors.maxOf { it.errorCode.httpCode }`.
+`ErrorCode` enum in the `domain.common` package carries `(message: String, httpCode: Int)`. All `CocroError` subtypes delegate to an `ErrorCode`. `ErrorMapper.toResponseEntity()` automatically computes HTTP status from `errors.maxOf { it.errorCode.httpCode }`.
 
 Example error definition:
 
 ```kotlin
-// cocro-shared
+// domain/common
 enum class ErrorCode(val message: String, val httpCode: Int) {
     SESSION_NOT_FOUND("Session not found", 404),
     UNAUTHORIZED("Unauthorized", 401),

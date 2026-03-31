@@ -19,20 +19,22 @@ These files are designed to be referenced with `@` in Claude Code prompts to pro
 | File | Description |
 |------|-------------|
 | `@docs/sessions/lifecycle.md` | Session state machine, transitions, REST endpoints summary, WebSocket events, heartbeat and reconnection |
-| `@docs/session-ddd.md` | Full domain model documentation: Session aggregate, SessionGridState, commands, errors (pre-existing) |
+| `@docs/sessions/session-ddd.md` | Full domain model documentation: Session aggregate, SessionGridState, commands, errors |
+| `@docs/sessions/audit-2026-03-28.md` | Full session & WebSocket audit: flow mapping BFF↔Angular, inconsistencies, doc gaps, action items |
+| `@docs/sessions/session-ws-modifications-spec.md` | Spec for WebSocket modifications identified during audit |
 
 ### Frontend
 
 | File | Description |
 |------|-------------|
 | `@docs/frontend/angular.md` | Angular 20 frontend: stack, directory structure, auth signals, STOMP subscribe pattern, route guards, anonymous flow |
-| `@docs/frontend/cmp.md` | Compose Multiplatform (KMP) mobile app: MVI architecture, navigation, state model, custom keyboard, networking, design system |
 
 ### Design
 
 | File | Description |
 |------|-------------|
-| `@docs/design/option-2.md` | Approved design spec "L'Atelier du Cruciverbiste": palette, typography, component specs, layout wireframes for all screens |
+| `@docs/design/cocro-design-charter.md` | Design charter: principles, tokens, component rules, layout rules, screen-specific guidance, anti-patterns |
+| `@docs/design/cocro-design-book.html` | Visual design book: current implementation state review, reference renders (open in browser) |
 | `@docs/design/catalog.html` | Visual component catalog (open in browser): swatches, typography specimens, buttons, fields, keyboard, grid cells, page previews |
 
 ### Infrastructure
@@ -41,3 +43,9 @@ These files are designed to be referenced with `@` in Claude Code prompts to pro
 |------|-------------|
 | `@docs/infra/overview.md` | VPS OVH specs, budget RAM, architecture générale, exposition réseau, accès dev SSH tunnel, distribution APK Android |
 | `@docs/infra/kubernetes.md` | k3s setup, namespaces, workloads, Ingress Traefik, Secrets, PersistentVolumes, concepts k8s couverts |
+
+### Roadmap
+
+| File | Description |
+|------|-------------|
+| `@docs/roadmap/v0.2.0-backlog.md` | v0.2.0 backlog: session management, grid management, UX flow, WebSocket robustness |
