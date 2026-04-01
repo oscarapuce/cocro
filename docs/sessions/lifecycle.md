@@ -118,7 +118,7 @@ The Angular frontend sends heartbeats automatically via `SessionStompAdapter.sta
 ### Disconnect detection
 
 The server detects client disconnections via two mechanisms:
-1. **STOMP disconnect event** (`StompSessionEventListener`): when the WebSocket closes, the user is immediately moved to "away" status.
+1. **STOMP disconnect event** (`StompSessionEventListener`): when the WebSocket closes, the `shareCode` is read from WebSocket session attributes (set during STOMP CONNECT), the session is resolved via `SessionRepository.findByShareCode()`, and the user is immediately moved to "away" status. This approach correctly supports users connected to multiple sessions simultaneously.
 2. **Missing heartbeat**: if no heartbeat arrives within the 30s grace period (after a STOMP disconnect), `HeartbeatTimeoutScheduler` evicts the user.
 
 ### Server-side flow

@@ -2,7 +2,7 @@
 
 **Date :** 2026-04-01
 **Priorité :** v0.2.0
-**Risque actuel :** Moyen (le reverse lookup `user:{userId}:session` est un STRING → un seul sessionId par user)
+**Status :** ✅ Implémenté (2026-04-01)
 
 ---
 

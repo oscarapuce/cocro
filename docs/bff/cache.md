@@ -28,18 +28,23 @@ sessions:active                → Redis Set of active sessionId strings
 
 ### compareAndSet — Atomic CAS via Lua
 
-`compareAndSet` is atomic via a Lua script executed with `RedisTemplate.execute(RedisScript)`. The script checks that the stored revision equals `expectedRevision` before writing, returning the new revision on success or `-1` on mismatch.
+`compareAndSet` is atomic via a Lua script executed with `RedisTemplate.execute(RedisScript)`. The script checks that the stored revision equals `expectedRevision` before writing, returning the new revision on success, `-1` if the key is missing, or `-2` on revision mismatch.
 
 ```lua
 local current = redis.call('GET', KEYS[1])
-if current == false then return -1 end
-local parsed = cjson.decode(current)
-if parsed['revision'] ~= tonumber(ARGV[1]) then return -1 end
-redis.call('SET', KEYS[1], ARGV[2], 'EX', ARGV[3])
-return tonumber(ARGV[1]) + 1
+if not current then
+  return -1
+end
+local state = cjson.decode(current)
+if tostring(state['revision']) ~= ARGV[1] then
+  return -2
+end
+redis.call('SET', KEYS[1], ARGV[2])
+redis.call('EXPIRE', KEYS[1], ARGV[3])
+return tonumber(ARGV[4])
 ```
 
-On `-1` return, the adapter throws `GridStateConflictException`, which `UpdateSessionGridUseCase` catches and maps to `CocroResult.Error(SessionError.GridStateConflict)`. The controller maps this to HTTP 409; the client retries after a `SyncRequired` event.
+On `-1` (key missing) or `-2` (revision conflict), the adapter throws `IllegalStateException`, which `UpdateSessionGridUseCase` catches and maps to `CocroResult.Error(SessionError.ConcurrentModification)`. The controller maps this to HTTP 409; the client retries after a `SyncRequired` event.
 
 ### Flush Threshold
 
@@ -75,7 +80,6 @@ If the Redis key has expired (e.g., after a restart), the embedded `sessionGridS
 ```
 session:{sessionId}:heartbeat:active  → Redis Set of userId strings
 session:{sessionId}:heartbeat:away    → Redis Hash  userId → timestamp (epoch ms)
-user:{userId}:session                 → String sessionId (reverse lookup)
 ```
 
 ### Operations
@@ -84,29 +88,31 @@ user:{userId}:session                 → String sessionId (reverse lookup)
 |--------|-------------|
 | `markActive(sessionId, userId)` | Add to active set, remove from away hash |
 | `markAway(sessionId, userId)` | Remove from active set, add to away hash with `System.currentTimeMillis()` |
-| `isActive(sessionId, userId)` | Check membership in active set |
+| `remove(sessionId, userId)` | Remove from both active and away (explicit leave or timeout) |
 | `isAway(sessionId, userId)` | Check membership in away hash |
-| `getActiveUserIds(sessionId)` | Returns all members of active set |
 | `getTimedOutUserIds(sessionId, gracePeriodMs)` | Returns userIds from away hash where `now - timestamp > gracePeriodMs` |
-| `registerUserSession(userId, sessionId)` | Write reverse lookup key |
-| `unregisterUserSession(userId)` | Delete reverse lookup key |
-| `getSessionIdForUser(userId)` | Read reverse lookup key |
 
 ### Flow
 
 **User connects** (STOMP CONNECT):
 - `StompAuthChannelInterceptor` authenticates and stores `CocroAuthentication`
-- `SessionConnectEventListener` calls `heartbeatTracker.markActive(sessionId, userId)`
+- The `shareCode` is stored in WebSocket session attributes (`SESSION_SHARE_CODE_KEY`)
 
 **User sends heartbeat** (WebSocket SEND to `/app/session/{code}/heartbeat`):
 - `SessionWebSocketController` calls `heartbeatTracker.markActive(sessionId, userId)`
 
 **User disconnects** (STOMP DISCONNECT or TCP close):
-- `StompSessionEventListener` calls `heartbeatTracker.markAway(sessionId, userId)` with current timestamp
+- `StompSessionEventListener` reads the `shareCode` from WebSocket **session attributes** (not a Redis reverse lookup)
+- Resolves the session via `sessionRepository.findByShareCode(shareCode)`
+- Calls `heartbeatTracker.markAway(sessionId, userId)` — this correctly supports users connected to multiple sessions simultaneously (each WebSocket connection carries its own shareCode)
 
 **Reconnect within grace period**:
 - `JoinSessionUseCase` detects `heartbeatTracker.isAway(sessionId, userId)` is true
 - Calls `heartbeatTracker.markActive(sessionId, userId)` — no domain mutation, no broadcast (transparent reconnection)
+
+**Session ends** (grid complete + correct):
+- `CheckGridUseCase` calls `heartbeatTracker.remove(sessionId, userId)` for all participants
+- `sessionGridStateCache.deactivate(sessionId)` removes the session from the active set
 
 ### HeartbeatTimeoutScheduler
 
@@ -115,15 +121,16 @@ Runs every **15 seconds**. Grace period: **30 seconds**.
 ```kotlin
 @Scheduled(fixedDelay = 15_000)
 fun checkTimeouts() {
-    val activeSessions = sessionGridStateCache.getAllActiveSessionIds()
+    val activeSessions = sessionGridStateCache.getActiveSessions()
     for (sessionId in activeSessions) {
         val timedOut = heartbeatTracker.getTimedOutUserIds(sessionId, gracePeriodMs = 30_000)
         for (userId in timedOut) {
-            leaveSessionUseCase.execute(LeaveSessionDto(sessionId = sessionId, userId = userId))
-            heartbeatTracker.unregisterUserSession(UserId(userId))
+            session.leave(userId)
+            heartbeatTracker.remove(sessionId, userId)
         }
+        // If all participants timed out → session.interrupt()
     }
 }
 ```
 
-When `LeaveSessionUseCase` is invoked by the scheduler, it performs the full leave flow: updates the `Session` aggregate, saves to MongoDB, broadcasts `ParticipantLeft`, and triggers `INTERRUPTED` if the session was the last participant.
+When a user is evicted by the scheduler, it performs the full leave flow: updates the `Session` aggregate, saves to MongoDB, broadcasts `ParticipantLeft { reason: "timeout" }`, and triggers `INTERRUPTED` if all participants have left.
