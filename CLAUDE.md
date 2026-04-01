@@ -60,7 +60,7 @@ Business operations return `CocroResult<T, E>` (a sealed `Success`/`Error` type 
 - **Redis 7**: Session grid state cache.
 - **JWT (JJWT)**: Stateless auth. Claims include userId, username, role.
 - **Spring Security**: JWT resource server + channel interceptor for WebSocket auth.
-- **Dev credentials** (`.env`): `MONGO_USER=admin`, `MONGO_PASSWORD=admin`, `REDIS_PASSWORD=redispass`
+- **Dev credentials** (`.env.dev`): `MONGO_USER=admin`, `MONGO_PASSWORD=admin`, `REDIS_PASSWORD=redispass`
 
 ### Angular Frontend (cocro-web)
 

@@ -7,5 +7,5 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-podman compose -f compose.dev.yml up -d
-podman compose -f compose.dev.yml logs -f
+podman compose -f infra/compose.dev.yml up -d
+podman compose -f infra/compose.dev.yml logs -f
