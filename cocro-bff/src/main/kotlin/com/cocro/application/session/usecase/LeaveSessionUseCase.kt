@@ -84,7 +84,6 @@ class LeaveSessionUseCase(
 
         // HEARTBEAT CLEANUP
         heartbeatTracker.remove(session.id, user.userId)
-        heartbeatTracker.unregisterUserSession(user.userId)
 
         // NOTIFICATION
         sessionNotifier.broadcast(

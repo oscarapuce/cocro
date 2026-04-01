@@ -100,7 +100,6 @@ class JoinSessionUseCase(
 
         // HEARTBEAT
         heartbeatTracker.markActive(session.id, user.userId)
-        heartbeatTracker.registerUserSession(user.userId, session.id)
 
         // NOTIFICATION
         sessionNotifier.broadcast(

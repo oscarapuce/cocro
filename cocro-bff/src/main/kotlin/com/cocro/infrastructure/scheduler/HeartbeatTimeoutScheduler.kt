@@ -46,7 +46,6 @@ class HeartbeatTimeoutScheduler(
                 )
                 updatedSession = updatedSession.leave(userId)
                 heartbeatTracker.remove(sessionId, userId)
-                heartbeatTracker.unregisterUserSession(userId)
             }
 
             val saved = sessionRepository.save(updatedSession)

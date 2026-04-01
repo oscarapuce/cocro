@@ -3,6 +3,7 @@ package com.cocro.application.session.usecase
 import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.session.dto.notification.SessionEvent
+import com.cocro.application.session.port.HeartbeatTracker
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
@@ -42,8 +43,9 @@ class CheckGridUseCaseTest {
     private val sessionGridStateCache: SessionGridStateCache = mock()
     private val gridRepository: GridRepository = mock()
     private val sessionNotifier: SessionNotifier = mock()
+    private val heartbeatTracker: HeartbeatTracker = mock()
 
-    private val useCase = CheckGridUseCase(currentUserProvider, sessionRepository, sessionGridStateCache, gridRepository, sessionNotifier)
+    private val useCase = CheckGridUseCase(currentUserProvider, sessionRepository, sessionGridStateCache, gridRepository, sessionNotifier, heartbeatTracker)
 
     private val author = Author(id = UserId.new(), username = "Test")
     private val participantId = UserId.new()
@@ -165,6 +167,8 @@ class CheckGridUseCaseTest {
         assertThat(success.isComplete).isTrue()
         assertThat(success.isCorrect).isTrue()
         verify(sessionRepository, atLeastOnce()).save(argThat<Session> { status == SessionStatus.ENDED })
+        verify(heartbeatTracker).remove(session.id, participantId)
+        verify(sessionGridStateCache).deactivate(session.id)
         verify(sessionNotifier).broadcast(
             session.shareCode,
             SessionEvent.SessionEnded(shareCode = "AB12", correctCount = 0, totalCount = 0),

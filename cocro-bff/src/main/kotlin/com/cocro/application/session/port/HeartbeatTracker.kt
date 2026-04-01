@@ -22,13 +22,4 @@ interface HeartbeatTracker {
      * These users should be considered as timed out.
      */
     fun getTimedOutUserIds(sessionId: SessionId, gracePeriodMs: Long): List<UserId>
-
-    /** Persist the mapping userId → sessionId so disconnect events can find the session. */
-    fun registerUserSession(userId: UserId, sessionId: SessionId)
-
-    /** Look up which session a user belongs to (used on STOMP disconnect). */
-    fun getSessionIdForUser(userId: UserId): SessionId?
-
-    /** Remove the userId → sessionId mapping (on explicit leave or timeout). */
-    fun unregisterUserSession(userId: UserId)
 }

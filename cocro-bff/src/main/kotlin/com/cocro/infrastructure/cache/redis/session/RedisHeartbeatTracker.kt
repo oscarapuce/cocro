@@ -18,7 +18,6 @@ private val SESSION_TTL: Duration = Duration.ofHours(24)
  * Key structure:
  *   session:{id}:heartbeat:active  → Redis Set of active userId strings
  *   session:{id}:heartbeat:away    → Redis Hash { userId → awayTimestamp (epoch ms) }
- *   user:{userId}:session          → sessionId string
  */
 @Component
 class RedisHeartbeatTracker(
@@ -72,20 +71,6 @@ class RedisHeartbeatTracker(
             .map { (uid, _) -> UserId(UUID.fromString(uid)) }
     }
 
-    override fun registerUserSession(userId: UserId, sessionId: SessionId) {
-        redisTemplate.opsForValue().set(userSessionKey(userId.toString()), sessionId.value.toString(), SESSION_TTL)
-    }
-
-    override fun getSessionIdForUser(userId: UserId): SessionId? {
-        val raw = redisTemplate.opsForValue().get(userSessionKey(userId.toString())) ?: return null
-        return SessionId(UUID.fromString(raw))
-    }
-
-    override fun unregisterUserSession(userId: UserId) {
-        redisTemplate.delete(userSessionKey(userId.toString()))
-    }
-
     private fun activeKey(sessionId: String) = "session:$sessionId:heartbeat:active"
     private fun awayKey(sessionId: String) = "session:$sessionId:heartbeat:away"
-    private fun userSessionKey(userId: String) = "user:$userId:session"
 }

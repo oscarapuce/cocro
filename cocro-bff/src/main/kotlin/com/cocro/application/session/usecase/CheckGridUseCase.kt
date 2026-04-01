@@ -4,6 +4,7 @@ import com.cocro.application.auth.port.CurrentUserProvider
 import com.cocro.application.grid.port.GridRepository
 import com.cocro.application.session.dto.GridCheckSuccess
 import com.cocro.application.session.dto.notification.SessionEvent
+import com.cocro.application.session.port.HeartbeatTracker
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionNotifier
 import com.cocro.application.session.port.SessionRepository
@@ -22,6 +23,7 @@ class CheckGridUseCase(
     private val sessionGridStateCache: SessionGridStateCache,
     private val gridRepository: GridRepository,
     private val sessionNotifier: SessionNotifier,
+    private val heartbeatTracker: HeartbeatTracker,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -103,6 +105,11 @@ class CheckGridUseCase(
             when (val endResult = session.end()) {
                 is CocroResult.Success -> {
                     sessionRepository.save(endResult.value)
+                    // Cleanup heartbeat keys for all participants
+                    session.participants.forEach { p ->
+                        heartbeatTracker.remove(session.id, p.userId)
+                    }
+                    sessionGridStateCache.deactivate(session.id)
                     sessionNotifier.broadcast(
                         session.shareCode,
                         SessionEvent.SessionEnded(
