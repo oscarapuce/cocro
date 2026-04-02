@@ -71,7 +71,7 @@ class JoinSessionUseCaseTest {
         assertThat(success.shareCode).isEqualTo("AB12")
         verify(sessionNotifier).broadcast(
             session.shareCode,
-            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), participantCount = 1),
+            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), username = "JoiningUser", participantCount = 1),
         )
     }
 
@@ -218,7 +218,7 @@ class JoinSessionUseCaseTest {
         assertThat(success.shareCode).isEqualTo("AB12")
         verify(sessionNotifier).broadcast(
             interruptedSession.shareCode,
-            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), participantCount = 1),
+            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), username = "JoiningUser", participantCount = 1),
         )
     }
 
@@ -243,7 +243,7 @@ class JoinSessionUseCaseTest {
         assertThat(success.participantCount).isEqualTo(1)
         verify(sessionNotifier).broadcast(
             sessionWithLeft.shareCode,
-            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), participantCount = 1),
+            SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), username = "JoiningUser", participantCount = 1),
         )
     }
 }

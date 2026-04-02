@@ -40,6 +40,7 @@ fun Session.toDocument(): SessionDocument =
 fun Participant.toDocument(): ParticipantDocument =
     ParticipantDocument(
         userId = userId.value.toString(),
+        username = username,
         status = status.name,
     )
 
@@ -85,6 +86,7 @@ fun SessionDocument.toDomain(): Session =
 fun ParticipantDocument.toDomain(): Participant =
     Participant(
         userId = UserId(UUID.fromString(userId)),
+        username = username ?: "Inconnu",
         status = ParticipantStatus.valueOf(status),
     )
 

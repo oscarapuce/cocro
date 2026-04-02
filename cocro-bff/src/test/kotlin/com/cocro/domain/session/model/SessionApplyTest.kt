@@ -43,7 +43,7 @@ class SessionApplyTest {
             val joiner = UserId.new()
             val playing = session.withStatus(SessionStatus.PLAYING)
 
-            val result = playing.apply(SessionLifecycleCommand.Join(joiner))
+            val result = playing.apply(SessionLifecycleCommand.Join(joiner, "Joiner"))
 
             assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         }
@@ -53,7 +53,7 @@ class SessionApplyTest {
             val joiner = UserId.new()
             val sessionWithJoiner = session.join(joiner)
 
-            val result = sessionWithJoiner.apply(SessionLifecycleCommand.Join(joiner))
+            val result = sessionWithJoiner.apply(SessionLifecycleCommand.Join(joiner, "Joiner"))
 
             assertThat(result).isInstanceOf(CocroResult.Error::class.java)
             val errors = (result as CocroResult.Error).errors
@@ -65,7 +65,7 @@ class SessionApplyTest {
             val fullSession = (1..4).fold(session) { s, _ -> s.join(UserId.new()) }
             val joiner = UserId.new()
 
-            val result = fullSession.apply(SessionLifecycleCommand.Join(joiner))
+            val result = fullSession.apply(SessionLifecycleCommand.Join(joiner, "Joiner"))
 
             assertThat(result).isInstanceOf(CocroResult.Error::class.java)
             val errors = (result as CocroResult.Error).errors
@@ -77,7 +77,7 @@ class SessionApplyTest {
             val ended = session.withStatus(SessionStatus.ENDED)
             val joiner = UserId.new()
 
-            val result = ended.apply(SessionLifecycleCommand.Join(joiner))
+            val result = ended.apply(SessionLifecycleCommand.Join(joiner, "Joiner"))
 
             assertThat(result).isInstanceOf(CocroResult.Error::class.java)
             val errors = (result as CocroResult.Error).errors
@@ -89,7 +89,7 @@ class SessionApplyTest {
             val interrupted = session.withStatus(SessionStatus.INTERRUPTED)
             val joiner = UserId.new()
 
-            val result = interrupted.apply(SessionLifecycleCommand.Join(joiner))
+            val result = interrupted.apply(SessionLifecycleCommand.Join(joiner, "Joiner"))
 
             assertThat(result).isInstanceOf(CocroResult.Success::class.java)
             val updated = (result as CocroResult.Success).value
@@ -102,7 +102,7 @@ class SessionApplyTest {
             val joiner = UserId.new()
             val sessionAfterLeave = session.join(joiner).leave(joiner)
 
-            val result = sessionAfterLeave.apply(SessionLifecycleCommand.Join(joiner))
+            val result = sessionAfterLeave.apply(SessionLifecycleCommand.Join(joiner, "Joiner"))
 
             assertThat(result).isInstanceOf(CocroResult.Success::class.java)
             val updated = (result as CocroResult.Success).value
@@ -119,7 +119,7 @@ class SessionApplyTest {
             val afterLeave = filled.leave(ids[0])
 
             val joiner = UserId.new()
-            val result = afterLeave.apply(SessionLifecycleCommand.Join(joiner))
+            val result = afterLeave.apply(SessionLifecycleCommand.Join(joiner, "Joiner"))
 
             assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         }

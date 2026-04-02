@@ -152,6 +152,10 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
+
+    &--away {
+      opacity: 0.45;
+    }
   }
 
   &__dot {
@@ -185,6 +189,11 @@
     padding: 1px 6px;
     border-radius: 99px;
     margin-left: auto;
+
+    &--away {
+      color: var(--color-ink-muted);
+      background: var(--color-border-soft);
+    }
   }
 }
 

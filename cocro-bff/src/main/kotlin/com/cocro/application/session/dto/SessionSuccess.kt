@@ -42,6 +42,7 @@ data class SessionFullDto(
     val shareCode: String,
     val status: String,
     val participantCount: Int,
+    val participants: List<ParticipantDto>,
     val topicToSubscribe: String,
     val gridTemplate: GridTemplateDto,
     val gridRevision: Long,

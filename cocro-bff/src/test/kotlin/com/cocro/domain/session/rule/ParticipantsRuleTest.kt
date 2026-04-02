@@ -11,7 +11,7 @@ class ParticipantsRuleTest {
     @Test
     fun `isValid should return true when there is at least one participant`() {
         // given
-        val participants = listOf(Participant(UserId.new(), ParticipantStatus.JOINED))
+        val participants = listOf(Participant.joined(UserId.new(), "User1"))
 
         // when
         val result = ParticipantsRule.validate(*participants.toTypedArray())
@@ -36,7 +36,7 @@ class ParticipantsRuleTest {
     fun `isValid should return true with exactly max active participants`() {
         // given
         val participants = (1..ParticipantsRule.MAX_ACTIVE_PARTICIPANTS)
-            .map { Participant(UserId.new(), ParticipantStatus.JOINED) }
+            .map { Participant.joined(UserId.new(), "User$it") }
 
         // when
         val result = ParticipantsRule.validate(*participants.toTypedArray())
@@ -49,7 +49,7 @@ class ParticipantsRuleTest {
     fun `isValid should return false when active participants exceed max`() {
         // given
         val participants = (1..ParticipantsRule.MAX_ACTIVE_PARTICIPANTS + 1)
-            .map { Participant(UserId.new(), ParticipantStatus.JOINED) }
+            .map { Participant.joined(UserId.new(), "User$it") }
 
         // when
         val result = ParticipantsRule.validate(*participants.toTypedArray())
@@ -61,7 +61,7 @@ class ParticipantsRuleTest {
     @Test
     fun `canJoin should return true when active participants are below max`() {
         // given
-        val participants = listOf(Participant(UserId.new(), ParticipantStatus.JOINED))
+        val participants = listOf(Participant.joined(UserId.new(), "User1"))
 
         // when
         val result = ParticipantsRule.canJoin(participants)
@@ -74,7 +74,7 @@ class ParticipantsRuleTest {
     fun `canJoin should return false when active participants are at max`() {
         // given
         val participants = (1..ParticipantsRule.MAX_ACTIVE_PARTICIPANTS)
-            .map { Participant(UserId.new(), ParticipantStatus.JOINED) }
+            .map { Participant.joined(UserId.new(), "User$it") }
 
         // when
         val result = ParticipantsRule.canJoin(participants)
@@ -87,9 +87,9 @@ class ParticipantsRuleTest {
     fun `countActiveParticipants should ignore non-joined participants`() {
         // given
         val participants = listOf(
-            Participant(UserId.new(), ParticipantStatus.JOINED),
-            Participant(UserId.new(), ParticipantStatus.LEFT),
-            Participant(UserId.new(), ParticipantStatus.LEFT),
+            Participant.joined(UserId.new(), "User1"),
+            Participant(UserId.new(), "User2", ParticipantStatus.LEFT),
+            Participant(UserId.new(), "User3", ParticipantStatus.LEFT),
         )
 
         // when

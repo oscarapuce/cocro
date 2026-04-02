@@ -69,7 +69,7 @@ class LeaveSessionUseCaseTest {
         assertThat(success.sessionId).isEqualTo(session.id.toString())
         verify(sessionNotifier).broadcast(
             session.shareCode,
-            SessionEvent.ParticipantLeft(userId = participantId.toString(), participantCount = 0, reason = "explicit"),
+            SessionEvent.ParticipantLeft(userId = participantId.toString(), username = "Participant", participantCount = 0, reason = "explicit"),
         )
     }
 
@@ -154,7 +154,7 @@ class LeaveSessionUseCaseTest {
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
         verify(sessionNotifier).broadcast(
             session.shareCode,
-            SessionEvent.ParticipantLeft(userId = participantId.toString(), participantCount = 0, reason = "explicit"),
+            SessionEvent.ParticipantLeft(userId = participantId.toString(), username = "Participant", participantCount = 0, reason = "explicit"),
         )
         verify(sessionNotifier).broadcast(
             session.shareCode,

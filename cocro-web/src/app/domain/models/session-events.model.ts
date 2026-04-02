@@ -1,4 +1,4 @@
-import { CommandType, SessionStatus } from './session.model';
+import { CommandType, ParticipantInfo, SessionStatus } from './session.model';
 
 export type SessionEventType =
   | 'SessionWelcome'
@@ -19,6 +19,7 @@ export interface SessionWelcomeEvent extends SessionEvent {
   shareCode: string;
   topicToSubscribe: string;
   participantCount: number;
+  participants: ParticipantInfo[];
   status: SessionStatus;
   gridRevision: number;
 }
@@ -26,12 +27,14 @@ export interface SessionWelcomeEvent extends SessionEvent {
 export interface ParticipantJoinedEvent extends SessionEvent {
   type: 'ParticipantJoined';
   userId: string;
+  username: string;
   participantCount: number;
 }
 
 export interface ParticipantLeftEvent extends SessionEvent {
   type: 'ParticipantLeft';
   userId: string;
+  username: string;
   participantCount: number;
   reason: 'explicit' | 'timeout';
 }

@@ -22,7 +22,7 @@ import {
   SessionWelcomeEvent,
   SyncRequiredEvent,
 } from '@domain/models/session-events.model';
-import { CellStateDto, GridCheckResponse, SessionFullResponse, SessionStatus } from '@domain/models/session.model';
+import { CellStateDto, GridCheckResponse, ParticipantInfo, SessionFullResponse, SessionStatus } from '@domain/models/session.model';
 import { GridComponent } from '@presentation/shared/grid/grid-wrapper/grid.component';
 import { GlobalCluePreviewComponent } from '@presentation/features/grid/editor/global-clue-preview/global-clue-preview.component';
 import { PlayHeaderComponent } from './play-header/play-header.component';
@@ -51,6 +51,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly checkResult = signal<GridCheckedEvent | null>(null);
   readonly activePlayers = signal<string[]>([]);
+  readonly participants = signal<ParticipantInfo[]>([]);
   readonly codeCopied = signal(false);
 
   private readonly letterAuthors = inject(LetterAuthorService);
@@ -96,6 +97,10 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
         this.status.set(fullDto.status);
         this.gridLoaded.set(true);
         this.loading.set(false);
+
+        if (fullDto.participants) {
+          this.participants.set(fullDto.participants);
+        }
 
         const ghostCount = Math.max(0, fullDto.participantCount - 1);
         this.activePlayers.set([
@@ -225,6 +230,10 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
       case 'ParticipantJoined': {
         const joined = event as ParticipantJoinedEvent;
         this.participantCount.set(joined.participantCount);
+        this.participants.update(list => [
+          ...list.filter(p => p.userId !== joined.userId),
+          { userId: joined.userId, username: joined.username, status: 'JOINED', isCreator: false },
+        ]);
         this.activePlayers.update(ids => {
           const ghostIdx = ids.findIndex(id => id.startsWith('ghost-'));
           if (ghostIdx !== -1) {
@@ -239,6 +248,9 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
       case 'ParticipantLeft': {
         const left = event as ParticipantLeftEvent;
         this.participantCount.set(left.participantCount);
+        this.participants.update(list =>
+          list.map(p => p.userId === left.userId ? { ...p, status: 'LEFT' as const } : p),
+        );
         this.activePlayers.update(ids => {
           const knownIdx = ids.indexOf(left.userId);
           if (knownIdx !== -1) return ids.filter((_, i) => i !== knownIdx);
@@ -268,6 +280,9 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
     this.status.set(event.status);
     this.participantCount.set(event.participantCount);
     this.revision.set(event.gridRevision);
+    if (event.participants) {
+      this.participants.set(event.participants);
+    }
   }
 
   private onGridUpdated(event: GridUpdatedEvent): void {

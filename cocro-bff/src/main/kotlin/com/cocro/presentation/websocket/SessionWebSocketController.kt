@@ -1,5 +1,6 @@
 package com.cocro.presentation.websocket
 
+import com.cocro.application.session.dto.ParticipantDto
 import com.cocro.application.session.dto.UpdateSessionGridDto
 import com.cocro.application.session.dto.notification.SessionEvent
 import com.cocro.application.session.port.HeartbeatTracker
@@ -68,6 +69,14 @@ class SessionWebSocketController(
             shareCode = shareCode,
             topicToSubscribe = "/topic/session/$shareCode",
             participantCount = participantCount,
+            participants = session.participants.map { p ->
+                ParticipantDto(
+                    userId = p.userId.toString(),
+                    username = p.username,
+                    status = p.status.name,
+                    isCreator = p.userId == session.author.id,
+                )
+            },
             status = session.status.name,
             gridRevision = gridRevision,
         )

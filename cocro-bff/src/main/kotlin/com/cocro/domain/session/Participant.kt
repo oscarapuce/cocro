@@ -5,9 +5,10 @@ import com.cocro.domain.session.enum.ParticipantStatus
 
 data class Participant(
     val userId: UserId,
+    val username: String,
     val status: ParticipantStatus,
 ) {
     companion object {
-        fun joined(userId: UserId): Participant = Participant(userId, ParticipantStatus.JOINED)
+        fun joined(userId: UserId, username: String): Participant = Participant(userId, username, ParticipantStatus.JOINED)
     }
 }

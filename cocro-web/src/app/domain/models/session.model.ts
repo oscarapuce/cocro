@@ -40,11 +40,19 @@ export interface CellStateDto {
   letter: string;
 }
 
+export interface ParticipantInfo {
+  userId: string;
+  username: string;
+  status: 'JOINED' | 'LEFT';
+  isCreator: boolean;
+}
+
 export interface SessionFullResponse {
   sessionId: string;
   shareCode: string;
   status: SessionStatus;
   participantCount: number;
+  participants: ParticipantInfo[];
   topicToSubscribe: string;
   gridTemplate: GridTemplateResponse;
   gridRevision: number;

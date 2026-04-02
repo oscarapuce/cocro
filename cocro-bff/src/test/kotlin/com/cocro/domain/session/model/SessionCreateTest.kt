@@ -57,7 +57,7 @@ class SessionCreateTest {
             gridId = GridShareCode("GRID01"),
             gridTemplate = minimalSnapshot(),
         )
-        val result = session.apply(SessionLifecycleCommand.Join(UserId.new()))
+        val result = session.apply(SessionLifecycleCommand.Join(UserId.new(), "TestJoiner"))
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
     }
 }

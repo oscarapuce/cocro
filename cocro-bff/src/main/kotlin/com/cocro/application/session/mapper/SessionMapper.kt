@@ -1,6 +1,7 @@
 package com.cocro.application.session.mapper
 
 import com.cocro.application.session.dto.CellStateDto
+import com.cocro.application.session.dto.ParticipantDto
 import com.cocro.application.session.dto.SessionCreationSuccess
 import com.cocro.application.session.dto.SessionFullDto
 import com.cocro.application.session.dto.SessionGridUpdateSuccess
@@ -79,6 +80,14 @@ internal fun Session.toSessionFullDto(
         shareCode = this.shareCode.value,
         status = this.status.name,
         participantCount = activeParticipantCount,
+        participants = this.participants.map { p ->
+            ParticipantDto(
+                userId = p.userId.toString(),
+                username = p.username,
+                status = p.status.name,
+                isCreator = p.userId == this.author.id,
+            )
+        },
         topicToSubscribe = "/topic/session/${this.shareCode.value}",
         gridTemplate = template.toDto(),
         gridRevision = gridState.revision.value,

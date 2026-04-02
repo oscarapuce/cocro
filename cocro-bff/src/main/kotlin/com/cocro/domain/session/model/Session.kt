@@ -90,11 +90,11 @@ data class Session private constructor(
 
     fun apply(command: SessionLifecycleCommand): CocroResult<Session, SessionError> =
         when (command) {
-            is SessionLifecycleCommand.Join -> applyJoin(command.actorId)
+            is SessionLifecycleCommand.Join -> applyJoin(command.actorId, command.username)
             is SessionLifecycleCommand.Leave -> applyLeave(command.actorId)
         }
 
-    private fun applyJoin(actorId: UserId): CocroResult<Session, SessionError> {
+    private fun applyJoin(actorId: UserId, username: String): CocroResult<Session, SessionError> {
         if (status !in setOf(SessionStatus.PLAYING, SessionStatus.INTERRUPTED)) {
             return err(SessionError.InvalidStatusForAction(status, "join"))
         }
@@ -107,7 +107,7 @@ data class Session private constructor(
         if (!isRejoin && !ParticipantsRule.canJoin(participants)) {
             return err(SessionError.SessionFull)
         }
-        val updated = join(actorId)
+        val updated = join(actorId, username)
         // Resume INTERRUPTED → PLAYING when first participant joins
         val resumed = if (status == SessionStatus.INTERRUPTED) updated.copy(status = SessionStatus.PLAYING) else updated
         return ok(resumed)
@@ -169,13 +169,14 @@ data class Session private constructor(
 
     fun join(
         actorId: UserId,
+        username: String = "Inconnu",
         now: Instant = Instant.now(),
     ): Session {
         val leftIndex = participants.indexOfFirst { it.userId == actorId && it.status == ParticipantStatus.LEFT }
         val updatedParticipants = if (leftIndex >= 0) {
             participants.mapIndexed { i, p -> if (i == leftIndex) p.copy(status = ParticipantStatus.JOINED) else p }
         } else {
-            participants + Participant.joined(actorId)
+            participants + Participant.joined(actorId, username)
         }
         return copy(participants = updatedParticipants, updatedAt = now)
     }

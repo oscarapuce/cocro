@@ -90,6 +90,7 @@ class LeaveSessionUseCase(
             updatedSession.shareCode,
             SessionEvent.ParticipantLeft(
                 userId = user.userId(),
+                username = user.username,
                 participantCount = ParticipantsRule.countActiveParticipants(updatedSession.participants),
                 reason = "explicit",
             ),

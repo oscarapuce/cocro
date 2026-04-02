@@ -1,7 +1,7 @@
 # Spec — Participants visibles avec username & statut
 
 **Date :** 2026-04-01
-**Status :** Draft
+**Status :** Implemented
 **Priorité :** v0.2.0
 **Prérequis :** aucun
 

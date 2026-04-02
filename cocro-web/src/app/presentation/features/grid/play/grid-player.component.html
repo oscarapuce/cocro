@@ -56,16 +56,22 @@
 
         <!-- Players panel -->
         <div class="play-players">
-          <span class="play-players__label">Joueurs connectés</span>
+          <span class="play-players__label">Participants ({{ participantCount() }})</span>
           <ul class="play-players__list">
-            @for (playerId of activePlayers(); track playerId) {
-              <li class="play-players__item">
-                <span class="play-players__dot" [class.play-players__dot--me]="playerId === myUserId()"></span>
+            @for (p of participants(); track p.userId) {
+              <li class="play-players__item" [class.play-players__item--away]="p.status === 'LEFT'">
+                <span class="play-players__dot" [class.play-players__dot--me]="p.userId === myUserId()"></span>
                 <span class="play-players__name">
-                  {{ playerId === myUserId() ? 'Vous' : 'Joueur' }}
+                  {{ p.userId === myUserId() ? 'Vous' : p.username }}
                 </span>
-                @if (playerId === myUserId()) {
+                @if (p.isCreator) {
+                  <span class="play-players__badge">créateur</span>
+                }
+                @if (p.userId === myUserId()) {
                   <span class="play-players__badge">moi</span>
+                }
+                @if (p.status === 'LEFT') {
+                  <span class="play-players__badge play-players__badge--away">parti</span>
                 }
               </li>
             }

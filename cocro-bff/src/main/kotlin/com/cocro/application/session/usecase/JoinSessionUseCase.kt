@@ -66,7 +66,7 @@ class JoinSessionUseCase(
 
         // DOMAIN COMMAND (validates status, capacity, duplicates)
         val updatedSession =
-            when (val result = session.apply(SessionLifecycleCommand.Join(user.userId))) {
+            when (val result = session.apply(SessionLifecycleCommand.Join(user.userId, user.username))) {
                 is CocroResult.Success -> result.value
                 is CocroResult.Error -> {
                     // IDEMPOTENT REJOIN: active (JOINED) participant navigating to /play returns full dto
@@ -104,7 +104,7 @@ class JoinSessionUseCase(
         // NOTIFICATION
         sessionNotifier.broadcast(
             savedSession.shareCode,
-            SessionEvent.ParticipantJoined(userId = user.userId(), participantCount = activeParticipantCount),
+            SessionEvent.ParticipantJoined(userId = user.userId(), username = user.username, participantCount = activeParticipantCount),
         )
 
         logger.info(

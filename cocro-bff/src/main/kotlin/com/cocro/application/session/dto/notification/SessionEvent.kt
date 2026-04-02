@@ -1,5 +1,6 @@
 package com.cocro.application.session.dto.notification
 
+import com.cocro.application.session.dto.ParticipantDto
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
@@ -26,6 +27,7 @@ sealed interface SessionEvent {
         val shareCode: String,
         val topicToSubscribe: String,
         val participantCount: Int,
+        val participants: List<ParticipantDto>,
         val status: String,
         val gridRevision: Long,
     ) : SessionEvent
@@ -33,6 +35,7 @@ sealed interface SessionEvent {
     @JsonTypeName("ParticipantJoined")
     data class ParticipantJoined(
         val userId: String,
+        val username: String,
         val participantCount: Int,
     ) : SessionEvent
 
@@ -43,6 +46,7 @@ sealed interface SessionEvent {
     @JsonTypeName("ParticipantLeft")
     data class ParticipantLeft(
         val userId: String,
+        val username: String,
         val participantCount: Int,
         val reason: String = "explicit",
     ) : SessionEvent

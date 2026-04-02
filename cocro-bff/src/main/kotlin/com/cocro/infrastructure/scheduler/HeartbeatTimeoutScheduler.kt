@@ -58,10 +58,13 @@ class HeartbeatTimeoutScheduler(
 
             val activeCount = ParticipantsRule.countActiveParticipants(saved.participants)
             for (userId in timedOut) {
+                val username = session.participants
+                    .firstOrNull { it.userId == userId }?.username ?: "Inconnu"
                 sessionNotifier.broadcast(
                     saved.shareCode,
                     SessionEvent.ParticipantLeft(
                         userId = userId.toString(),
+                        username = username,
                         participantCount = activeCount,
                         reason = "timeout",
                     ),
