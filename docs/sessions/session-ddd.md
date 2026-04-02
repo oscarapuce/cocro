@@ -171,6 +171,7 @@ If a client receives `SyncRequired` or needs to rehydrate after reconnect, it ca
 ```
 Participant
 ├── userId: UserId
+├── username: String           ← display name (registered username or generated spice name for guests)
 └── status: ParticipantStatus
 ```
 
@@ -199,18 +200,20 @@ sealed class CocroResult<out T, out E> {
 
 ### Session Errors
 
-| Error                  | HTTP | Meaning                                    |
-|------------------------|------|--------------------------------------------|
-| `SessionNotFound`      | 404  | No session with given shareCode            |
-| `InvalidStatusForAction`| 400 | Action not allowed in current status       |
-| `AlreadyParticipant`   | 409  | User already joined this session           |
-| `SessionFull`          | 409  | MAX_ACTIVE_PARTICIPANTS reached            |
-| `UserNotParticipant`   | 403  | User is not a joined participant           |
-| `InvalidShareCode`     | 400  | Share code fails format validation         |
-| `InvalidGridId`        | 400  | Grid ID not found                          |
-| `GridCellOutOfBounds`  | 400  | (posX, posY) outside grid dimensions      |
-| `InvalidLetter`        | 400  | Letter value not allowed                   |
-| `Unauthorized`         | 401  | User not authenticated                     |
+| Error                    | HTTP | Meaning                                    |
+|--------------------------|------|--------------------------------------------|
+| `SessionNotFound`        | 404  | No session with given shareCode            |
+| `InvalidStatusForAction` | 400  | Action not allowed in current status       |
+| `AlreadyParticipant`     | 409  | User already joined this session           |
+| `SessionFull`            | 409  | MAX_ACTIVE_PARTICIPANTS reached            |
+| `ConcurrentModification` | 409  | CAS conflict on grid state update          |
+| `UserNotParticipant`     | 403  | User is not a joined participant           |
+| `NotCreator`             | 403  | Action requires session creator            |
+| `InvalidShareCode`       | 400  | Share code fails format validation         |
+| `ReferenceGridNotFound`  | 404  | Reference grid not found for check         |
+| `GridCellOutOfBounds`    | 400  | (posX, posY) outside grid dimensions       |
+| `InvalidLetter`          | 400  | Letter value not allowed                   |
+| `Unauthorized`           | 401  | User not authenticated                     |
 
 `ErrorMapper` in the presentation layer converts these to RFC 7807 problem responses.
 
@@ -227,9 +230,11 @@ They have no Spring dependencies — only ports (interfaces).
 | `JoinSessionUseCase`          | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider`, `SessionNotifier`, `HeartbeatTracker` |
 | `LeaveSessionUseCase`         | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider`, `SessionNotifier`, `HeartbeatTracker` |
 | `SynchroniseSessionUseCase`   | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider`                     |
-| `CheckGridUseCase`            | `SessionRepository`, `SessionGridStateCache`, `SessionNotifier`, `GridRepository`       |
+| `CheckGridUseCase`            | `SessionRepository`, `SessionGridStateCache`, `SessionNotifier`, `GridRepository`, `CurrentUserProvider`, `HeartbeatTracker` |
 | `UpdateSessionGridUseCase`    | `SessionRepository`, `SessionGridStateCache`, `SessionNotifier`, `CurrentUserProvider`  |
-| `GetSessionStateUseCase`      | `SessionRepository`, `SessionGridStateCache`                                            |
+| `GetSessionStateUseCase`      | `SessionRepository`, `SessionGridStateCache`, `CurrentUserProvider`                     |
+| `DeleteSessionUseCase`        | `SessionRepository`, `SessionGridStateCache`, `HeartbeatTracker`                        |
+| `GetMySessionsUseCase`        | `SessionRepository`                                                                     |
 
 ### Key Ports
 
@@ -272,6 +277,10 @@ SUBSCRIBE /app/session/{shareCode}/welcome
   "shareCode": "ABC123",
   "topicToSubscribe": "/topic/session/ABC123",
   "participantCount": 2,
+  "participants": [
+    { "userId": "...", "username": "Oscar", "status": "JOINED", "isCreator": true },
+    { "userId": "...", "username": "Cardamome-Dorée", "status": "JOINED", "isCreator": false }
+  ],
   "status": "PLAYING",
   "gridRevision": 0
 }
@@ -325,14 +334,15 @@ sealed interface SessionEvent
 Two responsibilities:
 
 1. **Session grid state cache** (`RedisSessionGridStateCache`):
-   - Key: `session:grid:{sessionId}`
-   - Value: serialized `SessionGridState`
+   - Key: `session:{sessionId}:state` → JSON of SessionGridState (TTL: 24h)
+   - Key: `session:{sessionId}:lastFlush` → Long (last flushed revision) (TTL: 24h)
+   - Key: `sessions:active` → Redis Set of active sessionId strings
    - CAS via Lua script on `revision` field
    - Flushed to MongoDB by `SessionFlushScheduler` and on participant changes
 
 2. **Heartbeat tracker** (`RedisHeartbeatTracker`):
-   - Key: `heartbeat:{sessionId}:{userId}`
-   - Value: last-seen timestamp
+   - Key: `session:{sessionId}:heartbeat:active` → Redis Set of userId strings
+   - Key: `session:{sessionId}:heartbeat:away` → Redis Hash { userId → epoch ms timestamp }
    - Read by `HeartbeatTimeoutScheduler`
 
 ### JWT
@@ -357,9 +367,9 @@ Both schedulers run inside the BFF application context (Spring `@Scheduled`).
 
 ### SessionFlushScheduler
 
-- Runs every **60 seconds** (configurable via `cocro.session.flush.interval-ms`)
-- Scans Redis for session grid states modified since last flush
-- Writes updated `SessionGridState` to MongoDB
+- Runs every **30 seconds** (configurable via `cocro.session.flush.idle-check-ms`, code default 60s, overridden to 30s in `application.yml`)
+- For each active session: if current `revision > lastFlushedRevision`, writes `SessionGridState` to MongoDB
+- Ensures MongoDB is eventually consistent even during bursts of rapid updates
 
 ---
 

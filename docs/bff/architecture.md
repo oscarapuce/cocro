@@ -87,12 +87,12 @@ Domain mutations never happen directly in use cases. They go through sealed `Xxx
 ```kotlin
 // cocro-bff/domain/session
 sealed interface SessionLifecycleCommand {
-    data class Join(val actorId: UserId) : SessionLifecycleCommand
+    data class Join(val actorId: UserId, val username: String) : SessionLifecycleCommand
     data class Leave(val actorId: UserId) : SessionLifecycleCommand
 }
 
 // Usage in use case:
-session.apply(SessionLifecycleCommand.Join(user.userId))
+session.apply(SessionLifecycleCommand.Join(user.userId, user.username))
 ```
 
 Grid cell mutations use `SessionGridCommand` (separate sealed interface in `domain.session.model.state`).
@@ -126,11 +126,11 @@ Every external dependency (database, cache, notifier) has a port interface in `a
 
 ```
 application/session/port/
-  SessionRepository          — findByShareCode, save, updateGridState
-  SessionGridStateCache      — get, set, compareAndSet
-  HeartbeatTracker           — markActive, markAway, getTimedOutUserIds
-  SessionNotifier            — broadcast, sendToUser
-
+  SessionRepository          — findByShareCode, findById, save, updateGridState, deleteById, findByCreator, findByParticipantUserId
+  SessionGridStateCache      — get, compareAndSet, initialize, getLastFlushedRevision, markFlushed, getActiveSessions, deactivate
+  HeartbeatTracker           — markActive, markAway, remove, isAway, getTimedOutUserIds
+  SessionNotifier            — broadcast, notifyUser
+```
 infrastructure/persistence/mongo/
   MongoSessionRepositoryAdapter implements SessionRepository
 

@@ -1,5 +1,6 @@
 package com.cocro.application.session.usecase
 
+import com.cocro.application.session.port.HeartbeatTracker
 import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.domain.auth.model.valueobject.UserId
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service
 class DeleteSessionUseCase(
     private val sessionRepository: SessionRepository,
     private val sessionGridStateCache: SessionGridStateCache,
+    private val heartbeatTracker: HeartbeatTracker,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -24,7 +26,15 @@ class DeleteSessionUseCase(
             return CocroResult.Error(listOf(SessionError.NotCreator(actorId.toString(), shareCode)))
         }
 
+        // Cleanup Redis: heartbeat keys for all participants
+        session.participants.forEach { p ->
+            heartbeatTracker.remove(session.id, p.userId)
+        }
+
+        // Cleanup Redis: grid state cache + active sessions set
         sessionGridStateCache.deactivate(session.id)
+
+        // Cleanup MongoDB
         sessionRepository.deleteById(session.id)
 
         logger.info("Session {} deleted by user {}", shareCode, actorId)

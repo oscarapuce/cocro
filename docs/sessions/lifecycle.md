@@ -83,6 +83,8 @@ Events are defined as sealed `SessionEvent` in the BFF application layer, serial
 | `SessionInterrupted` | broadcast | `/topic/session/{code}` | Last participant left (explicit or timeout) |
 | `SyncRequired` | private | `/user/queue/session` | CAS conflict on grid update (`UpdateSessionGridUseCases`) |
 
+> **Note:** `SessionWelcome` includes a `participants: List<ParticipantDto>` with full participant info (userId, username, status, isCreator). `ParticipantJoined` and `ParticipantLeft` events include a `username` field alongside `userId`.
+
 ### SessionWelcome Pattern
 
 The welcome message delivers full session state to a newly connected participant. Because `SessionConnectedEvent` fires before the client receives the STOMP CONNECTED frame, a simple event-based welcome would race with client subscription setup.

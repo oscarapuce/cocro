@@ -62,7 +62,7 @@ sealed interface SessionEvent {
 
     /**
      * Sent privately to the user when their local revision is behind the cache.
-     * The client should call GET /api/sessions/{code}/state to resync.
+     * The client should call POST /api/sessions/{code}/sync to resync.
      */
     @JsonTypeName("SyncRequired")
     data class SyncRequired(
