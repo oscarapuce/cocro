@@ -142,7 +142,7 @@ class UpdateSessionGridUseCasesTest {
         assertThat(success.commandType).isEqualTo("PLACE_LETTER")
         verify(sessionNotifier).broadcast(
             shareCode,
-            SessionEvent.GridUpdated(actorId = author.id.toString(), posX = 0, posY = 0, commandType = "PLACE_LETTER", letter = 'A'),
+            SessionEvent.GridUpdated(actorId = author.id.toString(), posX = 0, posY = 0, commandType = "PLACE_LETTER", letter = 'A', revision = 1),
         )
     }
 

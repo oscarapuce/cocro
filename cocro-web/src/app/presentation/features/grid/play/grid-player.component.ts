@@ -1,5 +1,6 @@
 import { Component, computed, HostListener, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { retry, timer } from 'rxjs';
 import { AuthService } from '@infrastructure/auth/auth.service';
 import { SESSION_SOCKET_PORT } from '@application/ports/session/session-socket.port';
 import { JoinSessionUseCase } from '@application/use-cases/join-session.use-case';
@@ -53,6 +54,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   readonly activePlayers = signal<string[]>([]);
   readonly participants = signal<ParticipantInfo[]>([]);
   readonly codeCopied = signal(false);
+  readonly syncing = signal(false);
 
   private readonly letterAuthors = inject(LetterAuthorService);
 
@@ -287,7 +289,14 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
 
   private onGridUpdated(event: GridUpdatedEvent): void {
     if (event.actorId === this.myUserId()) return;
-    this.revision.set(this.revision() + 1);
+
+    // Gap detection: if revision jumps, trigger full resync
+    if (event.revision && event.revision > this.revision() + 1) {
+      this.resync(event.revision);
+      return;
+    }
+
+    this.revision.set(event.revision ?? this.revision() + 1);
     if (event.commandType === 'PLACE_LETTER' && event.letter) {
       this.selector.setLetterAt(event.posX, event.posY, event.letter);
       this.letterAuthors.setAuthor(event.posX, event.posY, event.actorId);
@@ -299,15 +308,24 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
 
   private resync(_targetRevision: number): void {
     this.letterAuthors.clearAll();
-    this.syncSession.execute(this.shareCode()).subscribe({
+    this.syncing.set(true);
+    this.syncSession.execute(this.shareCode()).pipe(
+      retry({ count: 3, delay: (_err, attempt) => timer(1000 * Math.pow(2, attempt - 1)) }),
+    ).subscribe({
       next: (full: SessionFullResponse) => {
         this.revision.set(full.gridRevision);
         this.participantCount.set(full.participantCount);
+        this.participants.set(full.participants ?? []);
         this.status.set(full.status);
         this.selector.clearAllLetters();
         full.cells.forEach((c: CellStateDto) => {
           if (c.letter) this.selector.setLetterAt(c.x, c.y, c.letter);
         });
+        this.syncing.set(false);
+      },
+      error: () => {
+        this.error.set('Synchronisation échouée. Rechargez la page.');
+        this.syncing.set(false);
       },
     });
   }

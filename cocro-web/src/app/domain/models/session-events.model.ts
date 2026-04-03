@@ -46,6 +46,7 @@ export interface GridUpdatedEvent extends SessionEvent {
   posY: number;
   commandType: CommandType;
   letter?: string;
+  revision?: number;
 }
 
 export interface GridCheckedEvent extends SessionEvent {

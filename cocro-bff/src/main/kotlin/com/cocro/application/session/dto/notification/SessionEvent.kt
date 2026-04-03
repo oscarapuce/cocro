@@ -58,6 +58,7 @@ sealed interface SessionEvent {
         val posY: Int,
         val commandType: String,
         val letter: Char?,
+        val revision: Long,
     ) : SessionEvent
 
     /**

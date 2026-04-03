@@ -110,6 +110,7 @@ class UpdateSessionGridUseCases(
                 posY = dto.posY,
                 commandType = dto.commandType,
                 letter = dto.letter,
+                revision = newState.revision.value,
             ),
         )
 
