@@ -42,20 +42,35 @@ class DeleteSessionUseCaseTest {
 
     @Test
     fun `should delete session when actor is the creator`() {
-        // given
-        val sessionWithParticipants = session.join(UserId.new(), "P1").join(UserId.new(), "P2")
-        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(sessionWithParticipants)
+        // given — session with no active participants (all LEFT)
+        val p1 = UserId.new()
+        val p2 = UserId.new()
+        val sessionWithLeft = session.join(p1, "P1").leave(p1).join(p2, "P2").leave(p2)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(sessionWithLeft)
 
         // when
         val result = useCase.execute("AB12", creatorId)
 
         // then
         assertThat(result).isInstanceOf(CocroResult.Success::class.java)
-        verify(sessionGridStateCache).deactivate(sessionWithParticipants.id)
-        verify(sessionRepository).deleteById(sessionWithParticipants.id)
-        sessionWithParticipants.participants.forEach { p ->
-            verify(heartbeatTracker).remove(sessionWithParticipants.id, p.userId)
-        }
+        verify(sessionGridStateCache).deactivate(sessionWithLeft.id)
+        verify(sessionRepository).deleteById(sessionWithLeft.id)
+    }
+
+    @Test
+    fun `should return CannotDeleteActiveSession error when PLAYING session has active participants`() {
+        // given — PLAYING session with active JOINED participants
+        val sessionWithActive = session.join(UserId.new(), "P1")
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(sessionWithActive)
+
+        // when
+        val result = useCase.execute("AB12", creatorId)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is SessionError.CannotDeleteActiveSession }
+        verifyNoInteractions(sessionGridStateCache)
     }
 
     @Test
