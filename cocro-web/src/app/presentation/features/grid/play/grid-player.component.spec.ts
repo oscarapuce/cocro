@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError, Subject } from 'rxjs';
 import { signal } from '@angular/core';
 import { GridPlayerComponent } from './grid-player.component';
-import { AuthService } from '@infrastructure/auth/auth.service';
+import { AUTH_PORT } from '@application/ports/auth/auth.port';
 import { SESSION_SOCKET_PORT } from '@application/ports/session/session-socket.port';
 import { JoinSessionUseCase } from '@application/use-cases/join-session.use-case';
 import { SyncSessionUseCase } from '@application/use-cases/sync-session.use-case';
@@ -96,7 +96,7 @@ describe('GridPlayerComponent', () => {
       providers: [
         { provide: ActivatedRoute, useValue: mockRoute },
         { provide: Router, useValue: mockRouter },
-        { provide: AuthService, useValue: auth },
+        { provide: AUTH_PORT, useValue: auth },
         { provide: SESSION_SOCKET_PORT, useValue: mockSessionSocket },
         { provide: JoinSessionUseCase, useValue: mockJoinSession },
         { provide: SyncSessionUseCase, useValue: mockSyncSession },
@@ -223,6 +223,8 @@ describe('GridPlayerComponent', () => {
   it('should leave and disconnect on ngOnDestroy', () => {
     createComponent();
     fixture.detectChanges();
+    // Fire an event so the socket callback sets connected = true
+    eventCallback!({ type: 'SessionWelcome', shareCode: 'TEST01' } as any);
     component.ngOnDestroy();
     expect(mockLeaveSession.execute).toHaveBeenCalledWith('TEST01');
     expect(mockSessionSocket.disconnect).toHaveBeenCalled();

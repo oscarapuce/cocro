@@ -14,6 +14,8 @@ import { AUTH_PORT } from '@application/ports/auth/auth.port';
 import { AuthService } from '@infrastructure/auth/auth.service';
 import { EDITOR_DRAFT_PORT } from '@application/ports/editor/editor-draft.port';
 import { EditorDraftLocalStorageAdapter } from '@infrastructure/adapters/editor/editor-draft-local-storage.adapter';
+import { SESSION_MANAGEMENT_PORT } from '@application/ports/session/session-management.port';
+import { SessionHttpAdapter } from '@infrastructure/adapters/session/session-http.adapter';
 
 export const rootConfig: ApplicationConfig = {
   providers: [
@@ -25,5 +27,6 @@ export const rootConfig: ApplicationConfig = {
     { provide: SESSION_SOCKET_PORT, useExisting: SessionStompAdapter },
     { provide: AUTH_PORT, useExisting: AuthService },
     { provide: EDITOR_DRAFT_PORT, useExisting: EditorDraftLocalStorageAdapter },
+    { provide: SESSION_MANAGEMENT_PORT, useExisting: SessionHttpAdapter },
   ],
 };

@@ -3,9 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SessionSummary } from '@domain/models/session-summary.model';
 import { environment } from '@infrastructure/environment';
+import { SessionManagementPort } from '@application/ports/session/session-management.port';
 
 @Injectable({ providedIn: 'root' })
-export class SessionHttpAdapter {
+export class SessionHttpAdapter implements SessionManagementPort {
   private readonly baseUrl = `${environment.apiBaseUrl}/api/sessions`;
 
   constructor(private http: HttpClient) {}

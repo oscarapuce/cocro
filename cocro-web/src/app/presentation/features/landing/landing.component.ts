@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '@infrastructure/auth/auth.service';
+import { AUTH_PORT, AuthPort } from '@application/ports/auth/auth.port';
 import { LandingHomeShellComponent } from '@presentation/shared/shell/landing-home-shell.component';
 import { FrontPanelComponent } from '@presentation/shared/front-panel/front-panel.component';
 
@@ -12,7 +12,7 @@ import { FrontPanelComponent } from '@presentation/shared/front-panel/front-pane
   styleUrl: './landing.component.scss',
 })
 export class LandingComponent {
-  readonly auth = inject(AuthService);
+  readonly auth = inject<AuthPort>(AUTH_PORT);
   private readonly router = inject(Router);
 
   readonly heroSubtitle = (): string =>

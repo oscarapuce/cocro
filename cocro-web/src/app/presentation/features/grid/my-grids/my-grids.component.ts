@@ -5,7 +5,7 @@ import { CreateSessionUseCase } from '@application/use-cases/create-session.use-
 import { DeleteGridUseCase } from '@application/use-cases/delete-grid.use-case';
 import { GridSummary } from '@domain/models/grid-summary.model';
 import { ToastService } from '@presentation/shared/components/toast/toast.service';
-import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
+import { getNetworkErrorMessage } from '@application/error/error-message.util';
 import { GridCardComponent } from './grid-card/grid-card.component';
 
 @Component({

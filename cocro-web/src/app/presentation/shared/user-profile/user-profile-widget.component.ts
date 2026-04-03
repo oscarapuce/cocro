@@ -1,6 +1,6 @@
 import { Component, computed, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '@infrastructure/auth/auth.service';
+import { AUTH_PORT, AuthPort } from '@application/ports/auth/auth.port';
 
 @Component({
   selector: 'cocro-user-profile-widget',
@@ -10,7 +10,7 @@ import { AuthService } from '@infrastructure/auth/auth.service';
   styleUrl: './user-profile-widget.component.scss',
 })
 export class UserProfileWidgetComponent {
-  readonly auth = inject(AuthService);
+  readonly auth = inject<AuthPort>(AUTH_PORT);
   private readonly router = inject(Router);
   private readonly el = inject(ElementRef);
 

@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CreateSessionUseCase } from '@application/use-cases/create-session.use-case';
-import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
+import { getNetworkErrorMessage } from '@application/error/error-message.util';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
 import { InputComponent } from '@presentation/shared/components/input/input.component';
 

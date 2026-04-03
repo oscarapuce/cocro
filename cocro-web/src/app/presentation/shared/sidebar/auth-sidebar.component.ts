@@ -1,6 +1,6 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '@infrastructure/auth/auth.service';
+import { AUTH_PORT, AuthPort } from '@application/ports/auth/auth.port';
 
 @Component({
   selector: 'cocro-auth-sidebar',
@@ -14,7 +14,7 @@ export class AuthSidebarComponent {
   readonly toggle = output<void>();
   readonly navigate = output<void>();
 
-  readonly auth = inject(AuthService);
+  readonly auth = inject<AuthPort>(AUTH_PORT);
   private readonly router = inject(Router);
 
   readonly gridMenuOpen = signal(false);

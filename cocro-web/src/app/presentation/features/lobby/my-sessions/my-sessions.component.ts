@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { SessionHttpAdapter } from '@infrastructure/adapters/session/session-http.adapter';
+import { GetMySessionsUseCase } from '@application/use-cases/get-my-sessions.use-case';
+import { DeleteSessionUseCase } from '@application/use-cases/delete-session.use-case';
 import { SessionSummary } from '@domain/models/session-summary.model';
 import { ToastService } from '@presentation/shared/components/toast/toast.service';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
@@ -13,7 +14,8 @@ import { ButtonComponent } from '@presentation/shared/components/button/button.c
   styleUrl: './my-sessions.component.scss',
 })
 export class MySessionsComponent implements OnInit {
-  private readonly sessionHttp = inject(SessionHttpAdapter);
+  private readonly getMySessions = inject(GetMySessionsUseCase);
+  private readonly deleteSessionUseCase = inject(DeleteSessionUseCase);
   readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
@@ -29,7 +31,7 @@ export class MySessionsComponent implements OnInit {
   private loadSessions(): void {
     this.loading.set(true);
     this.error.set('');
-    this.sessionHttp.getMySessions().subscribe({
+    this.getMySessions.execute().subscribe({
       next: (sessions) => {
         this.sessions.set(sessions);
         this.loading.set(false);
@@ -57,7 +59,7 @@ export class MySessionsComponent implements OnInit {
     if (this.deleting()) return;
     if (!confirm(`Supprimer la session "${session.gridTitle}" ?`)) return;
     this.deleting.set(session.shareCode);
-    this.sessionHttp.deleteSession(session.shareCode).subscribe({
+    this.deleteSessionUseCase.execute(session.shareCode).subscribe({
       next: () => {
         this.sessions.update((list) => list.filter((s) => s.shareCode !== session.shareCode));
         this.toast.success('Session supprimée.');
@@ -91,4 +93,3 @@ export class MySessionsComponent implements OnInit {
     return session.status === 'PLAYING' || session.status === 'INTERRUPTED';
   }
 }
-

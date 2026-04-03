@@ -5,6 +5,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MyGridsComponent } from './my-grids.component';
 import { GetMyGridsUseCase } from '@application/use-cases/get-my-grids.use-case';
 import { CreateSessionUseCase } from '@application/use-cases/create-session.use-case';
+import { DeleteGridUseCase } from '@application/use-cases/delete-grid.use-case';
 import { ToastService } from '@presentation/shared/components/toast/toast.service';
 import { GridSummary } from '@domain/models/grid-summary.model';
 
@@ -23,6 +24,7 @@ describe('MyGridsComponent', () => {
   let fixture: ComponentFixture<MyGridsComponent>;
   let mockGetMyGrids: { execute: jest.Mock };
   let mockCreateSession: { execute: jest.Mock };
+  let mockDeleteGrid: { execute: jest.Mock };
   let mockRouter: { navigate: jest.Mock };
   let mockToast: { error: jest.Mock; success: jest.Mock };
 
@@ -35,6 +37,7 @@ describe('MyGridsComponent', () => {
   beforeEach(async () => {
     mockGetMyGrids = { execute: jest.fn().mockReturnValue(of([])) };
     mockCreateSession = { execute: jest.fn() };
+    mockDeleteGrid = { execute: jest.fn() };
     mockRouter = { navigate: jest.fn() };
     mockToast = { error: jest.fn(), success: jest.fn() };
 
@@ -43,6 +46,7 @@ describe('MyGridsComponent', () => {
       providers: [
         { provide: GetMyGridsUseCase, useValue: mockGetMyGrids },
         { provide: CreateSessionUseCase, useValue: mockCreateSession },
+        { provide: DeleteGridUseCase, useValue: mockDeleteGrid },
         { provide: Router, useValue: mockRouter },
         { provide: ToastService, useValue: mockToast },
       ],
@@ -72,7 +76,7 @@ describe('MyGridsComponent', () => {
 
     expect(component.loading()).toBe(true);
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('.my-grids__loading')).toBeTruthy();
+    expect(el.querySelector('.my-grids__state')).toBeTruthy();
   });
 
   it('should show grid cards when grids are loaded', () => {
@@ -82,7 +86,7 @@ describe('MyGridsComponent', () => {
     expect(component.loading()).toBe(false);
     expect(component.grids()).toEqual([GRID_STUB]);
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('.my-grids__grid-list')).toBeTruthy();
+    expect(el.querySelector('.my-grids__table')).toBeTruthy();
   });
 
   it('should show empty state when no grids', () => {
@@ -92,7 +96,7 @@ describe('MyGridsComponent', () => {
     expect(component.grids()).toEqual([]);
     expect(component.loading()).toBe(false);
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('.my-grids__empty')).toBeTruthy();
+    expect(el.querySelector('.my-grids__state--empty')).toBeTruthy();
   });
 
   it('should show error state when load fails', () => {
@@ -104,7 +108,7 @@ describe('MyGridsComponent', () => {
     expect(component.error()).toBe('Impossible de charger vos grilles.');
     expect(component.loading()).toBe(false);
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('.my-grids__error')).toBeTruthy();
+    expect(el.querySelector('.my-grids__state--error')).toBeTruthy();
   });
 
   it('should navigate to edit on onEdit()', () => {

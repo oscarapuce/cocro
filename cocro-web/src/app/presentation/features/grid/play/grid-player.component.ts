@@ -1,7 +1,7 @@
 import { Component, computed, HostListener, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { retry, timer } from 'rxjs';
-import { AuthService } from '@infrastructure/auth/auth.service';
+import { AUTH_PORT, AuthPort } from '@application/ports/auth/auth.port';
 import { SESSION_SOCKET_PORT } from '@application/ports/session/session-socket.port';
 import { JoinSessionUseCase } from '@application/use-cases/join-session.use-case';
 import { SyncSessionUseCase } from '@application/use-cases/sync-session.use-case';
@@ -10,8 +10,8 @@ import { CheckGridUseCase } from '@application/use-cases/check-grid.use-case';
 import { LetterAuthorService } from '@application/service/letter-author.service';
 import { GridSelectorService } from '@application/service/grid-selector.service';
 import { createEmptyGrid } from '@domain/services/grid-utils.service';
-import { mapGridTemplateToGrid } from '@infrastructure/adapters/session/grid-template.mapper';
-import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
+import { mapGridTemplateToGrid } from '@application/mappers/grid-template.mapper';
+import { getNetworkErrorMessage } from '@application/error/error-message.util';
 import {
   GridCheckedEvent,
   GridUpdatedEvent,
@@ -65,7 +65,7 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   };
 
   private readonly route = inject(ActivatedRoute);
-  private readonly auth = inject(AuthService);
+  private readonly auth = inject<AuthPort>(AUTH_PORT);
   private readonly sessionSocket = inject(SESSION_SOCKET_PORT);
   private readonly joinSession = inject(JoinSessionUseCase);
   private readonly syncSession = inject(SyncSessionUseCase);

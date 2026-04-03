@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { getNetworkErrorMessage, NetworkError, toNetworkError } from './network-error';
+import { NetworkError, toNetworkError } from './network-error';
+import { getNetworkErrorMessage } from '@application/error/error-message.util';
 
 describe('network-error', () => {
   it('maps known backend codes to a French message', () => {

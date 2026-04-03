@@ -38,66 +38,55 @@ describe('PlayHeaderComponent', () => {
     expect(title?.textContent?.trim()).toBe('Mots Croisés du Dimanche');
   });
 
-  it('shows the share code', () => {
-    create({ shareCode: 'XY99' });
-    const code = fixture.nativeElement.querySelector('.play-header__code');
-    expect(code?.textContent?.trim()).toBe('XY99');
-  });
-
-  it('shows the author when provided', () => {
-    create({ author: 'Oscar' });
-    const author = fixture.nativeElement.querySelector('.play-header__author');
-    expect(author?.textContent?.trim()).toContain('Oscar');
-  });
-
-  it('does not show author section when author is empty', () => {
-    create({ author: '' });
-    const author = fixture.nativeElement.querySelector('.play-header__author');
-    expect(author).toBeNull();
-  });
-
-  it('shows the difficulty badge when difficulty is not NONE', () => {
-    create({ difficulty: '3' });
-    const badge = fixture.nativeElement.querySelector('.play-header__difficulty.badge');
-    expect(badge).not.toBeNull();
-    expect(badge?.textContent).toContain('3');
-  });
-
-  it('does not show difficulty badge when NONE', () => {
-    create({ difficulty: 'NONE' });
-    const badge = fixture.nativeElement.querySelector('.play-header__difficulty.badge');
-    expect(badge).toBeNull();
-  });
-
   it('shows the reference when provided', () => {
     create({ reference: 'GRD-001' });
     const ref = fixture.nativeElement.querySelector('.play-header__reference');
     expect(ref?.textContent).toContain('GRD-001');
   });
 
-  it('shows participant count', () => {
+  it('does not show reference when not provided', () => {
+    create({});
+    const ref = fixture.nativeElement.querySelector('.play-header__reference');
+    expect(ref).toBeNull();
+  });
+
+  it('shows the difficulty when not NONE', () => {
+    create({ difficulty: '3' });
+    const diff = fixture.nativeElement.querySelector('.play-header__difficulty');
+    expect(diff).not.toBeNull();
+    expect(diff?.textContent).toContain('3');
+  });
+
+  it('does not show difficulty when NONE', () => {
+    create({ difficulty: 'NONE' });
+    const diff = fixture.nativeElement.querySelector('.play-header__difficulty');
+    expect(diff).toBeNull();
+  });
+
+  it('shows participant count with plural', () => {
     create({ participantCount: 3 });
-    const info = fixture.nativeElement.querySelector('.play-header__session');
-    expect(info?.textContent).toContain('3');
-    expect(info?.textContent).toContain('joueurs');
+    const el = fixture.nativeElement.querySelector('.play-header__players');
+    expect(el?.textContent).toContain('3');
+    expect(el?.textContent).toContain('joueurs');
   });
 
   it('shows singular joueur for 1 participant', () => {
     create({ participantCount: 1 });
-    const info = fixture.nativeElement.querySelector('.play-header__session');
-    expect(info?.textContent).toContain('1 joueur');
+    const el = fixture.nativeElement.querySelector('.play-header__players');
+    expect(el?.textContent).toContain('1 joueur');
+    expect(el?.textContent).not.toContain('joueurs');
   });
 
-  it('shows offline indicator when not connected', () => {
-    create({ connected: false });
-    const offline = fixture.nativeElement.querySelector('.play-header__offline');
-    expect(offline).not.toBeNull();
-  });
-
-  it('does not show offline indicator when connected', () => {
+  it('shows online dot when connected', () => {
     create({ connected: true });
-    const offline = fixture.nativeElement.querySelector('.play-header__offline');
-    expect(offline).toBeNull();
+    const dot = fixture.nativeElement.querySelector('.play-header__dot--online');
+    expect(dot).not.toBeNull();
+  });
+
+  it('does not show online dot when disconnected', () => {
+    create({ connected: false });
+    const dot = fixture.nativeElement.querySelector('.play-header__dot--online');
+    expect(dot).toBeNull();
   });
 
   it('emits leave event when leave button clicked', () => {

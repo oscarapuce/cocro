@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { GridPort, GRID_PORT } from '@application/ports/grid/grid.port';
 import { EditorDraftPort, EDITOR_DRAFT_PORT } from '@application/ports/editor/editor-draft.port';
@@ -7,10 +7,8 @@ import { Grid } from '@domain/models/grid.model';
 
 @Injectable({ providedIn: 'root' })
 export class SaveGridUseCase {
-  constructor(
-    @Inject(GRID_PORT) private readonly gridPort: GridPort,
-    @Inject(EDITOR_DRAFT_PORT) private readonly editorDraft: EditorDraftPort,
-  ) {}
+  private readonly gridPort = inject<GridPort>(GRID_PORT);
+  private readonly editorDraft = inject<EditorDraftPort>(EDITOR_DRAFT_PORT);
 
   async create(grid: Grid): Promise<string> {
     const request: SubmitGridRequest = {

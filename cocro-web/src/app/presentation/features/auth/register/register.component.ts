@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '@infrastructure/auth/auth.service';
-import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
+import { AUTH_PORT, AuthPort } from '@application/ports/auth/auth.port';
+import { getNetworkErrorMessage } from '@application/error/error-message.util';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
 import { InputComponent } from '@presentation/shared/components/input/input.component';
 
@@ -15,7 +15,7 @@ import { InputComponent } from '@presentation/shared/components/input/input.comp
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
+  private auth = inject<AuthPort>(AUTH_PORT);
   private router = inject(Router);
 
   form = this.fb.nonNullable.group({

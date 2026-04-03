@@ -113,12 +113,3 @@ export function toNetworkError(error: HttpErrorResponse): NetworkError {
   return new NetworkError(message, error.status, code, errors, error);
 }
 
-export function getNetworkErrorMessage(error: unknown, fallback = 'Une erreur est survenue.'): string {
-  if (error instanceof NetworkError) {
-    return error.message;
-  }
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  return fallback;
-}
