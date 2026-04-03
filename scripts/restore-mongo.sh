@@ -14,11 +14,11 @@ else
 fi
 
 if [ -z "$ARCHIVE" ] || [ ! -f "$ARCHIVE" ]; then
-  echo "❌ No backup found. Usage: $0 [path/to/cocro.archive]"
+  echo "!! No backup found. Usage: $0 [path/to/cocro.archive]"
   exit 1
 fi
 
-echo "♻️  Restoring MongoDB from $ARCHIVE"
+echo " OK: Restoring MongoDB from $ARCHIVE"
 podman exec -i infra-mongo-1 mongorestore \
   --username admin \
   --password admin \

@@ -10,7 +10,7 @@ BACKUP_PATH="$BACKUP_DIR/$TIMESTAMP"
 
 mkdir -p "$BACKUP_PATH"
 
-echo "📦 Dumping MongoDB → $BACKUP_PATH"
+echo "Dumping MongoDB → $BACKUP_PATH"
 podman exec infra-mongo-1 mongodump \
   --username admin \
   --password admin \
@@ -19,6 +19,6 @@ podman exec infra-mongo-1 mongodump \
   --archive \
   > "$BACKUP_PATH/cocro.archive"
 
-echo "✅ Backup done: $(du -h "$BACKUP_PATH/cocro.archive" | cut -f1)"
+echo "Backup done: $(du -h "$BACKUP_PATH/cocro.archive" | cut -f1)"
 echo "   📁 $BACKUP_PATH/cocro.archive"
 

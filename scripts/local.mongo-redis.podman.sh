@@ -9,7 +9,7 @@ COMPOSE_FILE="$PROJECT_ROOT/infra/compose.dev.yml"
 ENV_FILE="$PROJECT_ROOT/.env.dev"
 
 if [ ! -f "$ENV_FILE" ]; then
-  echo "❌ .env.dev file not found at $ENV_FILE"
+  echo "!! .env.dev file not found at $ENV_FILE"
   exit 1
 fi
 

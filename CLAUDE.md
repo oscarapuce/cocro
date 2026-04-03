@@ -82,6 +82,7 @@ cocro-web/src/app/
 ## Roadmap & Backlog
 
 - **v0.2.0 backlog**: [`docs/roadmap/v0.2.0-backlog.md`](docs/roadmap/v0.2.0-backlog.md)
-  — session management (list/delete), grid picker, WebSocket robustness, flow wiring.
-  Add items here naturally as new work is identified.
+  — ✅ TERMINÉ. Session management, grid picker, WebSocket robustness, flow wiring.
+- **v0.3.0 audit & spec**: [`docs/roadmap/v0.3.0-audit.md`](docs/roadmap/v0.3.0-audit.md)
+  — DDD architecture audit, test coverage gaps (Jest, IT, E2E), remediation spec.
 
