@@ -88,6 +88,7 @@ The creator must then call `POST /api/sessions/join` to join their own session.
 2. `JoinSessionUseCase` loads the session, applies `SessionLifecycleCommand.Join(userId)`.
 3. Domain rules:
    - Session must be in `PLAYING` or `INTERRUPTED` status.
+   - INTERRUPTED sessions can be joined by any authenticated user (new or previously LEFT). The session transitions back to PLAYING on the first join.
    - Participant must not already be `JOINED`.
    - Active participants (`JOINED`) must be < `ParticipantsRule.MAX_ACTIVE_PARTICIPANTS` (= **4**).
    - A previously `LEFT` participant may rejoin.

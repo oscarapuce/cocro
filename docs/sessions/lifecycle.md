@@ -30,7 +30,7 @@ States:
 |------|---------|-----------------|-----|-------------|
 | (new) | `Join` | any authenticated user | `PLAYING` | `ParticipantJoined` broadcast |
 | `PLAYING` | `Join` | previously LEFT participant | `PLAYING` | `ParticipantJoined` broadcast |
-| `INTERRUPTED` | `Join` | any previously LEFT participant | `PLAYING` | `ParticipantJoined` broadcast |
+| `INTERRUPTED` | `Join` | any authenticated user | `PLAYING` | `ParticipantJoined` broadcast |
 | `PLAYING` | `Leave` (not last) | any participant | `PLAYING` | `ParticipantLeft` broadcast |
 | `PLAYING` | `Leave` (last participant) | any participant | `INTERRUPTED` | `ParticipantLeft` + `SessionInterrupted` broadcast |
 | `PLAYING` | `end()` (grid complete+correct) | system (CheckGrid) | `ENDED` | `SessionEnded` broadcast |

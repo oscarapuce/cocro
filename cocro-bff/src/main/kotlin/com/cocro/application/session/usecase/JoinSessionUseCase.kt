@@ -15,7 +15,9 @@ import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.SessionLifecycleCommand
 import com.cocro.domain.session.model.valueobject.SessionShareCode
 import com.cocro.domain.session.enum.ParticipantStatus
+import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.rule.ParticipantsRule
+import com.cocro.domain.session.rule.SessionLimitRule
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -64,6 +66,18 @@ class JoinSessionUseCase(
             return CocroResult.Success(session.toSessionFullDto(gridState, activeCount))
         }
 
+        // SESSION LIMIT: max 5 active sessions per user (skip for idempotent rejoins handled below)
+        val isAlreadyJoined = session.participants.any {
+            it.userId == user.userId && it.status == ParticipantStatus.JOINED
+        }
+        if (!isAlreadyJoined) {
+            val userActiveCount = sessionRepository.countActiveByUser(user.userId)
+            if (!SessionLimitRule.canCreateOrJoin(userActiveCount)) {
+                logger.warn("Session join rejected: user {} has {} active sessions (max {})", user.userId(), userActiveCount, SessionLimitRule.MAX_ACTIVE_SESSIONS)
+                return CocroResult.Error(listOf(SessionError.ActiveSessionLimitReached))
+            }
+        }
+
         // DOMAIN COMMAND (validates status, capacity, duplicates)
         val updatedSession =
             when (val result = session.apply(SessionLifecycleCommand.Join(user.userId, user.username))) {
@@ -92,6 +106,13 @@ class JoinSessionUseCase(
         // PERSISTENCE
         val savedSession = sessionRepository.save(updatedSession)
         val activeParticipantCount = ParticipantsRule.countActiveParticipants(savedSession.participants)
+
+        // Re-activate Redis cache when session resumes from INTERRUPTED
+        if (session.status == SessionStatus.INTERRUPTED && savedSession.status == SessionStatus.PLAYING) {
+            val gridState = sessionGridStateCache.get(session.id) ?: session.sessionGridState
+            sessionGridStateCache.initialize(session.id, gridState)
+            logger.info("Session {} cache re-activated (INTERRUPTED → PLAYING)", session.shareCode.value)
+        }
 
         sessionGridStateCache.get(session.id)?.let { gridState ->
             sessionRepository.updateGridState(session.id, gridState)

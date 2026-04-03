@@ -246,4 +246,85 @@ class JoinSessionUseCaseTest {
             SessionEvent.ParticipantJoined(userId = joiningUserId.toString(), username = "JoiningUser", participantCount = 1),
         )
     }
+
+    @Test
+    fun `should re-activate cache when INTERRUPTED session transitions to PLAYING`() {
+        // given — interrupted session with a LEFT participant
+        val sessionWithLeft = session.join(joiningUserId).leave(joiningUserId)
+        val interruptedSession = Session.rehydrate(
+            id = sessionWithLeft.id,
+            shareCode = sessionWithLeft.shareCode,
+            author = sessionWithLeft.author,
+            gridId = sessionWithLeft.gridId,
+            status = SessionStatus.INTERRUPTED,
+            participants = sessionWithLeft.participants,
+            sessionGridState = sessionWithLeft.sessionGridState,
+            createdAt = sessionWithLeft.createdAt,
+            updatedAt = sessionWithLeft.updatedAt,
+            gridTemplate = sessionWithLeft.gridTemplate,
+        )
+        val dto = JoinSessionDto(shareCode = "AB12")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(interruptedSession)
+        whenever(sessionRepository.save(any())).thenAnswer { it.arguments[0] as Session }
+        whenever(sessionGridStateCache.get(interruptedSession.id)).thenReturn(null)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+        verify(sessionGridStateCache).initialize(interruptedSession.id, interruptedSession.sessionGridState)
+    }
+
+    @Test
+    fun `should return ActiveSessionLimitReached when user has 5 active sessions`() {
+        // given
+        val dto = JoinSessionDto(shareCode = "AB12")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(session)
+        whenever(sessionRepository.countActiveByUser(joiningUserId)).thenReturn(5)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is SessionError.ActiveSessionLimitReached }
+    }
+
+    @Test
+    fun `should bypass session limit for transparent reconnection`() {
+        // given — user is in away state (transparent reconnection)
+        val dto = JoinSessionDto(shareCode = "AB12")
+        val sessionWithUser = session.join(joiningUserId)
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(sessionWithUser)
+        whenever(heartbeatTracker.isAway(sessionWithUser.id, joiningUserId)).thenReturn(true)
+        whenever(sessionGridStateCache.get(sessionWithUser.id)).thenReturn(null)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then — reconnection bypasses limit check
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+    }
+
+    @Test
+    fun `should bypass session limit for idempotent rejoin`() {
+        // given — user is already a JOINED participant
+        val sessionWithUser = session.join(joiningUserId)
+        val dto = JoinSessionDto(shareCode = "AB12")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(joiningUser)
+        whenever(sessionRepository.findByShareCode(shareCode)).thenReturn(sessionWithUser)
+        whenever(sessionGridStateCache.get(sessionWithUser.id)).thenReturn(null)
+        // countActiveByUser NOT stubbed — it should not be called for already-joined users
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then — idempotent: returns full dto
+        assertThat(result).isInstanceOf(CocroResult.Success::class.java)
+    }
 }
