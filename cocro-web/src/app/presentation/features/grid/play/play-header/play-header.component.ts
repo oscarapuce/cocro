@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { ButtonComponent } from '@presentation/shared/components/button/button.component';
 
 @Component({
@@ -18,9 +18,18 @@ export class PlayHeaderComponent {
   revision = input<number>(0);
   connected = input<boolean>(false);
 
+  codeCopied = signal(false);
+
   leave = output<void>();
 
   onLeave(): void {
     this.leave.emit();
+  }
+
+  copyCode(): void {
+    navigator.clipboard.writeText(this.shareCode()).then(() => {
+      this.codeCopied.set(true);
+      setTimeout(() => this.codeCopied.set(false), 1500);
+    });
   }
 }

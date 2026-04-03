@@ -53,7 +53,6 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   readonly checkResult = signal<GridCheckedEvent | null>(null);
   readonly activePlayers = signal<string[]>([]);
   readonly participants = signal<ParticipantInfo[]>([]);
-  readonly codeCopied = signal(false);
   readonly syncing = signal(false);
 
   private readonly letterAuthors = inject(LetterAuthorService);
@@ -61,7 +60,9 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
   readonly getCellColorClass = (x: number, y: number): string => {
     const author = this.letterAuthors.getAuthor(x, y);
     if (!author) return '';
-    return author === 'me' ? 'letter--mine' : 'letter--other';
+    if (author === 'me') return 'letter--mine';
+    if (author === 'preloaded') return 'letter--preloaded';
+    return 'letter--other';
   };
 
   private readonly route = inject(ActivatedRoute);
@@ -92,7 +93,10 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
       next: (fullDto: SessionFullResponse) => {
         this.selector.initGrid(mapGridTemplateToGrid(fullDto.gridTemplate));
         fullDto.cells.forEach((c: CellStateDto) => {
-          if (c.letter) this.selector.setLetterAt(c.x, c.y, c.letter);
+          if (c.letter) {
+            this.selector.setLetterAt(c.x, c.y, c.letter);
+            this.letterAuthors.setAuthor(c.x, c.y, 'preloaded');
+          }
         });
         this.revision.set(fullDto.gridRevision);
         this.participantCount.set(fullDto.participantCount);
@@ -199,12 +203,6 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
     this.router.navigate(['/']);
   }
 
-  copyShareCode(): void {
-    navigator.clipboard.writeText(this.shareCode()).then(() => {
-      this.codeCopied.set(true);
-      setTimeout(() => this.codeCopied.set(false), 1800);
-    });
-  }
 
   checkGrid(): void {
     this.checkGridUseCase.execute(this.shareCode()).subscribe({
@@ -319,7 +317,10 @@ export class GridPlayerComponent implements OnInit, OnDestroy {
         this.status.set(full.status);
         this.selector.clearAllLetters();
         full.cells.forEach((c: CellStateDto) => {
-          if (c.letter) this.selector.setLetterAt(c.x, c.y, c.letter);
+          if (c.letter) {
+            this.selector.setLetterAt(c.x, c.y, c.letter);
+            this.letterAuthors.setAuthor(c.x, c.y, 'preloaded');
+          }
         });
         this.syncing.set(false);
       },

@@ -62,7 +62,7 @@ $col-actions: 190px;
   // ——— titre ————————————————————————————————————————————————
 
   &__title {
-    font-family: 'Patrick Hand', cursive;
+    font-family: var(--font-hand);
     font-size: 1rem;
     color: var(--color-ink);
     white-space: nowrap;
@@ -178,7 +178,7 @@ $col-actions: 190px;
   }
 
   &__name {
-    font-family: 'Patrick Hand', cursive;
+    font-family: var(--font-hand);
     font-size: 0.875rem;
     color: var(--color-ink);
     font-weight: 500;

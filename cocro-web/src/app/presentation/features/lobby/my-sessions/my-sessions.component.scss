@@ -43,8 +43,8 @@
 
 .session-card {
   padding: var(--space-lg);
-  border: var(--border-dashed);
-  border-radius: var(--radius-panel);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
   background: var(--color-surface);
   display: flex;
   flex-direction: column;

@@ -1,9 +1,8 @@
-.create-session {
+.join-session {
   max-width: var(--page-max-width-narrow);
   margin: 0 auto;
   padding: 0 var(--space-xl) var(--space-2xl);
   animation: enter-up 350ms ease-out both;
-
 
   &__content {
     padding-top: var(--space-xl);
@@ -14,8 +13,8 @@
 
   &__card {
     background-color: var(--color-surface);
-    border: var(--border-dashed);
-    border-radius: var(--radius-lg);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
     box-shadow: var(--shadow-panel);
     padding: var(--space-xl);
   }
@@ -28,7 +27,8 @@
 
   &__error {
     font-size: var(--text-sm);
-    color: var(--color-red);
+    color: var(--color-danger);
     font-style: italic;
   }
 }
+

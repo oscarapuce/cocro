@@ -47,4 +47,10 @@
     color: #8B6914; // brun/sépia
     font-weight: 600;
   }
+
+  &.letter--preloaded {
+    color: var(--color-ink);
+    font-weight: 500;
+    opacity: 0.8;
+  }
 }

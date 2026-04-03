@@ -9,7 +9,7 @@ $col-actions: 190px;
   // Pas de background — les lignes Séyès du body transparaissent
 
   &__content {
-    max-width: 1080px;
+    max-width: var(--page-max-width-wide);
     margin: 0 auto;
     padding: 2.5rem 2rem 4rem calc(var(--margin-line-offset) + 1.5rem);
     display: flex;
@@ -43,8 +43,8 @@ $col-actions: 190px;
     }
 
     h1 {
-      font-family: 'Caveat', cursive;
-      font-size: 2.6rem;
+      font-family: var(--font-title);
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
       color: var(--color-forest);
       margin: 0;
       line-height: 1;
@@ -144,8 +144,7 @@ $col-actions: 190px;
     gap: 1.25rem;
     padding: 4rem 2rem;
     text-align: center;
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1.15rem;
+    font-family: var(--font-hand);
     color: var(--color-ink-muted);
 
     &--error { color: var(--color-red); }
@@ -165,7 +164,7 @@ $col-actions: 190px;
 
   &__empty-text {
     color: var(--color-ink-muted);
-    font-family: 'Patrick Hand', cursive;
+    font-family: var(--font-hand);
     font-size: 1.1rem;
   }
 

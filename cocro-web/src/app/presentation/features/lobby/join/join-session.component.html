@@ -1,0 +1,30 @@
+<div class="join-session">
+  <div class="join-session__content">
+    <span class="section-label">Rejoindre</span>
+    <h1>Rejoindre une partie</h1>
+
+    <div class="join-session__card">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="join-session__form">
+        <cocro-input
+          label="Code de la partie"
+          placeholder="ex: AB12CD"
+          formControlName="shareCode"
+          [hasError]="form.controls.shareCode.invalid && form.controls.shareCode.touched"
+          errorMessage="Code requis (min. 4 caractères)"
+        />
+        <p class="text-muted">
+          Entrez le code de session partagé par le créateur de la partie.
+        </p>
+
+        @if (error()) {
+          <p class="join-session__error">{{ error() }}</p>
+        }
+
+        <cocro-button type="submit" [loading]="loading()">
+          Rejoindre
+        </cocro-button>
+      </form>
+    </div>
+  </div>
+</div>
+

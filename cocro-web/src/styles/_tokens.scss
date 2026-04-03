@@ -26,6 +26,7 @@ $bp-md: 960px;
   --color-gold:         #C4952A;
   --color-red:          #B83225;
   --color-red-light:    #E8756A;
+  --color-danger:       var(--color-red);  // semantic alias
 
   --color-border: #1e1e1e;
   --color-border-inter-grid: #4f674f99;
@@ -127,6 +128,11 @@ $bp-md: 960px;
 
   // — Layout —
   --margin-line-offset: 72px; // décalage horizontal du trait rouge Séyès
+  --page-max-width-narrow: 680px;   // formulaires seuls (create, join)
+  --page-max-width-mid:    920px;   // listes de cards (sessions, grilles)
+  --page-max-width-wide:  1100px;   // dashboards et pages riches
+  --card-radius: var(--radius-lg);
+  --card-border: var(--border-dashed);
 
   // — Typography (tailles spécifiques) —
   --text-btn: 1.05rem; // taille Patrick Hand pour variants primary/secondary/danger

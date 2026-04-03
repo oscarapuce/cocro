@@ -77,6 +77,16 @@ a {
   padding: 0 var(--space-lg);
 }
 
+// — Page title —
+.page-title {
+  font-family: var(--font-title);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  color: var(--color-forest);
+  font-weight: 400;
+  margin: 0;
+  line-height: 1;
+}
+
 // — Utility —
 .sr-only {
   position: absolute;

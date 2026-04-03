@@ -9,6 +9,11 @@ export const LOBBY_ROUTES: Routes = [
       import('./create/create-session.component').then((m) => m.CreateSessionComponent),
   },
   {
+    path: 'join',
+    loadComponent: () =>
+      import('./join/join-session.component').then((m) => m.JoinSessionComponent),
+  },
+  {
     path: 'mine',
     title: 'Mes sessions',
     canActivate: [playerGuard],
