@@ -12,11 +12,10 @@ import com.cocro.application.session.usecase.JoinSessionUseCase
 import com.cocro.application.session.usecase.LeaveSessionUseCase
 import com.cocro.application.session.usecase.SynchroniseSessionUseCase
 import com.cocro.presentation.rest.error.toResponseEntity
-import com.cocro.infrastructure.security.spring.CocroAuthentication
+import com.cocro.application.auth.port.CurrentUserProvider
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -36,6 +35,7 @@ class SessionController(
     private val synchroniseSessionUseCase: SynchroniseSessionUseCase,
     private val getMySessionsUseCase: GetMySessionsUseCase,
     private val deleteSessionUseCase: DeleteSessionUseCase,
+    private val currentUserProvider: CurrentUserProvider,
 ) {
     @PostMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
@@ -99,9 +99,10 @@ class SessionController(
 
     @GetMapping("/mine")
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
-    fun getMySessions(authentication: Authentication): ResponseEntity<*> {
-        val userId = (authentication as CocroAuthentication).user.userId
-        val sessions = getMySessionsUseCase.execute(userId)
+    fun getMySessions(): ResponseEntity<*> {
+        val user = currentUserProvider.currentUserOrNull()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Unit>()
+        val sessions = getMySessionsUseCase.execute(user.userId)
         return ResponseEntity.ok(sessions)
     }
 
@@ -109,11 +110,11 @@ class SessionController(
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
     fun deleteSession(
         @PathVariable shareCode: String,
-        authentication: Authentication,
     ): ResponseEntity<*> {
-        val userId = (authentication as CocroAuthentication).user.userId
+        val user = currentUserProvider.currentUserOrNull()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Unit>()
         return deleteSessionUseCase
-            .execute(shareCode, userId)
+            .execute(shareCode, user.userId)
             .toResponseEntity(HttpStatus.NO_CONTENT)
     }
 }
