@@ -5,8 +5,10 @@ import com.cocro.application.session.port.SessionGridStateCache
 import com.cocro.application.session.port.SessionRepository
 import com.cocro.domain.auth.model.valueobject.UserId
 import com.cocro.domain.common.CocroResult
+import com.cocro.domain.session.enum.SessionStatus
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.valueobject.SessionShareCode
+import com.cocro.domain.session.rule.ParticipantsRule
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -24,6 +26,11 @@ class DeleteSessionUseCase(
 
         if (session.author.id != actorId) {
             return CocroResult.Error(listOf(SessionError.NotCreator(actorId.toString(), shareCode)))
+        }
+
+        // Guard: cannot delete a PLAYING session with active participants
+        if (session.status == SessionStatus.PLAYING && ParticipantsRule.countActiveParticipants(session.participants) > 0) {
+            return CocroResult.Error(listOf(SessionError.CannotDeleteActiveSession))
         }
 
         // Cleanup Redis: heartbeat keys for all participants
