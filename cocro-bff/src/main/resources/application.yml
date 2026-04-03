@@ -20,3 +20,5 @@ cocro:
     flush:
       threshold: 50
       idle-check-ms: 30000
+    interrupted:
+      expiry-days: 7
