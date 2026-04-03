@@ -50,6 +50,9 @@ enum class ErrorCode(
     SESSION_REFERENCE_GRID_NOT_FOUND("Reference grid not found for this session", 404),
     SESSION_GRID_CONCURRENT_MODIFICATION("Grid state was modified concurrently; client must resync", 409),
     SESSION_NOT_CREATOR("Only the session creator can perform this action", 403),
+    SESSION_LIMIT_REACHED("Active session limit reached", 409),
+    SESSION_CANNOT_DELETE_ACTIVE("Cannot delete a session with active participants", 409),
+    GRID_HAS_ACTIVE_SESSIONS("Grid has active sessions and cannot be deleted", 409),
 
     // --- auth domain ---
     AUTH_USERNAME_ALREADY_EXISTS("Username already exists", 409),

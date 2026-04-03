@@ -78,6 +78,7 @@ class CreateSessionUseCaseTest {
         whenever(shareCodeGenerator.generateId()).thenReturn(shareCode)
         whenever(gridRepository.findByShortId(gridId)).thenReturn(grid)
         whenever(sessionRepository.save(any())).thenReturn(session)
+        whenever(sessionRepository.countActiveByUser(authenticatedUser.userId)).thenReturn(0)
 
         // when
         val result = useCase.execute(dto)
@@ -119,5 +120,21 @@ class CreateSessionUseCaseTest {
         val errors = (result as CocroResult.Error).errors
         assertThat(errors).anyMatch { it is SessionError.InvalidGridId }
         verifyNoInteractions(sessionRepository)
+    }
+
+    @Test
+    fun `should return ActiveSessionLimitReached when user has 5 active sessions`() {
+        // given
+        val dto = CreateSessionDto(gridId = "GRID01")
+        whenever(currentUserProvider.currentUserOrNull()).thenReturn(authenticatedUser)
+        whenever(sessionRepository.countActiveByUser(authenticatedUser.userId)).thenReturn(5)
+
+        // when
+        val result = useCase.execute(dto)
+
+        // then
+        assertThat(result).isInstanceOf(CocroResult.Error::class.java)
+        val errors = (result as CocroResult.Error).errors
+        assertThat(errors).anyMatch { it is SessionError.ActiveSessionLimitReached }
     }
 }

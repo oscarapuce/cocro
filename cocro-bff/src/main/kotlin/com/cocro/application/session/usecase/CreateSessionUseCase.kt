@@ -15,6 +15,7 @@ import com.cocro.domain.common.model.Author
 import com.cocro.domain.grid.model.valueobject.GridShareCode
 import com.cocro.domain.session.error.SessionError
 import com.cocro.domain.session.model.Session
+import com.cocro.domain.session.rule.SessionLimitRule
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -40,6 +41,13 @@ class CreateSessionUseCase(
         if (errors.isNotEmpty()) {
             logger.warn("Session creation rejected: {} validation errors for gridId={}", errors.size, createSessionDto.gridId)
             return CocroResult.Error(errors)
+        }
+
+        // SESSION LIMIT: max 5 active sessions per user
+        val activeCount = sessionRepository.countActiveByUser(user.userId)
+        if (!SessionLimitRule.canCreateOrJoin(activeCount)) {
+            logger.warn("Session creation rejected: user {} has {} active sessions (max {})", user.userId(), activeCount, SessionLimitRule.MAX_ACTIVE_SESSIONS)
+            return CocroResult.Error(listOf(SessionError.ActiveSessionLimitReached))
         }
 
         val gridId = GridShareCode(createSessionDto.gridId)

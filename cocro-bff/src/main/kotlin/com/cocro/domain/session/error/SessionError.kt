@@ -145,4 +145,12 @@ sealed interface SessionError : CocroError {
         override val errorCode = ErrorCode.SESSION_NOT_CREATOR
         override fun context() = mapOf("userId" to userId, "shareCode" to shareCode)
     }
+
+    object ActiveSessionLimitReached : SessionError {
+        override val errorCode = ErrorCode.SESSION_LIMIT_REACHED
+    }
+
+    object CannotDeleteActiveSession : SessionError {
+        override val errorCode = ErrorCode.SESSION_CANNOT_DELETE_ACTIVE
+    }
 }
