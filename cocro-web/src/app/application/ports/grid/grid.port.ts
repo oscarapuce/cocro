@@ -9,6 +9,7 @@ export interface GridPort {
   getMyGrids(): Observable<GridSummary[]>;
   submitGrid(request: SubmitGridRequest): Observable<GridSubmitResponse>;
   patchGrid(request: PatchGridRequest): Observable<void>;
+  deleteGrid(gridId: string): Observable<void>;
 }
 
 export const GRID_PORT = new InjectionToken<GridPort>('GRID_PORT');

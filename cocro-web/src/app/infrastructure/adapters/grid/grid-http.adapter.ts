@@ -28,4 +28,8 @@ export class GridHttpAdapter implements GridPort {
   patchGrid(request: PatchGridRequest): Observable<void> {
     return this.http.patch<void>(this.baseUrl, request);
   }
+
+  deleteGrid(gridId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${gridId}`);
+  }
 }

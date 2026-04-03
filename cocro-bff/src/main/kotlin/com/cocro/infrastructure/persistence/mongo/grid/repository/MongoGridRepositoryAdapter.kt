@@ -33,4 +33,8 @@ class MongoGridRepositoryAdapter(
         springDataRepo
             .findByMetadataAuthorId(author.toString())
             .map { it.toDomain() }
+
+    override fun deleteByShortId(shortId: GridShareCode) {
+        springDataRepo.deleteByShortId(shortId.toString())
+    }
 }

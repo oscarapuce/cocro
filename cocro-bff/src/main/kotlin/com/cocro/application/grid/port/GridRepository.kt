@@ -14,4 +14,6 @@ interface GridRepository {
     fun findByShortId(shortId: GridShareCode): Grid?
 
     fun findByAuthor(author: UserId): List<Grid>
+
+    fun deleteByShortId(shortId: GridShareCode)
 }

@@ -2,8 +2,10 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { GetMyGridsUseCase } from '@application/use-cases/get-my-grids.use-case';
 import { CreateSessionUseCase } from '@application/use-cases/create-session.use-case';
+import { DeleteGridUseCase } from '@application/use-cases/delete-grid.use-case';
 import { GridSummary } from '@domain/models/grid-summary.model';
 import { ToastService } from '@presentation/shared/components/toast/toast.service';
+import { getNetworkErrorMessage } from '@infrastructure/http/network-error';
 import { GridCardComponent } from './grid-card/grid-card.component';
 
 @Component({
@@ -16,6 +18,7 @@ import { GridCardComponent } from './grid-card/grid-card.component';
 export class MyGridsComponent implements OnInit {
   private readonly getMyGrids = inject(GetMyGridsUseCase);
   private readonly createSession = inject(CreateSessionUseCase);
+  private readonly deleteGrid = inject(DeleteGridUseCase);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
@@ -23,6 +26,7 @@ export class MyGridsComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal('');
   readonly launching = signal<string | null>(null);
+  readonly deleting = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadGrids();
@@ -59,6 +63,23 @@ export class MyGridsComponent implements OnInit {
 
   onEdit(grid: GridSummary): void {
     this.router.navigate(['/grid', grid.gridId, 'edit']);
+  }
+
+  onDelete(grid: GridSummary): void {
+    if (this.deleting()) return;
+    if (!confirm(`Supprimer la grille « ${grid.title} » ? Cette action est irréversible.`)) return;
+    this.deleting.set(grid.gridId);
+    this.deleteGrid.execute(grid.gridId).subscribe({
+      next: () => {
+        this.grids.update(list => list.filter(g => g.gridId !== grid.gridId));
+        this.toast.success('Grille supprimée.');
+        this.deleting.set(null);
+      },
+      error: (err: unknown) => {
+        this.toast.error(getNetworkErrorMessage(err, 'Impossible de supprimer la grille.'));
+        this.deleting.set(null);
+      },
+    });
   }
 
   retry(): void {

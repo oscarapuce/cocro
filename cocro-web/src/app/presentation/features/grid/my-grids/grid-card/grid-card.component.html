@@ -36,6 +36,12 @@
     <button class="grid-row__btn grid-row__btn--edit" (click)="edit.emit()">
       ✏ Éditer
     </button>
+    <button
+      class="grid-row__btn grid-row__btn--delete"
+      (click)="deleteGrid.emit()"
+      [disabled]="deleting">
+      @if (deleting) { <span class="grid-row__spinner"></span> } @else { 🗑 }
+    </button>
   </div>
 </div>
 

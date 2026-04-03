@@ -2,6 +2,7 @@ package com.cocro.presentation.rest.grid
 
 import com.cocro.application.grid.dto.PatchGridDto
 import com.cocro.application.grid.dto.SubmitGridDto
+import com.cocro.application.grid.usecase.DeleteGridUseCase
 import com.cocro.application.grid.usecase.GetGridUseCase
 import com.cocro.application.grid.usecase.GetMyGridsUseCase
 import com.cocro.application.grid.usecase.PatchGridUseCase
@@ -10,6 +11,7 @@ import com.cocro.presentation.rest.error.toResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -25,6 +27,7 @@ class GridController(
     private val patchGridUseCase: PatchGridUseCase,
     private val getMyGridsUseCase: GetMyGridsUseCase,
     private val getGridUseCase: GetGridUseCase,
+    private val deleteGridUseCase: DeleteGridUseCase,
 ) {
     @PostMapping
     @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
@@ -59,4 +62,13 @@ class GridController(
         getGridUseCase
             .execute(shortId)
             .toResponseEntity(HttpStatus.OK)
+
+    @DeleteMapping("/{shortId}")
+    @PreAuthorize("hasAnyRole('PLAYER', 'ADMIN')")
+    fun deleteGrid(
+        @PathVariable shortId: String,
+    ): ResponseEntity<*> =
+        deleteGridUseCase
+            .execute(shortId)
+            .toResponseEntity(HttpStatus.NO_CONTENT)
 }

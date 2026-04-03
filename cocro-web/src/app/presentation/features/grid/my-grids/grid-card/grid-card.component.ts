@@ -21,8 +21,10 @@ const OFFSET    = 20;  // distance entre curseur et tooltip
 export class GridCardComponent {
   @Input({ required: true }) grid!: GridSummary;
   @Input() launching = false;
+  @Input() deleting = false;
   @Output() launchSession = new EventEmitter<void>();
   @Output() edit = new EventEmitter<void>();
+  @Output() deleteGrid = new EventEmitter<void>();
 
   private readonly gridPort = inject(GRID_PORT);
 

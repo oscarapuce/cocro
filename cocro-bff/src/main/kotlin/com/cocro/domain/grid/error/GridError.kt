@@ -151,4 +151,8 @@ sealed interface GridError : CocroError {
     object GlobalClueNumberingInvalid : GridError {
         override val errorCode = ErrorCode.GRID_GLOBAL_CLUE_NUMBERING_INVALID
     }
+
+    object GridHasActiveSessions : GridError {
+        override val errorCode = ErrorCode.GRID_HAS_ACTIVE_SESSIONS
+    }
 }
