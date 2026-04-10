@@ -42,4 +42,5 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     environment("TESTCONTAINERS_RYUK_DISABLED", "true")
+    // DOCKER_HOST is read from ~/.testcontainers.properties (local dev only)
 }

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 # Resolve project root (parent of scripts/)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
@@ -14,10 +13,14 @@ if [ ! -f "$ENV_FILE" ]; then
 fi
 
 cleanup() {
-  podman compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" down
+  echo ""
+  echo "⏹ Stopping containers..."
+  podman compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" down 2>/dev/null
+  echo "✅ Containers stopped."
 }
 
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
 
-podman compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d
-podman compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" logs -f
+echo "▶️ Starting Mongo + Redis..."
+# Foreground mode: logs stream to stdout, IntelliJ stop button (SIGTERM) triggers cleanup
+podman compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up --abort-on-container-exit
